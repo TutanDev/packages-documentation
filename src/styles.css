@@ -29,12 +29,12 @@
   --func-color:    #22c55e;
   --func-glow:     rgba(34, 197, 94, 0.15);
   --func-soft:     rgba(34, 197, 94, 0.08);
-  --util-color:    #f97316;
-  --util-glow:     rgba(249, 115, 22, 0.15);
-  --util-soft:     rgba(249, 115, 22, 0.08);
-  --msg-color:     #06b6d4;
-  --msg-glow:      rgba(6, 182, 212, 0.15);
-  --msg-soft:      rgba(6, 182, 212, 0.08);
+  --util-color:    #06b6d4;
+  --util-glow:     rgba(6, 182, 212, 0.15);
+  --util-soft:     rgba(6, 182, 212, 0.08);
+  --msg-color:     #f97316;
+  --msg-glow:      rgba(249, 115, 22, 0.15);
+  --msg-soft:      rgba(249, 115, 22, 0.08);
 
   /* Code */
   --code-bg:       #080c18;
@@ -541,8 +541,8 @@ code { font-family: var(--font-code); font-size: 0.875em; }
 
 .code-card--arch { border-color: rgba(59, 130, 246, 0.12); }
 .code-card--func { border-color: rgba(34, 197, 94, 0.12); }
-.code-card--util { border-color: rgba(249, 115, 22, 0.12); }
-.code-card--msg  { border-color: rgba(6, 182, 212, 0.12); }
+.code-card--util { border-color: rgba(6, 182, 212, 0.12); }
+.code-card--msg  { border-color: rgba(249, 115, 22, 0.12); }
 .code-card--wide { margin-top: 48px; }
 
 .code-card-header {
