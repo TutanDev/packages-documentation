@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Utilities — API Reference — Unity Framework</title>
-  <meta name="description" content="UP-Utilities API Reference: complete type and member documentation for MessageBus, Timer, AudioPlayer, Persistence, and Reporter.">
+  <meta name="description" content="UP-Utilities API Reference: complete type and member documentation for Timer, AudioPlayer, Persistence, and Reporter.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,6 +23,7 @@
       <div class="nav-links">
         <a href="architecture.html" class="nav-link">Architecture</a>
         <a href="functional.html" class="nav-link">Functional</a>
+        <a href="messagebus.html" class="nav-link">MessageBus</a>
         <a href="utilities.html" class="nav-link" style="color:var(--util-color)">Utilities</a>
       </div>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
@@ -52,7 +53,6 @@
             <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="sidebar-items">
-            <a href="#api-messagebus" class="sidebar-link" data-pkg="util">MessageBus</a>
             <a href="#api-timer" class="sidebar-link" data-pkg="util">Timer</a>
             <a href="#api-audioplayer" class="sidebar-link" data-pkg="util">AudioPlayer</a>
             <a href="#api-persistence" class="sidebar-link" data-pkg="util">Persistence</a>
@@ -67,94 +67,6 @@
     <main class="docs-main">
 
       <div class="docs-content">
-
-        <!-- ── API: MessageBus ── -->
-        <section class="docs-section" id="api-messagebus">
-          <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">MessageBus API</h2>
-          <p class="section-intro">Namespace: <code>Utilities.Messaging</code>. Access via <code>MessageBus.Instance</code>.</p>
-
-          <div class="api-group">
-            <div class="api-group-header">
-              <span class="api-group-name">MessageBus</span>
-              <span class="api-type-badge badge--class">class</span>
-            </div>
-            <div class="api-members">
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">SubscriptionToken Subscribe&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, IMessage</div>
-                  <div class="api-member-desc">Registers a handler. Returns an integer token for unsubscription.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">bool Unsubscribe(SubscriptionToken token)</div>
-                  <div class="api-member-desc">Removes the handler associated with the token. Returns <code>false</code> if already removed.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">void Publish&lt;T&gt;(ref T message) where T : unmanaged, IMessage</div>
-                  <div class="api-member-desc">Dispatches immediately to all subscribers on the calling thread.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">void Enqueue&lt;T&gt;(in T message) where T : unmanaged, IMessage</div>
-                  <div class="api-member-desc">Thread-safe enqueue. Process with <code>DrainQueues()</code> on the main thread.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">void DrainQueues()</div>
-                  <div class="api-member-desc">Processes all enqueued messages. Call once per frame on the main thread.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">int ChannelCount { get; }</div>
-                  <div class="api-member-desc">Number of distinct message types with at least one active subscriber.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">int GetSubscriberCount&lt;T&gt;()</div>
-                  <div class="api-member-desc">Number of active subscribers for message type <code>T</code>.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">void Reset() / void Dispose()</div>
-                  <div class="api-member-desc">Clears all subscriptions and channels.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="api-group">
-            <div class="api-group-header">
-              <span class="api-group-name">MessageHandler&lt;T&gt;</span>
-              <span class="api-type-badge badge--delegate">delegate</span>
-            </div>
-            <div class="api-members">
-              <div class="api-member">
-                <span class="api-kind kind--field">sig</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">void MessageHandler&lt;T&gt;(ref T message) where T : unmanaged, IMessage</div>
-                  <div class="api-member-desc">Handler delegate. Receives the message by <code>ref</code> — no struct copy on dispatch.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         <!-- ── API: Timer ── -->
         <section class="docs-section" id="api-timer">

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MessageBus — Unity Framework</title>
+  <meta name="description" content="UP-MessageBus: standalone zero-allocation pub/sub message bus for Unity. Struct messages, ref dispatch, thread-safe enqueue — built for 72–120 Hz XR frame budgets.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles.css">
+  <link rel="stylesheet" href="src/docs.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/favicon/favicon-32x32.png" alt="" class="nav-logo-icon" aria-hidden="true">
+        Unity Framework
+      </a>
+      <div class="nav-links">
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="functional.html" class="nav-link">Functional</a>
+        <a href="messagebus.html" class="nav-link" style="color:var(--msg-color)">MessageBus</a>
+        <a href="utilities.html" class="nav-link">Utilities</a>
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="docs-shell">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to home
+        </a>
+        <span class="sidebar-pkg-id sidebar-pkg-id--msg">com.tutan.messagebus</span>
+        <div class="sidebar-pkg-name">MessageBus</div>
+      </div>
+      <nav class="sidebar-nav" aria-label="Page sections">
+        <a href="#getting-started" class="sidebar-direct" data-pkg="msg">Getting Started</a>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Guides
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#guide-messages" class="sidebar-link" data-pkg="msg">Defining Messages</a>
+            <a href="#guide-events-commands" class="sidebar-link" data-pkg="msg">Events vs Commands</a>
+            <a href="#guide-subscribe" class="sidebar-link" data-pkg="msg">Subscribe &amp; Unsubscribe</a>
+            <a href="#guide-publish" class="sidebar-link" data-pkg="msg">Publish &amp; Enqueue</a>
+            <a href="#guide-threading" class="sidebar-link" data-pkg="msg">Threading Model</a>
+            <a href="#guide-bootstrap" class="sidebar-link" data-pkg="msg">Auto-bootstrap</a>
+            <a href="#guide-performance" class="sidebar-link" data-pkg="msg">Performance</a>
+          </div>
+        </div>
+
+        <a href="messagebus-api.html" class="sidebar-direct" data-pkg="msg">API Reference →</a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="docs-main">
+
+      <!-- ── Getting Started Hero ── -->
+      <section class="docs-hero" id="getting-started">
+        <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--msg-glow) 0%, transparent 70%)" aria-hidden="true"></div>
+        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messagebus · v1.0.0</span>
+        <h1 class="docs-hero-title">Zero-Allocation<br>Pub/Sub for XR</h1>
+        <p class="docs-hero-desc">
+          UP-MessageBus is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, integer subscription tokens, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
+        </p>
+        <div class="docs-hero-stats">
+          <div>
+            <span class="docs-stat-value" style="color:var(--msg-color)">Zero</span>
+            <span class="docs-stat-label">GC Allocs</span>
+          </div>
+          <div>
+            <span class="docs-stat-value" style="color:var(--msg-color)">N:M</span>
+            <span class="docs-stat-label">Events</span>
+          </div>
+          <div>
+            <span class="docs-stat-value" style="color:var(--msg-color)">N:1</span>
+            <span class="docs-stat-label">Commands</span>
+          </div>
+        </div>
+
+        <div class="callout callout--note" style="margin-top:8px">
+          <strong>Standalone package</strong>
+          MessageBus ships independently of the rest of the Framework — <code>com.tutan.messagebus</code> has no dependencies beyond <code>UnityEngine</code> and <code>Unity.Profiling</code>, and is also available on the Unity Asset Store as a self-contained product.
+        </div>
+
+        <div class="steps" style="margin-top:28px">
+          <div class="step">
+            <div class="step-num" style="border-color:var(--msg-color);color:var(--msg-color)">1</div>
+            <div class="step-body">
+              <div class="step-title">Install the package</div>
+              <div class="step-desc">Open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, navigate to <code>Packages/com.tutan.messagebus/package.json</code>. Or install the Asset Store release.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--msg-color);color:var(--msg-color)">2</div>
+            <div class="step-body">
+              <div class="step-title">Auto-bootstrap runs</div>
+              <div class="step-desc">A hidden persistent <code>[MessageBusHost]</code> is created at <code>BeforeSceneLoad</code> and calls <code>DrainQueues()</code> in <code>LateUpdate</code> for both buses. No scene setup required.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--msg-color);color:var(--msg-color)">3</div>
+            <div class="step-body">
+              <div class="step-title">Publish your first event</div>
+              <div class="step-desc">Define an <code>unmanaged struct</code> implementing <code>IEvent</code>, subscribe with <code>EventBus.Subscribe&lt;T&gt;</code>, and publish with <code>EventBus.Publish(ref msg)</code>.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="docs-content">
+
+        <!-- ── Guide: Defining Messages ── -->
+        <section class="docs-section" id="guide-messages">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Defining Messages</h2>
+          <p class="section-intro">
+            A message is any <code>unmanaged struct</code> implementing <code>IEvent</code> or <code>ICommand</code> (both extend <code>IMessage</code>). The <code>unmanaged</code> constraint guarantees no managed references — no <code>string</code>, no arrays, no class fields — making the struct blittable and invisible to the GC.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Correct messages</h3>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Messages.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.MessageBus;
+<span class="kw">using</span> Unity.Collections;
+<span class="kw">using</span> UnityEngine;
+
+<span class="cmt">// Correct — all fields are unmanaged</span>
+<span class="kw">public struct</span> <span class="type">HandTrackingLost</span> : <span class="type">IEvent</span>
+{
+    <span class="kw">public int</span> HandIndex;       <span class="cmt">// 0 = left, 1 = right</span>
+    <span class="kw">public float</span> Timestamp;
+    <span class="kw">public float</span> Confidence;
+}
+
+<span class="cmt">// Use FixedString for string-like data</span>
+<span class="kw">public struct</span> <span class="type">SceneLoaded</span> : <span class="type">IEvent</span>
+{
+    <span class="kw">public int</span> SceneIndex;
+    <span class="kw">public</span> <span class="type">FixedString64Bytes</span> SceneName;
+}
+
+<span class="cmt">// COMPILE ERROR — string is a managed reference</span>
+<span class="kw">public struct</span> <span class="type">BadMessage</span> : <span class="type">IEvent</span>
+{
+    <span class="kw">public string</span> Name; <span class="cmt">// won't compile: not unmanaged</span>
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="callout callout--tip">
+            <strong>Need string-like data?</strong>
+            Use <code>Unity.Collections.FixedString64Bytes</code> (from <code>com.unity.collections</code>) or store an integer handle that indexes into a separate lookup table. Both approaches keep the message blittable.
+          </div>
+        </section>
+
+        <!-- ── Guide: Events vs Commands ── -->
+        <section class="docs-section" id="guide-events-commands">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Events vs Commands</h2>
+          <p class="section-intro">
+            The bus exposes two static facades — <code>EventBus</code> for N:M notifications and <code>CommandBus</code> for N:1 intents. Picking the right one enforces CQRS rules at runtime.
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Type</th><th>Cardinality</th><th>Naming</th><th>Use For</th></tr></thead>
+              <tbody>
+                <tr><td>IEvent</td><td>N publishers, N subscribers</td><td>Past tense — <code>PlayerScored</code>, <code>OrderPlaced</code></td><td>Notifying the world that something happened</td></tr>
+                <tr><td>ICommand</td><td>N publishers, 1 subscriber</td><td>Imperative — <code>MovePlayer</code>, <code>PlaceOrder</code></td><td>Requesting that something be done</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="prose">A second <code>CommandBus.Subscribe&lt;T&gt;</code> for the same command type throws — this is the runtime enforcement of CQRS's "one writer per command" rule.</p>
+        </section>
+
+        <!-- ── Guide: Subscribe ── -->
+        <section class="docs-section" id="guide-subscribe">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Subscribe &amp; Unsubscribe</h2>
+          <p class="section-intro">
+            <code>Subscribe</code> returns a <code>SubscriptionToken</code> — an integer handle. Store it and pass it to <code>Unsubscribe</code>. There is no <code>-=</code> operator: this avoids the well-known fragility of delegate equality with lambdas and closures.
+          </p>
+
+          <div class="code-card code-card--msg">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">FadeController.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.MessageBus;
+<span class="kw">using</span> UnityEngine;
+
+<span class="kw">public class</span> <span class="type">FadeController</span> : <span class="type">MonoBehaviour</span>
+{
+    <span class="type">SubscriptionToken</span> _token;
+
+    <span class="kw">void</span> OnEnable()
+    {
+        _token = <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerTeleported</span>&gt;(OnTeleported);
+    }
+
+    <span class="kw">void</span> OnDisable()
+    {
+        <span class="type">EventBus</span>.Unsubscribe(_token);
+    }
+
+    <span class="kw">void</span> OnTeleported(<span class="kw">ref</span> <span class="type">PlayerTeleported</span> msg)
+    {
+        StartFade(msg.Duration);
+    }
+}</code></pre>
+          </div>
+
+          <p class="prose">The handler signature uses <code>ref T</code> — this eliminates the struct copy that <code>Action&lt;T&gt;</code> would force on every dispatch. Handlers <em>may</em> mutate the message (e.g., set a <code>Consumed</code> flag), and subsequent handlers will observe the mutation.</p>
+        </section>
+
+        <!-- ── Guide: Publish & Enqueue ── -->
+        <section class="docs-section" id="guide-publish">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Publish &amp; Enqueue</h2>
+          <p class="section-intro">
+            <code>Publish</code> dispatches immediately on the calling thread (main only). <code>Enqueue</code> is thread-safe and defers dispatch until <code>DrainQueues()</code> runs on the main thread. The auto-bootstrapped <code>[MessageBusHost]</code> calls <code>DrainQueues()</code> in <code>LateUpdate</code>.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Immediate dispatch</h3>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">TeleportSystem.cs</span></div>
+<pre class="code-block"><code><span class="kw">public class</span> <span class="type">TeleportSystem</span> : <span class="type">MonoBehaviour</span>
+{
+    <span class="kw">public void</span> ExecuteTeleport(<span class="type">Vector3</span> origin, <span class="type">Vector3</span> dest, <span class="kw">float</span> duration)
+    {
+        <span class="kw">var</span> msg = <span class="kw">new</span> <span class="type">PlayerTeleported</span>
+        {
+            Origin = origin,
+            Destination = dest,
+            Duration = duration
+        };
+        <span class="type">EventBus</span>.Publish(<span class="kw">ref</span> msg);
+    }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Queued dispatch from a worker thread</h3>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">VideoStreamReceiver.cs</span></div>
+<pre class="code-block"><code><span class="kw">public struct</span> <span class="type">FrameDecoded</span> : <span class="type">IEvent</span>
+{
+    <span class="kw">public int</span> FrameIndex;
+    <span class="kw">public int</span> Width;
+    <span class="kw">public int</span> Height;
+    <span class="kw">public long</span> TimestampTicks;
+}
+
+<span class="kw">public class</span> <span class="type">VideoStreamReceiver</span>
+{
+    <span class="cmt">// Called on a network/decode thread — NOT the main thread</span>
+    <span class="kw">void</span> OnFrameReady(<span class="kw">int</span> index, <span class="kw">int</span> w, <span class="kw">int</span> h)
+    {
+        <span class="kw">var</span> msg = <span class="kw">new</span> <span class="type">FrameDecoded</span> { FrameIndex = index, Width = w, Height = h };
+
+        <span class="cmt">// Enqueue is thread-safe. Dispatched on next DrainQueues() call.</span>
+        <span class="type">EventBus</span>.Enqueue(msg);
+    }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Commands — N:1 dispatch</h3>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">OrderHandler.cs</span></div>
+<pre class="code-block"><code><span class="kw">public struct</span> <span class="type">PlaceOrder</span> : <span class="type">ICommand</span>
+{
+    <span class="kw">public int</span> ItemId;
+    <span class="kw">public int</span> Quantity;
+}
+
+<span class="kw">public class</span> <span class="type">OrderHandler</span> : <span class="type">MonoBehaviour</span>
+{
+    <span class="type">SubscriptionToken</span> _token;
+    <span class="kw">void</span> OnEnable()  =&gt; _token = <span class="type">CommandBus</span>.Subscribe&lt;<span class="type">PlaceOrder</span>&gt;(Handle);
+    <span class="kw">void</span> OnDisable() =&gt; <span class="type">CommandBus</span>.Unsubscribe(_token);
+
+    <span class="kw">void</span> Handle(<span class="kw">ref</span> <span class="type">PlaceOrder</span> cmd)
+    {
+        ProcessOrder(cmd.ItemId, cmd.Quantity);
+    }
+}
+
+<span class="cmt">// Caller — same publish API</span>
+<span class="type">CommandBus</span>.Publish(<span class="kw">new</span> <span class="type">PlaceOrder</span> { ItemId = <span class="num">7</span>, Quantity = <span class="num">3</span> });</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Guide: Threading ── -->
+        <section class="docs-section" id="guide-threading">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Threading Model</h2>
+          <p class="section-intro">
+            Worker threads enqueue; the main thread drains and dispatches. The split lets you push messages out of network or decode threads without ever touching Unity APIs off the main thread.
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>API</th><th>Thread</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>Publish / Subscribe / Unsubscribe / DrainQueues</td><td>Main thread only</td><td>Lock-free reads via <code>ConcurrentDictionary&lt;Type, ChannelBase&gt;</code></td></tr>
+                <tr><td>Enqueue</td><td>Thread-safe</td><td>Lookup via <code>ConcurrentDictionary.GetOrAdd</code>; message lands in a per-channel <code>ConcurrentQueue&lt;T&gt;</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout--tip">
+            <strong>Always safe to touch Unity in handlers</strong>
+            Even when the publisher was a background thread, the handler runs on the main thread — because <code>DrainQueues()</code> is called from <code>LateUpdate</code>. <code>EventBus.Enqueue</code> + handler is the idiomatic way to bridge worker results back to Unity APIs.
+          </div>
+        </section>
+
+        <!-- ── Guide: Auto-bootstrap ── -->
+        <section class="docs-section" id="guide-bootstrap">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Auto-bootstrap &amp; Scene Cleanup</h2>
+          <p class="section-intro">
+            By default, the package creates a hidden persistent <code>[MessageBusHost]</code> GameObject at startup via <code>RuntimeInitializeOnLoad(BeforeSceneLoad)</code>. It survives scene loads and calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Opting out</h3>
+            <p class="prose">To drain from a custom PlayerLoop callback, or to host the drainer under your own scene root, add this scripting define:</p>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Player Settings</span></div>
+<pre class="code-block"><code><span class="cmt">// Project Settings → Player → Scripting Define Symbols</span>
+TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">When disabled, attach the <code>MessageBusHost</code> component to your own persistent GameObject, or call <code>EventBus.DrainQueues()</code> and <code>CommandBus.DrainQueues()</code> from your own update logic.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Scene transition cleanup</h3>
+            <p class="prose">Reset the buses before unloading to clear stale subscriptions from destroyed MonoBehaviours:</p>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SceneLoader.cs</span></div>
+<pre class="code-block"><code><span class="kw">public class</span> <span class="type">SceneLoader</span> : <span class="type">MonoBehaviour</span>
+{
+    <span class="kw">async void</span> LoadScene(<span class="kw">string</span> sceneName)
+    {
+        <span class="type">EventBus</span>.Reset();
+        <span class="type">CommandBus</span>.Reset();
+
+        <span class="kw">await</span> <span class="type">SceneManager</span>.LoadSceneAsync(sceneName);
+        <span class="cmt">// New scene's OnEnable calls will re-subscribe.</span>
+    }
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Guide: Performance ── -->
+        <section class="docs-section" id="guide-performance">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Performance &amp; Edge Cases</h2>
+          <p class="section-intro">
+            Every operation on the dispatch hot path is zero-allocation and amortized O(1) or O(n) in subscriber count. Pre-warm channels at startup to eliminate the initial growth of the backing <code>List&lt;T&gt;</code>.
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Operation</th><th>Allocation</th><th>Complexity</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>Publish</td><td>Zero</td><td>O(n) subscribers</td><td><code>ref</code> dispatch, no delegate combine</td></tr>
+                <tr><td>Enqueue</td><td>Amortized</td><td>O(1)</td><td>Queue may grow; pre-warm to avoid</td></tr>
+                <tr><td>Subscribe</td><td>Amortized</td><td>O(1)</td><td><code>List.Add</code>; one-time per subscription</td></tr>
+                <tr><td>Unsubscribe</td><td>Zero</td><td>O(n) subscribers</td><td>Linear scan by token ID</td></tr>
+                <tr><td>DrainQueues</td><td>Zero</td><td>O(channels × msgs)</td><td>One dictionary iteration per frame</td></tr>
+                <tr><td>Channel lookup</td><td>Zero</td><td>O(1)</td><td><code>Dictionary&lt;Type, ChannelBase&gt;</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Pre-warming</h3>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Prewarm.cs</span></div>
+<pre class="code-block"><code><span class="kw">void</span> Awake()
+{
+    <span class="cmt">// Force channel creation with a dummy subscribe/unsubscribe.</span>
+    <span class="type">EventBus</span>.Unsubscribe(<span class="type">EventBus</span>.Subscribe&lt;<span class="type">HandGesture</span>&gt;((<span class="kw">ref</span> <span class="type">HandGesture</span> _) =&gt; { }));
+    <span class="type">EventBus</span>.Unsubscribe(<span class="type">EventBus</span>.Subscribe&lt;<span class="type">FrameDecoded</span>&gt;((<span class="kw">ref</span> <span class="type">FrameDecoded</span> _) =&gt; { }));
+    <span class="cmt">// ... repeat for all message types used in the application</span>
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="callout callout--note">
+            <strong>Reentrant publish, subscribe/unsubscribe during dispatch</strong>
+            All three are safe. A depth counter ensures list compaction never runs while an outer dispatch is still iterating. Handlers added during dispatch will not see the current message; handlers removed during dispatch are skipped for the rest of the cycle. Exceptions in a handler are caught via <code>Debug.LogException</code> and dispatch continues.
+          </div>
+        </section>
+
+      </div><!-- .docs-content -->
+    </main>
+  </div><!-- .docs-shell -->
+
+  <!-- Sidebar toggle (mobile) -->
+  <button class="sidebar-toggle-btn" aria-label="Toggle navigation sidebar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <script src="src/main.js"></script>
+  <script src="src/docs.js"></script>
+</body>
+</html>

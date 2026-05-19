@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MessageBus — API Reference — Unity Framework</title>
+  <meta name="description" content="UP-MessageBus API Reference: complete type and member documentation for EventBus, CommandBus, IMessage, IEvent, ICommand, SubscriptionToken.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles.css">
+  <link rel="stylesheet" href="src/docs.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/favicon/favicon-32x32.png" alt="" class="nav-logo-icon" aria-hidden="true">
+        Unity Framework
+      </a>
+      <div class="nav-links">
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="functional.html" class="nav-link">Functional</a>
+        <a href="messagebus.html" class="nav-link" style="color:var(--msg-color)">MessageBus</a>
+        <a href="utilities.html" class="nav-link">Utilities</a>
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="docs-shell">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to home
+        </a>
+        <span class="sidebar-pkg-id sidebar-pkg-id--msg">com.tutan.messagebus</span>
+        <div class="sidebar-pkg-name">MessageBus</div>
+      </div>
+      <nav class="sidebar-nav" aria-label="Page sections">
+        <a href="messagebus.html" class="sidebar-direct" data-pkg="msg">← Guides</a>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            API Reference
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#api-imessage" class="sidebar-link" data-pkg="msg">IMessage / IEvent / ICommand</a>
+            <a href="#api-eventbus" class="sidebar-link" data-pkg="msg">EventBus</a>
+            <a href="#api-commandbus" class="sidebar-link" data-pkg="msg">CommandBus</a>
+            <a href="#api-handler" class="sidebar-link" data-pkg="msg">MessageHandler&lt;T&gt;</a>
+            <a href="#api-token" class="sidebar-link" data-pkg="msg">SubscriptionToken</a>
+            <a href="#api-host" class="sidebar-link" data-pkg="msg">MessageBusHost</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="docs-main">
+
+      <div class="docs-content">
+
+        <!-- ── API: IMessage / IEvent / ICommand ── -->
+        <section class="docs-section" id="api-imessage">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">IMessage / IEvent / ICommand</h2>
+          <p class="section-intro">Marker interfaces in <code>Tutan.MessageBus</code>. Implementing types must be <code>unmanaged struct</code>.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">IMessage</span>
+              <span class="api-type-badge badge--iface">interface</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">marker</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">interface IMessage</div>
+                  <div class="api-member-desc">Root marker interface. Not used directly — implement <code>IEvent</code> or <code>ICommand</code> instead.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">IEvent</span>
+              <span class="api-type-badge badge--iface">interface</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">marker</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">interface IEvent : IMessage</div>
+                  <div class="api-member-desc">Marker for N:M notifications. Any number of subscribers may register via <code>EventBus</code>. Name in past tense.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">ICommand</span>
+              <span class="api-type-badge badge--iface">interface</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">marker</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">interface ICommand : IMessage</div>
+                  <div class="api-member-desc">Marker for N:1 intents. Exactly one subscriber may register via <code>CommandBus</code>; a second <code>Subscribe</code> call throws. Name in imperative.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: EventBus ── -->
+        <section class="docs-section" id="api-eventbus">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">EventBus</h2>
+          <p class="section-intro">Static N:M facade in <code>Tutan.MessageBus</code>.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">EventBus</span>
+              <span class="api-type-badge badge--static">static</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">SubscriptionToken Subscribe&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, IEvent</div>
+                  <div class="api-member-desc">Registers a handler. Returns an integer token for unsubscription. Main thread only.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool Unsubscribe(SubscriptionToken token)</div>
+                  <div class="api-member-desc">Removes the handler associated with the token. Returns <code>false</code> if already removed. Safe during dispatch.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Publish&lt;T&gt;(ref T message) where T : unmanaged, IEvent</div>
+                  <div class="api-member-desc">Dispatches immediately to all subscribers on the calling thread. Zero-copy via <code>ref</code>. Main thread only.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Publish&lt;T&gt;(T message) where T : unmanaged, IEvent</div>
+                  <div class="api-member-desc">Convenience overload — one struct copy from caller to parameter. Acceptable for small messages where the <code>ref</code> call site is inconvenient.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Enqueue&lt;T&gt;(in T message) where T : unmanaged, IEvent</div>
+                  <div class="api-member-desc">Thread-safe enqueue. Channel creation uses a brief lock; the enqueue itself is lock-free via <code>ConcurrentQueue&lt;T&gt;</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void DrainQueues()</div>
+                  <div class="api-member-desc">Processes all pending queued messages across all channels. Call once per frame on the main thread. <code>MessageBusHost</code> does this in <code>LateUpdate</code> by default.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int GetSubscriberCount&lt;T&gt;() where T : unmanaged, IEvent</div>
+                  <div class="api-member-desc">Number of active subscribers for message type <code>T</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int ChannelCount { get; }</div>
+                  <div class="api-member-desc">Number of distinct message types with at least one active subscriber.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Reset()</div>
+                  <div class="api-member-desc">Clears all subscriptions and queues. Use on scene transitions or test teardown.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: CommandBus ── -->
+        <section class="docs-section" id="api-commandbus">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">CommandBus</h2>
+          <p class="section-intro">Static N:1 facade in <code>Tutan.MessageBus</code>. Same API surface as <code>EventBus</code>, but constrained to <code>ICommand</code> with the additional rule that <code>Subscribe&lt;T&gt;</code> throws if a handler for <code>T</code> already exists.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">CommandBus</span>
+              <span class="api-type-badge badge--static">static</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">SubscriptionToken Subscribe&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, ICommand</div>
+                  <div class="api-member-desc">Registers the single handler for command type <code>T</code>. Throws <code>InvalidOperationException</code> if a handler already exists.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool Unsubscribe(SubscriptionToken token)</div>
+                  <div class="api-member-desc">Removes the handler. After unsubscribe, a new <code>Subscribe</code> for the same command type is allowed.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Publish&lt;T&gt;(ref T command) / void Publish&lt;T&gt;(T command)</div>
+                  <div class="api-member-desc">Dispatches the command to its single handler. No-op if no handler is registered.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Enqueue&lt;T&gt;(in T command) / void DrainQueues() / void Reset()</div>
+                  <div class="api-member-desc">Same semantics as <code>EventBus</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: MessageHandler ── -->
+        <section class="docs-section" id="api-handler">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">MessageHandler&lt;T&gt;</h2>
+          <p class="section-intro">Delegate type in <code>Tutan.MessageBus</code>.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">MessageHandler&lt;T&gt;</span>
+              <span class="api-type-badge badge--delegate">delegate</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">sig</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void MessageHandler&lt;T&gt;(ref T message) where T : unmanaged, IMessage</div>
+                  <div class="api-member-desc">Receives the message by <code>ref</code> — no struct copy on dispatch. Handlers may mutate the message; subsequent handlers see the mutation in registration order.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: SubscriptionToken ── -->
+        <section class="docs-section" id="api-token">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">SubscriptionToken</h2>
+          <p class="section-intro"><code>readonly struct</code> in <code>Tutan.MessageBus</code>. The only mechanism for unsubscription — no <code>-=</code> operator.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">SubscriptionToken</span>
+              <span class="api-type-badge badge--struct">struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Id { get; }</div>
+                  <div class="api-member-desc">Monotonically increasing integer identifier for the subscription.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool IsValid { get; }</div>
+                  <div class="api-member-desc"><code>true</code> if the token references a non-default subscription. Does not check whether the subscription is still active.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: MessageBusHost ── -->
+        <section class="docs-section" id="api-host">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">MessageBusHost</h2>
+          <p class="section-intro"><code>MonoBehaviour</code> in <code>Tutan.MessageBus</code>. Calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>. Auto-instantiated at <code>BeforeSceneLoad</code> unless <code>TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code> is defined.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">MessageBusHost</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void LateUpdate()</div>
+                  <div class="api-member-desc">Calls <code>EventBus.DrainQueues()</code> and <code>CommandBus.DrainQueues()</code>. Override or detach if you need a different drain cadence.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">MessageBusBootstrap</span>
+              <span class="api-type-badge badge--static">static</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)] static void Bootstrap()</div>
+                  <div class="api-member-desc">Creates a hidden persistent <code>[MessageBusHost]</code> GameObject. Stripped from the build entirely when <code>TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code> is defined.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- .docs-content -->
+    </main>
+  </div><!-- .docs-shell -->
+
+  <!-- Sidebar toggle (mobile) -->
+  <button class="sidebar-toggle-btn" aria-label="Toggle navigation sidebar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <script src="src/main.js"></script>
+  <script src="src/docs.js"></script>
+</body>
+</html>

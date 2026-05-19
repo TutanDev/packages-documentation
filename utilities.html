@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Utilities — Unity Framework</title>
-  <meta name="description" content="UP-Utilities: zero-GC MessageBus, Timer, AudioPlayer, Persistence, and Reporter for professional Unity projects.">
+  <meta name="description" content="UP-Utilities: zero-GC Timer, AudioPlayer, Persistence, and Reporter for professional Unity projects.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,6 +23,7 @@
       <div class="nav-links">
         <a href="architecture.html" class="nav-link">Architecture</a>
         <a href="functional.html" class="nav-link">Functional</a>
+        <a href="messagebus.html" class="nav-link">MessageBus</a>
         <a href="utilities.html" class="nav-link" style="color:var(--util-color)">Utilities</a>
       </div>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
@@ -52,7 +53,6 @@
             <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="sidebar-items">
-            <a href="#guide-messagebus" class="sidebar-link" data-pkg="util">MessageBus</a>
             <a href="#guide-timer" class="sidebar-link" data-pkg="util">Timer</a>
             <a href="#guide-audioplayer" class="sidebar-link" data-pkg="util">AudioPlayer</a>
             <a href="#guide-persistence" class="sidebar-link" data-pkg="util">Persistence</a>
@@ -78,7 +78,7 @@
         </p>
         <div class="docs-hero-stats">
           <div>
-            <span class="docs-stat-value" style="color:var(--util-color)">5</span>
+            <span class="docs-stat-value" style="color:var(--util-color)">4</span>
             <span class="docs-stat-label">Utilities</span>
           </div>
           <div>
@@ -129,78 +129,6 @@
       </section>
 
       <div class="docs-content">
-
-        <!-- ── Guide: MessageBus ── -->
-        <section class="docs-section" id="guide-messagebus">
-          <div class="section-eyebrow">Guides</div>
-          <h2 class="section-title">MessageBus</h2>
-          <p class="section-intro">
-            Type-safe N:M pub/sub for decoupled architecture. Messages are <code>unmanaged struct</code> — no GC heap allocation, no delegate equality problems. Built for 72–120 Hz XR frame budgets.
-          </p>
-
-          <div class="sub-section">
-            <h3 class="sub-title">Define a message</h3>
-            <p class="prose">A message is any <code>unmanaged struct</code> implementing <code>IMessage</code>. The <code>unmanaged</code> constraint guarantees no managed references — no <code>string</code>, no arrays, no class fields.</p>
-            <div class="code-card code-card--util">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Messages.cs</span></div>
-<pre class="code-block"><code><span class="kw">using</span> Utilities.Messaging;
-
-<span class="kw">public struct</span> <span class="type">PlayerDied</span> : <span class="type">IMessage</span>
-{
-    <span class="kw">public int</span> PlayerId;
-    <span class="kw">public float</span> Timestamp;
-}
-
-<span class="cmt">// If you need string-like data, use FixedString:</span>
-<span class="kw">public struct</span> <span class="type">SceneLoaded</span> : <span class="type">IMessage</span>
-{
-    <span class="kw">public int</span> SceneIndex;
-    <span class="kw">public</span> <span class="type">FixedString64Bytes</span> SceneName;
-}</code></pre>
-            </div>
-          </div>
-
-          <div class="sub-section">
-            <h3 class="sub-title">Subscribe and unsubscribe</h3>
-            <p class="prose">Subscribe returns a <code>SubscriptionToken</code> — an integer handle. Store it and pass it to <code>Unsubscribe</code>. No delegate equality comparison, no allocation on subscription changes.</p>
-            <div class="code-card code-card--util">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Subscriber.cs</span></div>
-<pre class="code-block"><code><span class="kw">private</span> <span class="type">SubscriptionToken</span> _token;
-
-<span class="kw">void</span> OnEnable()
-{
-    _token = <span class="type">MessageBus</span>.Instance.Subscribe&lt;<span class="type">PlayerDied</span>&gt;(OnPlayerDied);
-}
-
-<span class="kw">void</span> OnDisable()
-{
-    <span class="type">MessageBus</span>.Instance.Unsubscribe(_token);
-}
-
-<span class="kw">void</span> OnPlayerDied(<span class="kw">ref</span> <span class="type">PlayerDied</span> msg)
-{
-    Debug.Log($<span class="str">"Player {msg.PlayerId} died at {msg.Timestamp}"</span>);
-}</code></pre>
-            </div>
-          </div>
-
-          <div class="sub-section">
-            <h3 class="sub-title">Publish and enqueue</h3>
-            <p class="prose"><code>Publish</code> dispatches immediately on the calling thread. <code>Enqueue</code> is thread-safe — use it from worker threads. Call <code>DrainQueues()</code> on the main thread to process queued messages.</p>
-            <div class="code-card code-card--util">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Publisher.cs</span></div>
-<pre class="code-block"><code><span class="cmt">// Immediate dispatch (main thread)</span>
-<span class="kw">var</span> msg = <span class="kw">new</span> <span class="type">PlayerDied</span> { PlayerId = id, Timestamp = <span class="type">Time</span>.time };
-<span class="type">MessageBus</span>.Instance.Publish(<span class="kw">ref</span> msg);
-
-<span class="cmt">// Thread-safe enqueue (any thread)</span>
-<span class="type">MessageBus</span>.Instance.Enqueue(<span class="kw">in</span> msg);
-
-<span class="cmt">// Drain on main thread (e.g., in Update)</span>
-<span class="type">MessageBus</span>.Instance.DrainQueues();</code></pre>
-            </div>
-          </div>
-        </section>
 
         <!-- ── Guide: Timer ── -->
         <section class="docs-section" id="guide-timer">

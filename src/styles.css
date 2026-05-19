@@ -32,6 +32,9 @@
   --util-color:    #f97316;
   --util-glow:     rgba(249, 115, 22, 0.15);
   --util-soft:     rgba(249, 115, 22, 0.08);
+  --msg-color:     #06b6d4;
+  --msg-glow:      rgba(6, 182, 212, 0.15);
+  --msg-soft:      rgba(6, 182, 212, 0.08);
 
   /* Code */
   --code-bg:       #080c18;
@@ -333,6 +336,18 @@ code { font-family: var(--font-code); font-size: 0.875em; }
 }
 .btn--cta--util:focus-visible { outline: 2px solid var(--util-color); outline-offset: 2px; }
 
+.btn--cta--msg {
+  color: var(--msg-color);
+  background: var(--msg-soft);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+}
+.btn--cta--msg:hover {
+  background: rgba(6, 182, 212, 0.18);
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 24px var(--msg-glow);
+}
+.btn--cta--msg:focus-visible { outline: 2px solid var(--msg-color); outline-offset: 2px; }
+
 /* Hero package links */
 .hero-packages {
   display: flex;
@@ -363,6 +378,7 @@ code { font-family: var(--font-code); font-size: 0.875em; }
 .hero-package--arch .hero-package-dot { background: var(--arch-color); }
 .hero-package--func .hero-package-dot { background: var(--func-color); }
 .hero-package--util .hero-package-dot { background: var(--util-color); }
+.hero-package--msg .hero-package-dot { background: var(--msg-color); }
 
 /* --- Package Sections --- */
 .package {
@@ -405,6 +421,12 @@ code { font-family: var(--font-code); font-size: 0.875em; }
   color: var(--util-color);
   background: var(--util-soft);
   border: 1px solid rgba(249, 115, 22, 0.15);
+}
+
+.package-label--msg {
+  color: var(--msg-color);
+  background: var(--msg-soft);
+  border: 1px solid rgba(6, 182, 212, 0.15);
 }
 
 .package-title {
@@ -484,6 +506,11 @@ code { font-family: var(--font-code); font-size: 0.875em; }
   background: var(--util-soft);
 }
 
+.feature-icon--msg {
+  color: var(--msg-color);
+  background: var(--msg-soft);
+}
+
 .feature-name {
   font-size: 1rem;
   font-weight: 600;
@@ -515,6 +542,7 @@ code { font-family: var(--font-code); font-size: 0.875em; }
 .code-card--arch { border-color: rgba(59, 130, 246, 0.12); }
 .code-card--func { border-color: rgba(34, 197, 94, 0.12); }
 .code-card--util { border-color: rgba(249, 115, 22, 0.12); }
+.code-card--msg  { border-color: rgba(6, 182, 212, 0.12); }
 .code-card--wide { margin-top: 48px; }
 
 .code-card-header {

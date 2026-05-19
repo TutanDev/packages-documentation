@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Unity Framework - Professional Unity Packages</title>
-  <meta name="description" content="Three Unity packages for building professional projects using volatility-based architecture. Architecture enforcement, functional primitives, and infrastructure utilities.">
+  <meta name="description" content="Unity packages for building professional projects using volatility-based architecture: Architecture enforcement, functional primitives, zero-allocation message bus, and infrastructure utilities.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,6 +27,7 @@
       <div class="nav-links">
         <a href="#architecture" class="nav-link">Architecture</a>
         <a href="#functional" class="nav-link">Functional</a>
+        <a href="#messagebus" class="nav-link">MessageBus</a>
         <a href="#utilities" class="nav-link">Utilities</a>
         <a href="#framework" class="nav-link">Framework</a>
       </div>
@@ -46,8 +47,8 @@
         <span class="hero-title-accent">The Right Way</span>
       </h1>
       <p class="hero-subtitle">
-        Four packages implementing volatility-based architecture for professional Unity development.
-        Structure, safety, services, and a meta-package that glues them together.
+        Five packages implementing volatility-based architecture for professional Unity development.
+        Structure, safety, messaging, services, and a meta-package that glues them together.
       </p>
       <div class="hero-actions">
         <a href="#architecture" class="btn btn--primary">Explore Packages</a>
@@ -60,6 +61,10 @@
         <a href="#functional" class="hero-package hero-package--func">
           <span class="hero-package-dot" aria-hidden="true"></span>
           Functional
+        </a>
+        <a href="#messagebus" class="hero-package hero-package--msg">
+          <span class="hero-package-dot" aria-hidden="true"></span>
+          MessageBus
         </a>
         <a href="#utilities" class="hero-package hero-package--util">
           <span class="hero-package-dot" aria-hidden="true"></span>
@@ -243,6 +248,94 @@ result
     </div>
   </section>
 
+  <!-- MessageBus Package -->
+  <section class="package" id="messagebus">
+    <div class="container">
+      <div class="package-header">
+        <span class="package-label package-label--msg">com.tutan.messagebus</span>
+        <h2 class="package-title">MessageBus</h2>
+        <p class="package-desc">
+          Standalone zero-allocation pub/sub. <code>unmanaged struct</code> messages dispatched by <code>ref</code>,
+          thread-safe enqueue from worker threads, integer subscription tokens — built for 72–120 Hz XR frame budgets.
+        </p>
+      </div>
+      <div class="package-grid">
+        <div class="feature-list">
+          <div class="feature">
+            <div class="feature-icon feature-icon--msg" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">EventBus &amp; CommandBus</h3>
+              <p class="feature-desc">N:M event fan-out and N:1 command intents — two static facades, one zero-GC dispatcher underneath.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--msg" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Zero-GC Dispatch</h3>
+              <p class="feature-desc"><code>ref T</code> handler signature avoids struct copies. Integer tokens avoid delegate-equality bugs. No allocations on the hot path.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--msg" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Thread-Safe Enqueue</h3>
+              <p class="feature-desc">Push from network or decode threads with <code>Enqueue</code>; handlers run on the main thread when <code>DrainQueues()</code> fires in <code>LateUpdate</code>.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--msg" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Standalone &amp; Asset Store-Ready</h3>
+              <p class="feature-desc">No dependencies on the rest of the Framework. Ships independently and is also published to the Unity Asset Store.</p>
+            </div>
+          </div>
+        </div>
+        <div class="code-card code-card--msg">
+          <div class="code-card-header">
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-file">Teleport.cs</span>
+          </div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.MessageBus;
+
+<span class="cmt">// Define a message — must be unmanaged struct</span>
+<span class="kw">public struct</span> <span class="type">PlayerTeleported</span> : <span class="type">IEvent</span>
+{
+    <span class="kw">public</span> <span class="type">Vector3</span> Origin;
+    <span class="kw">public</span> <span class="type">Vector3</span> Destination;
+    <span class="kw">public float</span> Duration;
+}
+
+<span class="cmt">// Subscribe — store the token, no -= operator</span>
+<span class="type">SubscriptionToken</span> token = <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerTeleported</span>&gt;(
+    (<span class="kw">ref</span> <span class="type">PlayerTeleported</span> msg) =&gt; StartFade(msg.Duration));
+
+<span class="cmt">// Publish — zero copy via ref</span>
+<span class="kw">var</span> msg = <span class="kw">new</span> <span class="type">PlayerTeleported</span> { Duration = <span class="num">0.4f</span> };
+<span class="type">EventBus</span>.Publish(<span class="kw">ref</span> msg);
+
+<span class="cmt">// From any thread — handler still runs on main</span>
+<span class="type">EventBus</span>.Enqueue(msg);
+
+<span class="cmt">// Clean up</span>
+<span class="type">EventBus</span>.Unsubscribe(token);</code></pre>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:48px">
+        <a href="messagebus.html" class="btn btn--cta btn--cta--msg">Explore</a>
+      </div>
+    </div>
+  </section>
+
   <!-- Utilities Package -->
   <section class="package" id="utilities">
     <div class="container">
@@ -250,26 +343,12 @@ result
         <span class="package-label package-label--util">com.tutan.utilities</span>
         <h2 class="package-title">Utilities</h2>
         <p class="package-desc">
-          Five domain-agnostic services that every Unity project needs.
+          Four domain-agnostic services that every Unity project needs.
           Drop in the installer, configure via ScriptableObjects, and ship.
         </p>
       </div>
 
       <div class="util-grid">
-        <!-- MessageBus -->
-        <div class="util-card">
-          <div class="util-card-icon util-card-icon--util" aria-hidden="true">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          </div>
-          <h3 class="util-card-title">MessageBus</h3>
-          <p class="util-card-desc">Zero-allocation pub/sub. Struct messages passed by ref. Immediate and queued dispatch. Thread-safe enqueue for worker threads.</p>
-          <div class="util-card-tags">
-            <span class="tag">CommandBus</span>
-            <span class="tag">EventBus</span>
-            <span class="tag">Zero GC</span>
-          </div>
-        </div>
-
         <!-- Reporter -->
         <div class="util-card">
           <div class="util-card-icon util-card-icon--util" aria-hidden="true">
