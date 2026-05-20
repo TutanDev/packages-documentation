@@ -49,6 +49,7 @@
             <a href="#guide-publish" class="sidebar-link" data-pkg="msg">Publish &amp; Enqueue</a>
             <a href="#guide-threading" class="sidebar-link" data-pkg="msg">Threading Model</a>
             <a href="#guide-bootstrap" class="sidebar-link" data-pkg="msg">Auto-bootstrap</a>
+            <a href="#guide-editor" class="sidebar-link" data-pkg="msg">Editor Tooling</a>
             <a href="#guide-performance" class="sidebar-link" data-pkg="msg">Performance</a>
           </div>
         </div>
@@ -63,7 +64,7 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--msg-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messagebus · v1.0.0</span>
+        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messagebus · v0.4.0</span>
         <h1 class="docs-hero-title">Zero-Allocation<br>Pub/Sub for XR</h1>
         <p class="docs-hero-desc">
           UP-MessageBus is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, integer subscription tokens, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
@@ -360,6 +361,85 @@ TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code></pre>
     }
 }</code></pre>
             </div>
+          </div>
+        </section>
+
+        <!-- ── Guide: Editor Tooling ── -->
+        <section class="docs-section" id="guide-editor">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Editor Tooling</h2>
+          <p class="section-intro">
+            Editor-only instrumentation for inspecting bus traffic, plus inspector-friendly serialized wrappers for wiring messages without writing publisher code. Every instrumentation hook is gated behind <code>[Conditional("UNITY_EDITOR")]</code> and <code>[Conditional("TUTAN_MESSAGEBUS_DEBUG")]</code> — the C# compiler strips all call sites in release player builds.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Messages Console</h3>
+            <p class="prose">Open <strong>Window → Tutan → Messages Console</strong> for a virtualized log of recent <code>Subscribe</code>, <code>Unsubscribe</code>, <code>Publish</code>, <code>Enqueue</code>, and (optionally) drain operations with timestamp, frame, bus (E/C), op, and type. Selecting a row pretty-prints the payload and shows current subscribers for that message type.</p>
+            <p class="prose" style="margin-top:12px">Toolbar: <strong>Pause</strong>, <strong>Clear</strong>, <strong>Capture payloads</strong> (boxes structs into records for inspection — one allocation per <code>Publish</code>/<code>Enqueue</code>, off by default), per-op toggles, and a full-type-name search field. Drain records are off by default because they are noisy.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Enabling in development builds</h3>
+            <p class="prose">In the editor the console is always available (<code>UNITY_EDITOR</code> is always defined). To capture on-device in development player builds, add this scripting define:</p>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Player Settings</span></div>
+<pre class="code-block"><code><span class="cmt">// Project Settings → Player → Scripting Define Symbols</span>
+TUTAN_MESSAGEBUS_DEBUG</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">When the console window is closed, <code>MessageBusInstrumentation.Enabled</code> is set to <code>false</code> and every hook short-circuits on the first branch — so even with the define present, an empty/closed window costs roughly one <code>bool</code> check per <code>Publish</code>.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Programmatic access</h3>
+            <p class="prose"><code>MessageBusInstrumentation</code> is public and can drive custom diagnostics or in-game overlays:</p>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">DiagnosticsOverlay.cs</span></div>
+<pre class="code-block"><code><span class="type">MessageBusInstrumentation</span>.Enabled = <span class="kw">true</span>;
+<span class="type">MessageBusInstrumentation</span>.CapturePayloads = <span class="kw">true</span>;
+
+<span class="cmt">// Snapshot the ring buffer (allocates a copy; keep off the hot path).</span>
+<span class="kw">var</span> records = <span class="type">MessageBusInstrumentation</span>.Snapshot();
+<span class="kw">foreach</span> (<span class="kw">var</span> r <span class="kw">in</span> records)
+    <span class="type">Debug</span>.Log($<span class="str">"{r.Bus} {r.Op} {r.MessageType?.Name}"</span>);</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Inspector-serializable references</h3>
+            <p class="prose"><code>EventReference</code> and <code>CommandReference</code> are serializable wrappers that let designers pick a message type and edit its payload directly in the Inspector — useful for hooking up <code>UnityEvent</code>s, prototyping, or wiring data-driven triggers without writing publisher code.</p>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">TriggerZone.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.MessageBus;
+<span class="kw">using</span> UnityEngine;
+
+<span class="kw">public class</span> <span class="type">TriggerZone</span> : <span class="type">MonoBehaviour</span>
+{
+    [<span class="type">SerializeField</span>] <span class="type">EventReference</span>   onEntered;   <span class="cmt">// dropdown of all IEvent structs</span>
+    [<span class="type">SerializeField</span>] <span class="type">CommandReference</span> onActivate;  <span class="cmt">// dropdown of all ICommand structs</span>
+
+    <span class="kw">void</span> OnTriggerEnter(<span class="type">Collider</span> other)
+    {
+        onEntered.Publish();   <span class="cmt">// boxes + reflection — fine for a one-shot trigger</span>
+        onActivate.Publish();
+    }
+}</code></pre>
+            </div>
+            <div class="callout callout--warn" style="margin-top:12px">
+              <strong>Not for runtime hot paths.</strong>
+              Publishing via a <code>MessageReference</code> involves <code>JsonUtility.FromJson</code>, <code>Activator.CreateInstance</code>, <strong>boxing the struct</strong>, and a reflected generic <code>Publish</code> invocation — the opposite of the zero-alloc dispatch path. Use it for editor/authoring workflows, debug buttons, and tooling — not per-frame gameplay dispatch.
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The <code>[MessageType]</code> attribute</h3>
+            <p class="prose">If you only need the <em>type</em> (not a payload), decorate a <code>string</code> field with <code>[MessageType]</code> to get a dropdown that stores the <code>AssemblyQualifiedName</code>. Resolve at runtime with <code>Type.GetType(eventType)</code>.</p>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">TypePicker.cs</span></div>
+<pre class="code-block"><code>[<span class="type">MessageType</span>(<span class="kw">typeof</span>(<span class="type">IEvent</span>))]   <span class="kw">public string</span> eventType;
+[<span class="type">MessageType</span>(<span class="kw">typeof</span>(<span class="type">ICommand</span>))] <span class="kw">public string</span> commandType;
+[<span class="type">MessageType</span>]                   <span class="kw">public string</span> anyMessage;  <span class="cmt">// defaults to IMessage</span></code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">The inline reflection editor renders <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, <code>Vector3</code>, <code>Color</code>, and any <code>enum</code>. A field literally named <code>Timestamp</code> is skipped by the editor and auto-populated at publish time (<code>float</code> → <code>Time.time</code>, <code>double</code> → <code>(double)Time.time</code>, <code>long</code> → <code>DateTime.UtcNow.Ticks</code>).</p>
           </div>
         </section>
 

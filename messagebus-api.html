@@ -49,6 +49,9 @@
             <a href="#api-handler" class="sidebar-link" data-pkg="msg">MessageHandler&lt;T&gt;</a>
             <a href="#api-token" class="sidebar-link" data-pkg="msg">SubscriptionToken</a>
             <a href="#api-host" class="sidebar-link" data-pkg="msg">MessageBusHost</a>
+            <a href="#api-instrumentation" class="sidebar-link" data-pkg="msg">MessageBusInstrumentation</a>
+            <a href="#api-references" class="sidebar-link" data-pkg="msg">EventReference / CommandReference</a>
+            <a href="#api-messagetype" class="sidebar-link" data-pkg="msg">[MessageType]</a>
           </div>
         </div>
       </nav>
@@ -323,6 +326,107 @@
                 <div class="api-member-content">
                   <div class="api-member-name">[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)] static void Bootstrap()</div>
                   <div class="api-member-desc">Creates a hidden persistent <code>[MessageBusHost]</code> GameObject. Stripped from the build entirely when <code>TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code> is defined.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: MessageBusInstrumentation ── -->
+        <section class="docs-section" id="api-instrumentation">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">MessageBusInstrumentation</h2>
+          <p class="section-intro">Static editor-only diagnostics surface in <code>Tutan.MessageBus</code>. All hooks gated behind <code>[Conditional("UNITY_EDITOR")]</code> and <code>[Conditional("TUTAN_MESSAGEBUS_DEBUG")]</code> — stripped from release player builds.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">MessageBusInstrumentation</span>
+              <span class="api-type-badge badge--static">static</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool Enabled { get; set; }</div>
+                  <div class="api-member-desc">Master switch. When <code>false</code> every instrumentation hook short-circuits on the first branch (cost: one <code>bool</code> check per <code>Publish</code>).</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool CapturePayloads { get; set; }</div>
+                  <div class="api-member-desc">When <code>true</code>, message structs are boxed into records so they can be inspected. Adds one boxing allocation per <code>Publish</code>/<code>Enqueue</code>. Off by default.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Record[] Snapshot()</div>
+                  <div class="api-member-desc">Returns a copy of the ring buffer. Allocates — keep off the hot path. Each record exposes <code>Bus</code>, <code>Op</code>, <code>MessageType</code>, frame, and timestamp.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: EventReference / CommandReference ── -->
+        <section class="docs-section" id="api-references">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">EventReference / CommandReference</h2>
+          <p class="section-intro">Serializable wrappers in <code>Tutan.MessageBus</code> that let designers pick a message type and edit its payload from the Inspector. <strong>Not for runtime hot paths</strong> — publishing involves JSON deserialization, <code>Activator.CreateInstance</code>, boxing, and a reflected generic <code>Publish</code> invocation.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">EventReference</span>
+              <span class="api-type-badge badge--struct">serializable</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Publish()</div>
+                  <div class="api-member-desc">Synthesizes the selected <code>IEvent</code> struct from inspector-edited fields and dispatches it via <code>EventBus</code>. Boxes the struct and uses reflection.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">CommandReference</span>
+              <span class="api-type-badge badge--struct">serializable</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Publish()</div>
+                  <div class="api-member-desc">Same as <code>EventReference.Publish</code> but dispatches through <code>CommandBus</code>. Constrained to <code>ICommand</code> types in the inspector dropdown.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="prose" style="margin-top:12px">The inline reflection editor renders <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, <code>Vector3</code>, <code>Color</code>, and any <code>enum</code>. A field literally named <code>Timestamp</code> is skipped and auto-populated at publish time (<code>float</code> → <code>Time.time</code>, <code>double</code> → <code>(double)Time.time</code>, <code>long</code> → <code>DateTime.UtcNow.Ticks</code>).</p>
+        </section>
+
+        <!-- ── API: [MessageType] attribute ── -->
+        <section class="docs-section" id="api-messagetype">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">[MessageType] attribute</h2>
+          <p class="section-intro">Decorates a <code>string</code> field so the Inspector renders it as a dropdown of message types, storing the selected <code>AssemblyQualifiedName</code>.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">MessageTypeAttribute</span>
+              <span class="api-type-badge badge--attr">attribute</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">MessageTypeAttribute(Type filter = null)</div>
+                  <div class="api-member-desc">Restricts the dropdown to types assignable to <code>filter</code> (typically <code>IEvent</code> or <code>ICommand</code>). Defaults to <code>IMessage</code> when omitted.</div>
                 </div>
               </div>
             </div>
