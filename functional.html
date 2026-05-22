@@ -49,6 +49,7 @@
             <a href="#guide-validation" class="sidebar-link" data-pkg="func">Validation Pipelines</a>
             <a href="#guide-async" class="sidebar-link" data-pkg="func">Async Support</a>
             <a href="#guide-unity" class="sidebar-link" data-pkg="func">Unity Integration</a>
+            <a href="#guide-serializable" class="sidebar-link" data-pkg="func">SerializableOptional&lt;T&gt;</a>
           </div>
         </div>
 
@@ -62,7 +63,7 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--func-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v0.1.0</span>
+        <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v0.3.0</span>
         <h1 class="docs-hero-title">Null-Safe. Error-Safe.<br>Composable.</h1>
         <p class="docs-hero-desc">
           UP-Functional gives you <code>Optional&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, and composable extension methods that make absent values and errors impossible to ignore — without exceptions controlling normal flow.
@@ -415,6 +416,45 @@ item.Match(
     onSome: def => ShowItem(def)
 );</code></pre>
             </div>
+          </div>
+        </section>
+
+        <!-- ── Guide: SerializableOptional<T> ── -->
+        <section class="docs-section" id="guide-serializable">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">SerializableOptional&lt;T&gt;</h2>
+          <p class="section-intro">
+            <code>Optional&lt;T&gt;</code> is a <code>readonly record struct</code> — Unity's serializer cannot store it. <code>SerializableOptional&lt;T&gt;</code> is a <code>[Serializable]</code> wrapper that survives serialization, ships in the <code>Tutan.Functional.Unity</code> assembly, and converts to and from <code>Optional&lt;T&gt;</code> implicitly.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Declare an inspector-friendly field</h3>
+            <p class="prose">Add the field as <code>SerializableOptional&lt;T&gt;</code>, then read it as <code>Optional&lt;T&gt;</code> at the call site. The conversion is implicit — no manual unwrapping at the API boundary.</p>
+            <div class="code-card code-card--func">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SpawnPoint.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Functional;
+<span class="kw">using</span> Tutan.Functional.Unity;
+
+<span class="kw">public class</span> <span class="type">SpawnPoint</span> : <span class="type">MonoBehaviour</span>
+{
+    [<span class="type">SerializeField</span>] <span class="kw">private</span> <span class="type">SerializableOptional</span>&lt;<span class="type">Transform</span>&gt; overrideTarget;
+
+    <span class="kw">public</span> <span class="type">Vector3</span> Resolve() =>
+        ((<span class="type">Optional</span>&lt;<span class="type">Transform</span>&gt;) overrideTarget)
+            .Then(t => t.position)
+            .Or(transform.position);
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Inspector behaviour</h3>
+            <p class="prose"><code>SerializableOptionalDrawer</code> is a UI Toolkit <code>PropertyDrawer</code> registered for every closed generic. It renders a <code>Toggle</code> bound to the <em>has value</em> flag plus a <code>PropertyField</code> for the inner value — the value field is enabled only while the toggle is on.</p>
+          </div>
+
+          <div class="callout callout--note">
+            <strong>Assembly split</strong>
+            Runtime types live in <code>Tutan.Functional.Unity</code>; the drawer lives in <code>Tutan.Functional.Unity.Editor</code>. Add <code>Tutan.Functional.Unity</code> to your runtime <code>.asmdef</code> references — the editor assembly auto-loads in editor builds.
           </div>
         </section>
 

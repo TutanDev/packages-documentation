@@ -44,6 +44,7 @@
           </button>
           <div class="sidebar-items">
             <a href="#api-optional" class="sidebar-link" data-pkg="func">Optional&lt;T&gt;</a>
+            <a href="#api-serializable-optional" class="sidebar-link" data-pkg="func">SerializableOptional&lt;T&gt;</a>
             <a href="#api-result" class="sidebar-link" data-pkg="func">Result&lt;T&gt;</a>
             <a href="#api-error" class="sidebar-link" data-pkg="func">Error</a>
             <a href="#api-validator" class="sidebar-link" data-pkg="func">Validator&lt;T&gt;</a>
@@ -120,6 +121,79 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+
+        <!-- ── API: SerializableOptional<T> ── -->
+        <section class="docs-section" id="api-serializable-optional">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">SerializableOptional&lt;T&gt;</h2>
+          <p class="section-intro"><code>[Serializable] struct</code> in <code>Tutan.Functional.Unity</code>. Inspector-friendly counterpart to <code>Optional&lt;T&gt;</code>; implicitly converts both ways.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">SerializableOptional&lt;T&gt;</span>
+              <span class="api-type-badge badge--struct">struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">SerializableOptional(T value)</div>
+                  <div class="api-member-desc">Wraps a value and sets the has-value flag.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static SerializableOptional&lt;T&gt; From(Optional&lt;T&gt; opt)</div>
+                  <div class="api-member-desc">Converts from <code>Optional&lt;T&gt;</code>; <code>None</code> becomes <code>default</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool HasValue { get; }</div>
+                  <div class="api-member-desc"><code>true</code> when a value is present.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">T Value { get; }</div>
+                  <div class="api-member-desc">The wrapped value. Undefined when <code>HasValue</code> is <code>false</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Optional&lt;T&gt; ToOptional()</div>
+                  <div class="api-member-desc">Converts to <code>Optional&lt;T&gt;</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">implicit operator Optional&lt;T&gt;(SerializableOptional&lt;T&gt;)</div>
+                  <div class="api-member-desc">Implicit cast to <code>Optional&lt;T&gt;</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">implicit operator SerializableOptional&lt;T&gt;(Optional&lt;T&gt;)</div>
+                  <div class="api-member-desc">Implicit cast from <code>Optional&lt;T&gt;</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">SerializableOptionalDrawer</span>
+              <span class="api-type-badge badge--static">editor</span>
+            </div>
+            <p class="prose"><code>CustomPropertyDrawer</code> in <code>Tutan.Functional.Unity.Editor</code>, registered for all closed generics of <code>SerializableOptional&lt;&gt;</code> via <code>useForChildren: true</code>. UI Toolkit-based: a <code>Toggle</code> bound to the has-value flag next to a <code>PropertyField</code> for the inner value. The value field is enabled only while the toggle is on.</p>
           </div>
         </section>
 
