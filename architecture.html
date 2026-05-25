@@ -170,7 +170,7 @@
 
           <div class="sub-section">
             <h3 class="sub-title">Manager</h3>
-            <p class="prose">Orchestrates business logic by coordinating Engines and ResourceAccess. Managers are the <strong>only</strong> layer that may publish events to the MessageBus. They implement use cases — one method per use case entry point. Constructor dependencies are injected by <code>FrameworkContainer</code>.</p>
+            <p class="prose">Orchestrates business logic by coordinating Engines and ResourceAccess. Managers are the <strong>only</strong> layer that may publish events to the Messages. They implement use cases — one method per use case entry point. Constructor dependencies are injected by <code>FrameworkContainer</code>.</p>
             <div class="code-card code-card--arch">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SessionManager.cs</span></div>
 <pre class="code-block"><code><span class="attr">[Manager]</span>
@@ -216,7 +216,7 @@
 
           <div class="sub-section">
             <h3 class="sub-title">Utility (cross-cutting)</h3>
-            <p class="prose">Not a layer in the enum. Types marked <code>[Utility]</code> can be depended upon by any layer without violating the closed architecture. The litmus test: <em>"Could a smart cappuccino machine use this?"</em> Logging, serialization helpers, the MessageBus — all pass.</p>
+            <p class="prose">Not a layer in the enum. Types marked <code>[Utility]</code> can be depended upon by any layer without violating the closed architecture. The litmus test: <em>"Could a smart cappuccino machine use this?"</em> Logging, serialization helpers, the Messages — all pass.</p>
             <div class="callout callout--note">
               <strong>Resolution order</strong>
               Type-level attribute overrides assembly-level attribute. If a type has <code>[Manager]</code> but its assembly is tagged <code>[assembly: AssemblyLayer(Engine)]</code>, the type is a Manager.
@@ -290,7 +290,7 @@
             <p class="prose"><code>[Utility]</code> is not a layer attribute — it's a declaration that this type is domain-agnostic and can be used by any layer. Whole assemblies can be designated as Utility via <code>FrameworkSettings.UtilityAssemblies</code>.</p>
             <div class="callout callout--tip">
               <strong>When to use Utility</strong>
-              Logging facades, math helpers, serialization wrappers, the MessageBus, timers, audio. If the code has no business domain knowledge, it's Utility.
+              Logging facades, math helpers, serialization wrappers, the Messages, timers, audio. If the code has no business domain knowledge, it's Utility.
             </div>
           </div>
 
@@ -394,7 +394,7 @@
                 <tr><td>ARCH001</td><td>Closed Architecture</td><td>Dependencies only flow downward through adjacent layers. No skipping layers, no upward calls.</td></tr>
                 <tr><td>DONT001</td><td>Design Don'ts</td><td>Client calls only one Manager per use case entry point.</td></tr>
                 <tr><td>DONT002</td><td>Design Don'ts</td><td>Client must not depend on an Engine directly — must go through a Manager.</td></tr>
-                <tr><td>DONT006</td><td>Design Don'ts</td><td>Engine, ResourceAccess, and Resource must not access the MessageBus — only Managers may publish or subscribe.</td></tr>
+                <tr><td>DONT006</td><td>Design Don'ts</td><td>Engine, ResourceAccess, and Resource must not access the Messages — only Managers may publish or subscribe.</td></tr>
                 <tr><td>DONT011</td><td>Design Don'ts</td><td>Engine does not call another Engine.</td></tr>
                 <tr><td>DONT012</td><td>Design Don'ts</td><td>ResourceAccess does not call another ResourceAccess.</td></tr>
                 <tr><td>NAME001</td><td>Naming</td><td>Manager types end with <code>Manager</code>; Engine types end with <code>Engine</code>.</td></tr>

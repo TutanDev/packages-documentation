@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MessageBus — API Reference — Unity Framework</title>
-  <meta name="description" content="UP-MessageBus API Reference: complete type and member documentation for EventBus, CommandBus, IMessage, IEvent, ICommand, SubscriptionToken.">
+  <title>Messages — API Reference — Unity Framework</title>
+  <meta name="description" content="UP-Messages API Reference: complete type and member documentation for EventBus, CommandBus, IMessage, IEvent, ICommand, SubscriptionToken.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -31,11 +31,11 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
           Back to home
         </a>
-        <span class="sidebar-pkg-id sidebar-pkg-id--msg">com.tutan.messagebus</span>
-        <div class="sidebar-pkg-name">MessageBus</div>
+        <span class="sidebar-pkg-id sidebar-pkg-id--msg">com.tutan.messages</span>
+        <div class="sidebar-pkg-name">Messages</div>
       </div>
       <nav class="sidebar-nav" aria-label="Page sections">
-        <a href="messagebus.html" class="sidebar-direct" data-pkg="msg">← Guides</a>
+        <a href="messages.html" class="sidebar-direct" data-pkg="msg">← Guides</a>
 
         <div class="sidebar-group open">
           <button class="sidebar-group-btn" aria-expanded="true">
@@ -48,8 +48,8 @@
             <a href="#api-commandbus" class="sidebar-link" data-pkg="msg">CommandBus</a>
             <a href="#api-handler" class="sidebar-link" data-pkg="msg">MessageHandler&lt;T&gt;</a>
             <a href="#api-token" class="sidebar-link" data-pkg="msg">SubscriptionToken</a>
-            <a href="#api-host" class="sidebar-link" data-pkg="msg">MessageBusHost</a>
-            <a href="#api-instrumentation" class="sidebar-link" data-pkg="msg">MessageBusInstrumentation</a>
+            <a href="#api-host" class="sidebar-link" data-pkg="msg">MessagesHost</a>
+            <a href="#api-instrumentation" class="sidebar-link" data-pkg="msg">MessagesInstrumentation</a>
             <a href="#api-references" class="sidebar-link" data-pkg="msg">EventReference / CommandReference</a>
             <a href="#api-messagetype" class="sidebar-link" data-pkg="msg">[MessageType]</a>
           </div>
@@ -66,7 +66,7 @@
         <section class="docs-section" id="api-imessage">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">IMessage / IEvent / ICommand</h2>
-          <p class="section-intro">Marker interfaces in <code>Tutan.MessageBus</code>. Implementing types must be <code>unmanaged struct</code>.</p>
+          <p class="section-intro">Marker interfaces in <code>Tutan.Messages</code>. Implementing types must be <code>unmanaged struct</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -121,7 +121,7 @@
         <section class="docs-section" id="api-eventbus">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">EventBus</h2>
-          <p class="section-intro">Static N:M facade in <code>Tutan.MessageBus</code>.</p>
+          <p class="section-intro">Static N:M facade in <code>Tutan.Messages</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -168,7 +168,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">void DrainQueues()</div>
-                  <div class="api-member-desc">Processes all pending queued messages across all channels. Call once per frame on the main thread. <code>MessageBusHost</code> does this in <code>LateUpdate</code> by default.</div>
+                  <div class="api-member-desc">Processes all pending queued messages across all channels. Call once per frame on the main thread. <code>MessagesHost</code> does this in <code>LateUpdate</code> by default.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -200,7 +200,7 @@
         <section class="docs-section" id="api-commandbus">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">CommandBus</h2>
-          <p class="section-intro">Static N:1 facade in <code>Tutan.MessageBus</code>. Same API surface as <code>EventBus</code>, but constrained to <code>ICommand</code> with the additional rule that <code>Subscribe&lt;T&gt;</code> throws if a handler for <code>T</code> already exists.</p>
+          <p class="section-intro">Static N:1 facade in <code>Tutan.Messages</code>. Same API surface as <code>EventBus</code>, but constrained to <code>ICommand</code> with the additional rule that <code>Subscribe&lt;T&gt;</code> throws if a handler for <code>T</code> already exists.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -244,7 +244,7 @@
         <section class="docs-section" id="api-handler">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">MessageHandler&lt;T&gt;</h2>
-          <p class="section-intro">Delegate type in <code>Tutan.MessageBus</code>.</p>
+          <p class="section-intro">Delegate type in <code>Tutan.Messages</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -267,7 +267,7 @@
         <section class="docs-section" id="api-token">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">SubscriptionToken</h2>
-          <p class="section-intro"><code>readonly struct</code> in <code>Tutan.MessageBus</code>. The only mechanism for unsubscription — no <code>-=</code> operator.</p>
+          <p class="section-intro"><code>readonly struct</code> in <code>Tutan.Messages</code>. The only mechanism for unsubscription — no <code>-=</code> operator.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -293,15 +293,15 @@
           </div>
         </section>
 
-        <!-- ── API: MessageBusHost ── -->
+        <!-- ── API: MessagesHost ── -->
         <section class="docs-section" id="api-host">
           <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">MessageBusHost</h2>
-          <p class="section-intro"><code>MonoBehaviour</code> in <code>Tutan.MessageBus</code>. Calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>. Auto-instantiated at <code>BeforeSceneLoad</code> unless <code>TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code> is defined.</p>
+          <h2 class="section-title">MessagesHost</h2>
+          <p class="section-intro"><code>MonoBehaviour</code> in <code>Tutan.Messages</code>. Calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>. Auto-instantiated at <code>BeforeSceneLoad</code> unless <code>TUTAN_MESSAGES_DISABLE_AUTOBOOTSTRAP</code> is defined.</p>
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">MessageBusHost</span>
+              <span class="api-group-name">MessagesHost</span>
               <span class="api-type-badge badge--class">class</span>
             </div>
             <div class="api-members">
@@ -317,7 +317,7 @@
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">MessageBusBootstrap</span>
+              <span class="api-group-name">MessagesBootstrap</span>
               <span class="api-type-badge badge--static">static</span>
             </div>
             <div class="api-members">
@@ -325,37 +325,37 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)] static void Bootstrap()</div>
-                  <div class="api-member-desc">Creates a hidden persistent <code>[MessageBusHost]</code> GameObject. Stripped from the build entirely when <code>TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code> is defined.</div>
+                  <div class="api-member-desc">Creates a hidden persistent <code>[MessagesHost]</code> GameObject. Stripped from the build entirely when <code>TUTAN_MESSAGES_DISABLE_AUTOBOOTSTRAP</code> is defined.</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ── API: MessageBusInstrumentation ── -->
+        <!-- ── API: MessagesInstrumentation ── -->
         <section class="docs-section" id="api-instrumentation">
           <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">MessageBusInstrumentation</h2>
-          <p class="section-intro">Static editor-only diagnostics surface in <code>Tutan.MessageBus</code>. All hooks gated behind <code>[Conditional("UNITY_EDITOR")]</code> and <code>[Conditional("TUTAN_MESSAGEBUS_DEBUG")]</code> — stripped from release player builds.</p>
+          <h2 class="section-title">MessagesInstrumentation</h2>
+          <p class="section-intro">Static editor-only diagnostics surface in <code>Tutan.Messages</code>. All hooks gated behind <code>[Conditional("UNITY_EDITOR")]</code> and <code>[Conditional("TUTAN_MESSAGES_DEBUG")]</code> — stripped from release player builds.</p>
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">MessageBusInstrumentation</span>
+              <span class="api-group-name">MessagesInstrumentation</span>
               <span class="api-type-badge badge--static">static</span>
             </div>
             <div class="api-members">
               <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
+                <span class="api-kind kind--field">field</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">bool Enabled { get; set; }</div>
+                  <div class="api-member-name">bool Enabled</div>
                   <div class="api-member-desc">Master switch. When <code>false</code> every instrumentation hook short-circuits on the first branch (cost: one <code>bool</code> check per <code>Publish</code>).</div>
                 </div>
               </div>
               <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
+                <span class="api-kind kind--field">field</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">bool CapturePayloads { get; set; }</div>
-                  <div class="api-member-desc">When <code>true</code>, message structs are boxed into records so they can be inspected. Adds one boxing allocation per <code>Publish</code>/<code>Enqueue</code>. Off by default.</div>
+                  <div class="api-member-name">bool CapturePayloads</div>
+                  <div class="api-member-desc">When <code>true</code>, message structs are boxed into records so they can be inspected. Adds one boxing allocation per <code>Publish</code>/<code>Enqueue</code>. Off by default; the Messages Console turns it on automatically while the window is open.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -373,7 +373,7 @@
         <section class="docs-section" id="api-references">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">EventReference / CommandReference</h2>
-          <p class="section-intro">Serializable wrappers in <code>Tutan.MessageBus</code> that let designers pick a message type and edit its payload from the Inspector. <strong>Not for runtime hot paths</strong> — publishing involves JSON deserialization, <code>Activator.CreateInstance</code>, boxing, and a reflected generic <code>Publish</code> invocation.</p>
+          <p class="section-intro">Serializable wrappers in <code>Tutan.Messages</code> that let designers pick a message type and edit its payload from the Inspector. <strong>Not for runtime hot paths</strong> — publishing involves JSON deserialization, <code>Activator.CreateInstance</code>, boxing, and a reflected generic <code>Publish</code> invocation.</p>
 
           <div class="api-group">
             <div class="api-group-header">

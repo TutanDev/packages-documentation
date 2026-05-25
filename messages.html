@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MessageBus — Unity Framework</title>
-  <meta name="description" content="UP-MessageBus: standalone zero-allocation pub/sub message bus for Unity. Struct messages, ref dispatch, thread-safe enqueue — built for 72–120 Hz XR frame budgets.">
+  <title>Messages — Unity Framework</title>
+  <meta name="description" content="UP-Messages: standalone zero-allocation pub/sub message bus for Unity. Struct messages, ref dispatch, thread-safe enqueue — built for 72–120 Hz XR frame budgets.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -31,8 +31,8 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
           Back to home
         </a>
-        <span class="sidebar-pkg-id sidebar-pkg-id--msg">com.tutan.messagebus</span>
-        <div class="sidebar-pkg-name">MessageBus</div>
+        <span class="sidebar-pkg-id sidebar-pkg-id--msg">com.tutan.messages</span>
+        <div class="sidebar-pkg-name">Messages</div>
       </div>
       <nav class="sidebar-nav" aria-label="Page sections">
         <a href="#getting-started" class="sidebar-direct" data-pkg="msg">Getting Started</a>
@@ -54,7 +54,7 @@
           </div>
         </div>
 
-        <a href="messagebus-api.html" class="sidebar-direct" data-pkg="msg">API Reference →</a>
+        <a href="messages-api.html" class="sidebar-direct" data-pkg="msg">API Reference →</a>
       </nav>
     </aside>
 
@@ -64,10 +64,10 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--msg-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messagebus · v0.4.0</span>
+        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v0.4.0</span>
         <h1 class="docs-hero-title">Zero-Allocation<br>Pub/Sub for XR</h1>
         <p class="docs-hero-desc">
-          UP-MessageBus is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, integer subscription tokens, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
+          UP-Messages is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, integer subscription tokens, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
         </p>
         <div class="docs-hero-stats">
           <div>
@@ -86,7 +86,7 @@
 
         <div class="callout callout--note" style="margin-top:8px">
           <strong>Standalone package</strong>
-          MessageBus ships independently of the rest of the Framework — <code>com.tutan.messagebus</code> has no dependencies beyond <code>UnityEngine</code> and <code>Unity.Profiling</code>, and is also available on the Unity Asset Store as a self-contained product.
+          Messages ships independently of the rest of the Framework — <code>com.tutan.messages</code> has no dependencies beyond <code>UnityEngine</code> and <code>Unity.Profiling</code>, and is also available on the Unity Asset Store as a self-contained product.
         </div>
 
         <div class="steps" style="margin-top:28px">
@@ -94,14 +94,14 @@
             <div class="step-num" style="border-color:var(--msg-color);color:var(--msg-color)">1</div>
             <div class="step-body">
               <div class="step-title">Install the package</div>
-              <div class="step-desc">Open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, navigate to <code>Packages/com.tutan.messagebus/package.json</code>. Or install the Asset Store release.</div>
+              <div class="step-desc">Open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, navigate to <code>Packages/com.tutan.messages/package.json</code>. Or install the Asset Store release.</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num" style="border-color:var(--msg-color);color:var(--msg-color)">2</div>
             <div class="step-body">
               <div class="step-title">Auto-bootstrap runs</div>
-              <div class="step-desc">A hidden persistent <code>[MessageBusHost]</code> is created at <code>BeforeSceneLoad</code> and calls <code>DrainQueues()</code> in <code>LateUpdate</code> for both buses. No scene setup required.</div>
+              <div class="step-desc">A hidden persistent <code>[MessagesHost]</code> is created at <code>BeforeSceneLoad</code> and calls <code>DrainQueues()</code> in <code>LateUpdate</code> for both buses. No scene setup required.</div>
             </div>
           </div>
           <div class="step">
@@ -128,7 +128,7 @@
             <h3 class="sub-title">Correct messages</h3>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Messages.cs</span></div>
-<pre class="code-block"><code><span class="kw">using</span> Tutan.MessageBus;
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Messages;
 <span class="kw">using</span> Unity.Collections;
 <span class="kw">using</span> UnityEngine;
 
@@ -192,7 +192,7 @@
 
           <div class="code-card code-card--msg">
             <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">FadeController.cs</span></div>
-<pre class="code-block"><code><span class="kw">using</span> Tutan.MessageBus;
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Messages;
 <span class="kw">using</span> UnityEngine;
 
 <span class="kw">public class</span> <span class="type">FadeController</span> : <span class="type">MonoBehaviour</span>
@@ -224,7 +224,7 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Publish &amp; Enqueue</h2>
           <p class="section-intro">
-            <code>Publish</code> dispatches immediately on the calling thread (main only). <code>Enqueue</code> is thread-safe and defers dispatch until <code>DrainQueues()</code> runs on the main thread. The auto-bootstrapped <code>[MessageBusHost]</code> calls <code>DrainQueues()</code> in <code>LateUpdate</code>.
+            <code>Publish</code> dispatches immediately on the calling thread (main only). <code>Enqueue</code> is thread-safe and defers dispatch until <code>DrainQueues()</code> runs on the main thread. The auto-bootstrapped <code>[MessagesHost]</code> calls <code>DrainQueues()</code> in <code>LateUpdate</code>.
           </p>
 
           <div class="sub-section">
@@ -330,7 +330,7 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Auto-bootstrap &amp; Scene Cleanup</h2>
           <p class="section-intro">
-            By default, the package creates a hidden persistent <code>[MessageBusHost]</code> GameObject at startup via <code>RuntimeInitializeOnLoad(BeforeSceneLoad)</code>. It survives scene loads and calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>.
+            By default, the package creates a hidden persistent <code>[MessagesHost]</code> GameObject at startup via <code>RuntimeInitializeOnLoad(BeforeSceneLoad)</code>. It survives scene loads and calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>.
           </p>
 
           <div class="sub-section">
@@ -339,9 +339,9 @@
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Player Settings</span></div>
 <pre class="code-block"><code><span class="cmt">// Project Settings → Player → Scripting Define Symbols</span>
-TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code></pre>
+TUTAN_MESSAGES_DISABLE_AUTOBOOTSTRAP</code></pre>
             </div>
-            <p class="prose" style="margin-top:12px">When disabled, attach the <code>MessageBusHost</code> component to your own persistent GameObject, or call <code>EventBus.DrainQueues()</code> and <code>CommandBus.DrainQueues()</code> from your own update logic.</p>
+            <p class="prose" style="margin-top:12px">When disabled, attach the <code>MessagesHost</code> component to your own persistent GameObject, or call <code>EventBus.DrainQueues()</code> and <code>CommandBus.DrainQueues()</code> from your own update logic.</p>
           </div>
 
           <div class="sub-section">
@@ -369,13 +369,13 @@ TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code></pre>
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Editor Tooling</h2>
           <p class="section-intro">
-            Editor-only instrumentation for inspecting bus traffic, plus inspector-friendly serialized wrappers for wiring messages without writing publisher code. Every instrumentation hook is gated behind <code>[Conditional("UNITY_EDITOR")]</code> and <code>[Conditional("TUTAN_MESSAGEBUS_DEBUG")]</code> — the C# compiler strips all call sites in release player builds.
+            Editor-only instrumentation for inspecting bus traffic, plus inspector-friendly serialized wrappers for wiring messages without writing publisher code. Every instrumentation hook is gated behind <code>[Conditional("UNITY_EDITOR")]</code> and <code>[Conditional("TUTAN_MESSAGES_DEBUG")]</code> — the C# compiler strips all call sites in release player builds.
           </p>
 
           <div class="sub-section">
             <h3 class="sub-title">Messages Console</h3>
-            <p class="prose">Open <strong>Window → Tutan → Messages Console</strong> for a virtualized log of recent <code>Subscribe</code>, <code>Unsubscribe</code>, <code>Publish</code>, <code>Enqueue</code>, and (optionally) drain operations with timestamp, frame, bus (E/C), op, and type. Selecting a row pretty-prints the payload and shows current subscribers for that message type.</p>
-            <p class="prose" style="margin-top:12px">Toolbar: <strong>Pause</strong>, <strong>Clear</strong>, <strong>Capture payloads</strong> (boxes structs into records for inspection — one allocation per <code>Publish</code>/<code>Enqueue</code>, off by default), per-op toggles, and a full-type-name search field. Drain records are off by default because they are noisy.</p>
+            <p class="prose">Open <strong>Window → Tutan → Messages Console</strong> for a virtualized log of recent <code>Subscribe</code>, <code>Unsubscribe</code>, <code>Publish</code>, <code>Enqueue</code>, and (optionally) drain operations with timestamp, frame, bus (E/C), op, and type. Selecting a row shows the message type, its payload, and — for <code>Publish</code>/<code>Enqueue</code> rows — the subscribers captured at the moment the message was sent.</p>
+            <p class="prose" style="margin-top:12px">Toolbar: <strong>Pause</strong>, <strong>Clear</strong>, per-op toggles, and a full-type-name search field. Drain records are off by default because they are noisy. While the console is open, struct payloads are boxed into records automatically so they can be inspected (one allocation per <code>Publish</code>/<code>Enqueue</code>); this costs nothing once the window is closed.</p>
           </div>
 
           <div class="sub-section">
@@ -384,21 +384,21 @@ TUTAN_MESSAGEBUS_DISABLE_AUTOBOOTSTRAP</code></pre>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Player Settings</span></div>
 <pre class="code-block"><code><span class="cmt">// Project Settings → Player → Scripting Define Symbols</span>
-TUTAN_MESSAGEBUS_DEBUG</code></pre>
+TUTAN_MESSAGES_DEBUG</code></pre>
             </div>
-            <p class="prose" style="margin-top:12px">When the console window is closed, <code>MessageBusInstrumentation.Enabled</code> is set to <code>false</code> and every hook short-circuits on the first branch — so even with the define present, an empty/closed window costs roughly one <code>bool</code> check per <code>Publish</code>.</p>
+            <p class="prose" style="margin-top:12px">When the console window is closed, <code>MessagesInstrumentation.Enabled</code> is set to <code>false</code> and every hook short-circuits on the first branch — so even with the define present, an empty/closed window costs roughly one <code>bool</code> check per <code>Publish</code>.</p>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Programmatic access</h3>
-            <p class="prose"><code>MessageBusInstrumentation</code> is public and can drive custom diagnostics or in-game overlays:</p>
+            <p class="prose"><code>MessagesInstrumentation</code> is public and can drive custom diagnostics or in-game overlays:</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">DiagnosticsOverlay.cs</span></div>
-<pre class="code-block"><code><span class="type">MessageBusInstrumentation</span>.Enabled = <span class="kw">true</span>;
-<span class="type">MessageBusInstrumentation</span>.CapturePayloads = <span class="kw">true</span>;
+<pre class="code-block"><code><span class="type">MessagesInstrumentation</span>.Enabled = <span class="kw">true</span>;
+<span class="type">MessagesInstrumentation</span>.CapturePayloads = <span class="kw">true</span>;
 
 <span class="cmt">// Snapshot the ring buffer (allocates a copy; keep off the hot path).</span>
-<span class="kw">var</span> records = <span class="type">MessageBusInstrumentation</span>.Snapshot();
+<span class="kw">var</span> records = <span class="type">MessagesInstrumentation</span>.Snapshot();
 <span class="kw">foreach</span> (<span class="kw">var</span> r <span class="kw">in</span> records)
     <span class="type">Debug</span>.Log($<span class="str">"{r.Bus} {r.Op} {r.MessageType?.Name}"</span>);</code></pre>
             </div>
@@ -409,7 +409,7 @@ TUTAN_MESSAGEBUS_DEBUG</code></pre>
             <p class="prose"><code>EventReference</code> and <code>CommandReference</code> are serializable wrappers that let designers pick a message type and edit its payload directly in the Inspector — useful for hooking up <code>UnityEvent</code>s, prototyping, or wiring data-driven triggers without writing publisher code.</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">TriggerZone.cs</span></div>
-<pre class="code-block"><code><span class="kw">using</span> Tutan.MessageBus;
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Messages;
 <span class="kw">using</span> UnityEngine;
 
 <span class="kw">public class</span> <span class="type">TriggerZone</span> : <span class="type">MonoBehaviour</span>
