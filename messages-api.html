@@ -46,12 +46,13 @@
             <a href="#api-imessage" class="sidebar-link" data-pkg="msg">IMessage / IEvent / ICommand</a>
             <a href="#api-eventbus" class="sidebar-link" data-pkg="msg">EventBus</a>
             <a href="#api-commandbus" class="sidebar-link" data-pkg="msg">CommandBus</a>
+            <a href="#api-commandhandler" class="sidebar-link" data-pkg="msg">ICommandHandler&lt;T&gt;</a>
             <a href="#api-handler" class="sidebar-link" data-pkg="msg">MessageHandler&lt;T&gt;</a>
             <a href="#api-token" class="sidebar-link" data-pkg="msg">SubscriptionToken</a>
             <a href="#api-host" class="sidebar-link" data-pkg="msg">MessagesHost</a>
             <a href="#api-instrumentation" class="sidebar-link" data-pkg="msg">MessagesInstrumentation</a>
             <a href="#api-references" class="sidebar-link" data-pkg="msg">EventReference / CommandReference</a>
-            <a href="#api-messagetype" class="sidebar-link" data-pkg="msg">[MessageType]</a>
+            <a href="#api-messagetype" class="sidebar-link" data-pkg="msg">[EventType] / [CommandType]</a>
           </div>
         </div>
       </nav>
@@ -110,7 +111,7 @@
                 <span class="api-kind kind--field">marker</span>
                 <div class="api-member-content">
                   <div class="api-member-name">interface ICommand : IMessage</div>
-                  <div class="api-member-desc">Marker for N:1 intents. Exactly one subscriber may register via <code>CommandBus</code>; a second <code>Subscribe</code> call throws. Name in imperative.</div>
+                  <div class="api-member-desc">Marker for N:1 intents. Exactly one handler is bound per command type, declared at the composition root via <code>CommandBus.TryInstall</code>. Name in imperative.</div>
                 </div>
               </div>
             </div>
@@ -200,7 +201,7 @@
         <section class="docs-section" id="api-commandbus">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">CommandBus</h2>
-          <p class="section-intro">Static N:1 facade in <code>Tutan.Messages</code>. Same API surface as <code>EventBus</code>, but constrained to <code>ICommand</code> with the additional rule that <code>Subscribe&lt;T&gt;</code> throws if a handler for <code>T</code> already exists.</p>
+          <p class="section-intro">Static N:1 facade in <code>Tutan.Messages</code>. Shares <code>Publish</code>, <code>Enqueue</code>, <code>DrainQueues</code>, and <code>Reset</code> with <code>EventBus</code>, but has no <code>Subscribe</code>/<code>Unsubscribe</code>: the single handler per <code>ICommand</code> type is declared once at the composition root via <code>TryInstall</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -211,15 +212,15 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">SubscriptionToken Subscribe&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, ICommand</div>
-                  <div class="api-member-desc">Registers the single handler for command type <code>T</code>. Throws <code>InvalidOperationException</code> if a handler already exists.</div>
+                  <div class="api-member-name">bool TryInstall(out string error, Action&lt;CommandRegistry&gt; configure)</div>
+                  <div class="api-member-desc">Declares every command handler in one place. Returns <code>true</code> and atomically swaps in the new bindings on success. On a duplicate command type or null handler, returns <code>false</code>, sets <code>error</code> to a message naming the offending type(s), and leaves the live bus untouched. Calling it again rebuilds the bus from scratch.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">bool Unsubscribe(SubscriptionToken token)</div>
-                  <div class="api-member-desc">Removes the handler. After unsubscribe, a new <code>Subscribe</code> for the same command type is allowed.</div>
+                  <div class="api-member-name">CommandRegistry Handle&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, ICommand</div>
+                  <div class="api-member-desc">Fluent builder method, available inside the <code>TryInstall</code> callback. Binds the single handler for command type <code>T</code>. Chain one <code>Handle&lt;T&gt;</code> per command.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -234,6 +235,45 @@
                 <div class="api-member-content">
                   <div class="api-member-name">void Enqueue&lt;T&gt;(in T command) / void DrainQueues() / void Reset()</div>
                   <div class="api-member-desc">Same semantics as <code>EventBus</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: ICommandHandler ── -->
+        <section class="docs-section" id="api-commandhandler">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">ICommandHandler&lt;T&gt;</h2>
+          <p class="section-intro">Declarative marker in <code>Tutan.Messages</code>: a class implements <code>ICommandHandler&lt;T&gt;</code> to state that it handles command <code>T</code>. The interface does <strong>not</strong> auto-register on its own — handlers are bound at the composition root via <code>CommandBus.TryInstall</code>, exactly as without it. With <strong>Auto-Install Command Bus</strong> on, the bootstrap discovers concrete implementations via reflection and binds <code>instance.Handle</code> for every closed <code>ICommandHandler&lt;T&gt;</code> they implement. Without it, the interface still drives the Commands authoring view's orphan/duplicate audit.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">ICommandHandler</span>
+              <span class="api-type-badge badge--iface">interface</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">marker</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">interface ICommandHandler</div>
+                  <div class="api-member-desc">Non-generic base. The discovery seam used by tooling and the auto-install scan to enumerate handler types.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">ICommandHandler&lt;T&gt;</span>
+              <span class="api-type-badge badge--iface">interface</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Handle(ref T command) where T : unmanaged, ICommand</div>
+                  <div class="api-member-desc">Receives the command by <code>ref</code>. The signature matches <code>MessageHandler&lt;T&gt;</code>, so the method group binds directly: <code>r.Handle&lt;T&gt;(instance.Handle)</code>.</div>
                 </div>
               </div>
             </div>
@@ -297,7 +337,7 @@
         <section class="docs-section" id="api-host">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">MessagesHost</h2>
-          <p class="section-intro"><code>MonoBehaviour</code> in <code>Tutan.Messages</code>. Calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>. Auto-instantiated at <code>BeforeSceneLoad</code> unless <code>TUTAN_MESSAGES_DISABLE_AUTOBOOTSTRAP</code> is defined.</p>
+          <p class="section-intro"><code>MonoBehaviour</code> in <code>Tutan.Messages</code>. Calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>. Auto-instantiated at <code>BeforeSceneLoad</code> when <strong>Auto-Install Drainers</strong> is on in <strong>Project Settings → Tutan → Messages</strong> (which writes the <code>TUTAN_MESSAGES_AUTOINSTALL_DRAINERS</code> define).</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -324,8 +364,8 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)] static void Bootstrap()</div>
-                  <div class="api-member-desc">Creates a hidden persistent <code>[MessagesHost]</code> GameObject. Stripped from the build entirely when <code>TUTAN_MESSAGES_DISABLE_AUTOBOOTSTRAP</code> is defined.</div>
+                  <div class="api-member-name">[RuntimeInitializeOnLoadMethod] static void Bootstrap()</div>
+                  <div class="api-member-desc">When <code>TUTAN_MESSAGES_AUTOINSTALL_DRAINERS</code> is defined, creates a hidden persistent <code>[MessagesHost]</code> GameObject at <code>BeforeSceneLoad</code>. When <code>TUTAN_MESSAGES_AUTOINSTALL_COMMANDBUS</code> is defined, discovers every concrete <code>ICommandHandler</code> with a parameterless constructor at <code>AfterAssembliesLoaded</code> and binds them through one <code>CommandBus.TryInstall</code> call. Both defines are toggled from <strong>Project Settings → Tutan → Messages</strong>.</div>
                 </div>
               </div>
             </div>
@@ -410,23 +450,39 @@
           <p class="prose" style="margin-top:12px">The inline reflection editor renders <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, <code>Vector3</code>, <code>Color</code>, and any <code>enum</code>. A field literally named <code>Timestamp</code> is skipped and auto-populated at publish time (<code>float</code> → <code>Time.time</code>, <code>double</code> → <code>(double)Time.time</code>, <code>long</code> → <code>DateTime.UtcNow.Ticks</code>).</p>
         </section>
 
-        <!-- ── API: [MessageType] attribute ── -->
+        <!-- ── API: [EventType] / [CommandType] attributes ── -->
         <section class="docs-section" id="api-messagetype">
           <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">[MessageType] attribute</h2>
-          <p class="section-intro">Decorates a <code>string</code> field so the Inspector renders it as a dropdown of message types, storing the selected <code>AssemblyQualifiedName</code>.</p>
+          <h2 class="section-title">[EventType] / [CommandType] attributes</h2>
+          <p class="section-intro">Parameterless attributes that decorate a <code>string</code> field so the Inspector renders it as a dropdown of message types, storing the selected <code>AssemblyQualifiedName</code>. The base-type filter is baked in; the runtime field type and storage format are unchanged from the previous parameterized <code>[MessageType]</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">MessageTypeAttribute</span>
+              <span class="api-group-name">EventTypeAttribute</span>
               <span class="api-type-badge badge--attr">attribute</span>
             </div>
             <div class="api-members">
               <div class="api-member">
-                <span class="api-kind kind--method">method</span>
+                <span class="api-kind kind--field">usage</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">MessageTypeAttribute(Type filter = null)</div>
-                  <div class="api-member-desc">Restricts the dropdown to types assignable to <code>filter</code> (typically <code>IEvent</code> or <code>ICommand</code>). Defaults to <code>IMessage</code> when omitted.</div>
+                  <div class="api-member-name">[EventType] public string eventType;</div>
+                  <div class="api-member-desc">Dropdown of all concrete <code>IEvent</code> types in loaded assemblies.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">CommandTypeAttribute</span>
+              <span class="api-type-badge badge--attr">attribute</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">usage</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">[CommandType] public string commandType;</div>
+                  <div class="api-member-desc">Dropdown of all concrete <code>ICommand</code> types in loaded assemblies.</div>
                 </div>
               </div>
             </div>
