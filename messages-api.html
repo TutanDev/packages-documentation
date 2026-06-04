@@ -46,7 +46,6 @@
             <a href="#api-imessage" class="sidebar-link" data-pkg="msg">IMessage / IEvent / ICommand</a>
             <a href="#api-eventbus" class="sidebar-link" data-pkg="msg">EventBus</a>
             <a href="#api-commandbus" class="sidebar-link" data-pkg="msg">CommandBus</a>
-            <a href="#api-commandhandler" class="sidebar-link" data-pkg="msg">ICommandHandler&lt;T&gt;</a>
             <a href="#api-handler" class="sidebar-link" data-pkg="msg">MessageHandler&lt;T&gt;</a>
             <a href="#api-token" class="sidebar-link" data-pkg="msg">SubscriptionToken</a>
             <a href="#api-host" class="sidebar-link" data-pkg="msg">MessagesHost</a>
@@ -241,45 +240,6 @@
           </div>
         </section>
 
-        <!-- ── API: ICommandHandler ── -->
-        <section class="docs-section" id="api-commandhandler">
-          <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">ICommandHandler&lt;T&gt;</h2>
-          <p class="section-intro">Declarative marker in <code>Tutan.Messages</code>: a class implements <code>ICommandHandler&lt;T&gt;</code> to state that it handles command <code>T</code>. The interface does <strong>not</strong> auto-register on its own — handlers are bound at the composition root via <code>CommandBus.TryInstall</code>, exactly as without it. With <strong>Auto-Install Command Bus</strong> on, the bootstrap discovers concrete implementations via reflection and binds <code>instance.Handle</code> for every closed <code>ICommandHandler&lt;T&gt;</code> they implement. Without it, the interface still drives the Commands authoring view's orphan/duplicate audit.</p>
-
-          <div class="api-group">
-            <div class="api-group-header">
-              <span class="api-group-name">ICommandHandler</span>
-              <span class="api-type-badge badge--iface">interface</span>
-            </div>
-            <div class="api-members">
-              <div class="api-member">
-                <span class="api-kind kind--field">marker</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">interface ICommandHandler</div>
-                  <div class="api-member-desc">Non-generic base. The discovery seam used by tooling and the auto-install scan to enumerate handler types.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="api-group">
-            <div class="api-group-header">
-              <span class="api-group-name">ICommandHandler&lt;T&gt;</span>
-              <span class="api-type-badge badge--iface">interface</span>
-            </div>
-            <div class="api-members">
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">void Handle(ref T command) where T : unmanaged, ICommand</div>
-                  <div class="api-member-desc">Receives the command by <code>ref</code>. The signature matches <code>MessageHandler&lt;T&gt;</code>, so the method group binds directly: <code>r.Handle&lt;T&gt;(instance.Handle)</code>.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <!-- ── API: MessageHandler ── -->
         <section class="docs-section" id="api-handler">
           <div class="section-eyebrow">API Reference</div>
@@ -337,7 +297,7 @@
         <section class="docs-section" id="api-host">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">MessagesHost</h2>
-          <p class="section-intro"><code>MonoBehaviour</code> in <code>Tutan.Messages</code>. Calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>. Auto-instantiated at <code>BeforeSceneLoad</code> when <strong>Auto-Install Drainers</strong> is on in <strong>Project Settings → Tutan → Messages</strong> (which writes the <code>TUTAN_MESSAGES_AUTOINSTALL_DRAINERS</code> define).</p>
+          <p class="section-intro"><code>MonoBehaviour</code> in <code>Tutan.Messages</code>. Calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>. Auto-instantiated at <code>BeforeSceneLoad</code> with zero configuration; define <code>TUTAN_MESSAGES_NO_AUTO_HOST</code> to suppress the auto-spawned host and own the drain loop yourself.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -365,7 +325,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">[RuntimeInitializeOnLoadMethod] static void Bootstrap()</div>
-                  <div class="api-member-desc">When <code>TUTAN_MESSAGES_AUTOINSTALL_DRAINERS</code> is defined, creates a hidden persistent <code>[MessagesHost]</code> GameObject at <code>BeforeSceneLoad</code>. When <code>TUTAN_MESSAGES_AUTOINSTALL_COMMANDBUS</code> is defined, discovers every concrete <code>ICommandHandler</code> with a parameterless constructor at <code>AfterAssembliesLoaded</code> and binds them through one <code>CommandBus.TryInstall</code> call. Both defines are toggled from <strong>Project Settings → Tutan → Messages</strong>.</div>
+                  <div class="api-member-desc">Creates a hidden persistent <code>[MessagesHost]</code> GameObject at <code>BeforeSceneLoad</code> so both buses are drained every <code>LateUpdate</code> with no setup. Define <code>TUTAN_MESSAGES_NO_AUTO_HOST</code> to skip spawning the host and drive draining yourself. Command handlers are bound explicitly at your composition root via <code>CommandBus.TryInstall</code> — there is no reflection-based auto-install.</div>
                 </div>
               </div>
             </div>

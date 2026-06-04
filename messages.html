@@ -64,7 +64,7 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--msg-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v0.11.0</span>
+        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v0.13.0</span>
         <h1 class="docs-hero-title">Zero-Allocation<br>Pub/Sub for XR</h1>
         <p class="docs-hero-desc">
           UP-Messages is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, integer subscription tokens, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
@@ -100,8 +100,8 @@
           <div class="step">
             <div class="step-num" style="border-color:var(--msg-color);color:var(--msg-color)">2</div>
             <div class="step-body">
-              <div class="step-title">Enable the bootstrap</div>
-              <div class="step-desc">Open <strong>Project Settings → Tutan → Messages</strong> and flip <strong>Auto-Install Drainers</strong> on. A hidden persistent <code>[MessagesHost]</code> is then created at <code>BeforeSceneLoad</code> and calls <code>DrainQueues()</code> in <code>LateUpdate</code> for both buses.</div>
+              <div class="step-title">Nothing to configure</div>
+              <div class="step-desc">Draining is automatic. A hidden persistent <code>[MessagesHost]</code> is spawned for you at <code>BeforeSceneLoad</code> and calls <code>DrainQueues()</code> in <code>LateUpdate</code> for both buses. Define <code>TUTAN_MESSAGES_NO_AUTO_HOST</code> only if you want to own the drain loop yourself.</div>
             </div>
           </div>
           <div class="step">
@@ -111,6 +111,11 @@
               <div class="step-desc">Define an <code>unmanaged struct</code> implementing <code>IEvent</code>, subscribe with <code>EventBus.Subscribe&lt;T&gt;</code>, and publish with <code>EventBus.Publish(ref msg)</code>.</div>
             </div>
           </div>
+        </div>
+
+        <div class="callout callout--tip" style="margin-top:24px">
+          <strong>Runnable sample — Basic Publish / Subscribe</strong>
+          One self-contained sample ships with the package — import it from <strong>Package Manager → Messages → Samples → Import</strong>. It is a live score clicker in a single scene (no inspector wiring) where a button publishes commands, a background thread <code>Enqueue</code>s commands off the main thread, and the score UI listens for events. Drop the <code>BasicPubSubSample</code> component on a GameObject and press Play. It exercises the CommandBus (N:1), the EventBus (N:M), the composition-root <code>TryInstall</code> pattern, and thread-safe <code>Enqueue</code>/drain all in one place.
         </div>
       </section>
 
@@ -181,13 +186,13 @@
 
           <p class="prose">Command handlers are declared once at the composition root via <code>CommandBus.TryInstall</code>, each command type bound exactly once with <code>.Handle&lt;T&gt;(…)</code>. That is the runtime enforcement of CQRS's "one writer per command" rule: a duplicate (or null) handler makes <code>TryInstall</code> return <code>false</code> with an error naming the offending type — it never throws.</p>
 
-          <p class="prose" style="margin-top:12px">Implementing the <code>ICommandHandler&lt;T&gt;</code> interface is the declarative way to state that a class handles command <code>T</code>. It is <strong>declarative only</strong> — it does not auto-register unless <strong>Auto-Install Command Bus</strong> is on. Even without that toggle, the interface makes handlers discoverable by the <strong>Commands authoring view</strong> (Project Settings → Tutan → Messages) which flags orphan and duplicate commands at edit time.</p>
+          <p class="prose" style="margin-top:12px">A command handler is just a plain method matching <code>MessageHandler&lt;T&gt;</code> (<code>void Handle(ref T)</code>) — no interface to implement, no base class. Any object can supply one: a <code>MonoBehaviour</code>, a plain C# manager, or a service from your DI container. Because you new them up yourself at the composition root, handlers are free to take whatever dependencies they need.</p>
 
           <div class="code-card code-card--msg" style="margin-top:12px">
             <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">MovementManager.cs</span></div>
 <pre class="code-block"><code><span class="kw">using</span> Tutan.Messages;
 
-<span class="kw">public sealed class</span> <span class="type">MovementManager</span> : <span class="type">ICommandHandler</span>&lt;<span class="type">MovePlayer</span>&gt;
+<span class="kw">public sealed class</span> <span class="type">MovementManager</span>
 {
     <span class="kw">public void</span> Handle(<span class="kw">ref</span> <span class="type">MovePlayer</span> cmd) { <span class="cmt">/* ... */</span> }
 }
@@ -349,19 +354,19 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Auto-bootstrap &amp; Scene Cleanup</h2>
           <p class="section-intro">
-            Two pieces of startup work are usually needed before the bus is useful: something must call <code>DrainQueues()</code> every frame, and each command type needs its single handler bound through <code>CommandBus.TryInstall</code>. Both are <strong>opt-in</strong> and controlled from <strong>Project Settings → Tutan → Messages</strong>. The page writes the matching Scripting Define Symbols to the active build target so the same toggles apply in builds.
+            Two pieces of startup work are needed before the bus is useful: something must call <code>DrainQueues()</code> every frame, and each command type needs its single handler bound through <code>CommandBus.TryInstall</code>. The first is automatic with zero configuration; the second is one explicit call at your composition root.
           </p>
 
           <div class="sub-section">
-            <h3 class="sub-title">Auto-Install Drainers</h3>
-            <p class="prose">Flip <strong>Auto-Install Drainers</strong> on (or define <code>TUTAN_MESSAGES_AUTOINSTALL_DRAINERS</code>) and <code>MessagesBootstrap</code> spawns a hidden persistent <code>[MessagesHost]</code> at <code>BeforeSceneLoad</code>. The host survives scene loads and calls <code>DrainQueues()</code> for both buses in <code>LateUpdate</code>.</p>
-            <p class="prose" style="margin-top:12px">With the toggle <strong>off</strong>, attach <code>MessagesHost</code> to a persistent GameObject yourself, or call <code>EventBus.DrainQueues()</code> / <code>CommandBus.DrainQueues()</code> from your own update logic (PlayerLoop callback, manager, etc.).</p>
+            <h3 class="sub-title">Queue draining (automatic)</h3>
+            <p class="prose">At startup <code>MessagesBootstrap</code> always spawns a hidden, persistent <code>[MessagesHost]</code> GameObject at <code>BeforeSceneLoad</code>. It survives scene loads and calls <code>DrainQueues()</code> for both buses every <code>LateUpdate</code>. No prefab to drag in, no toggle, no setup.</p>
+            <p class="prose" style="margin-top:12px">If you would rather own the drain loop, define <code>TUTAN_MESSAGES_NO_AUTO_HOST</code> to suppress the auto-spawned host, then either attach <code>MessagesHost</code> to a persistent GameObject yourself, or call <code>EventBus.DrainQueues()</code> / <code>CommandBus.DrainQueues()</code> from your own update logic (a PlayerLoop callback, a manager, etc.).</p>
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title">Auto-Install Command Bus</h3>
-            <p class="prose">Flip <strong>Auto-Install Command Bus</strong> on (or define <code>TUTAN_MESSAGES_AUTOINSTALL_COMMANDBUS</code>) and <code>MessagesBootstrap</code> runs at <code>AfterAssembliesLoaded</code>: it scans every loaded assembly for concrete <code>ICommandHandler</code> implementations with a parameterless constructor, instantiates them, and for every closed <code>ICommandHandler&lt;T&gt;</code> they implement binds <code>instance.Handle</code> through a single <code>CommandBus.TryInstall</code> call.</p>
-            <p class="prose" style="margin-top:12px">If two handler types claim the same command, the N:1 rule turns it into one consolidated error logged at startup — the bus is left empty rather than partially installed. Handlers that need injected dependencies (services, scene refs, etc.) the discovery scan can't supply should be bound manually instead — leave this toggle off and do it at your composition root.</p>
+            <h3 class="sub-title">Binding command handlers (explicit)</h3>
+            <p class="prose">Command handlers are declared once, at your composition root, through <code>CommandBus.TryInstall</code>. The N:1 rule is validated there and reported as a return value — a duplicate command type or a null handler makes <code>TryInstall</code> return <code>false</code> with an <code>error</code> naming the offender, and leaves the live bus untouched (it never throws).</p>
+            <p class="prose" style="margin-top:12px">A handler is just a method matching <code>MessageHandler&lt;T&gt;</code> (<code>void Handle(ref T)</code>), so any object — a <code>MonoBehaviour</code>, a plain C# manager, a DI-resolved service — can supply one. Because you new them up yourself, handlers are free to take whatever dependencies they need; there is no discovery scan imposing a parameterless-constructor rule. Call <code>TryInstall</code> again to rebuild the bus from scratch — for example after a scene transition that calls <code>CommandBus.Reset()</code>.</p>
           </div>
 
           <div class="sub-section">
@@ -399,14 +404,8 @@
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title">Commands authoring view</h3>
-            <p class="prose">Embedded in the Messages settings page is a static, edit-time audit of the command → handler routing table. It lists every <code>ICommand</code> struct found via <code>TypeCache</code> as a card and resolves its handler(s) through <code>ICommandHandler&lt;T&gt;</code>; the command and each handler render as clickable <code>ScriptFileField</code> rows (single-click pings the <code>.cs</code>, double-click opens it).</p>
-            <p class="prose" style="margin-top:12px">A card is flagged when a command has <strong>no handler</strong> (orphan) or <strong>more than one</strong> (an N:1 violation). Toolbar: a name <strong>search</strong>, an <strong>Only warnings</strong> filter (persisted in <code>EditorPrefs</code>), and a <strong>Refresh</strong> re-scan. The view doubles as a sanity check for what <em>will be</em> installed when <strong>Auto-Install Command Bus</strong> is on.</p>
-          </div>
-
-          <div class="sub-section">
             <h3 class="sub-title">Enabling in development builds</h3>
-            <p class="prose">In the editor the console is always available (<code>UNITY_EDITOR</code> is always defined). To capture on-device in development player builds, flip <strong>Enable Instrumentation</strong> on in <strong>Project Settings → Tutan → Messages</strong> — it writes the <code>TUTAN_MESSAGES_DEBUG</code> define to the active build target.</p>
+            <p class="prose">In the editor the console is always available (<code>UNITY_EDITOR</code> is always defined). To capture on-device in development player builds, add <code>TUTAN_MESSAGES_DEBUG</code> to <strong>Project Settings → Player → Scripting Define Symbols</strong> for the target platform.</p>
             <p class="prose" style="margin-top:12px">When the console window is closed, <code>MessagesInstrumentation.Enabled</code> is set to <code>false</code> and every hook short-circuits on the first branch — so even with the define present, an empty/closed window costs roughly one <code>bool</code> check per <code>Publish</code>. With the toggle off, every <code>[Conditional]</code> call site is stripped at compile time and the ~256 KB record ring buffer is never allocated.</p>
           </div>
 
