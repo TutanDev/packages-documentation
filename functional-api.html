@@ -93,6 +93,13 @@
                   <div class="api-member-desc">Extracts the value by exhaustive pattern matching. Forces handling both cases.</div>
                 </div>
               </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">R Match&lt;TState,R&gt;(TState state, Func&lt;TState,R&gt; onNone, Func&lt;T,TState,R&gt; onSome)</div>
+                  <div class="api-member-desc">State-passing match — pass locals as <code>state</code> instead of capturing them in a closure. Also available as a void overload taking <code>Action</code>s.</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -116,6 +123,8 @@
                   <tr><td>AsEnumerable()</td><td>Zero or one element; safe to iterate with foreach</td></tr>
                   <tr><td>ToResult(Func&lt;Error&gt;)</td><td>Converts <code>None</code> to an error</td></tr>
                   <tr><td>Map / Bind</td><td>Aliases for <code>Then</code> overloads</td></tr>
+                  <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads — avoid closure capture in hot paths</td></tr>
+                  <tr><td>ToOptional(this T? nullable)</td><td>Converts a nullable struct to <code>Optional&lt;T&gt;</code></td></tr>
                   <tr><td>Select / Where / SelectMany</td><td>LINQ query syntax support</td></tr>
                   <tr><td>ThenAsync / MatchAsync</td><td>UniTask async counterparts</td></tr>
                 </tbody>
@@ -128,7 +137,7 @@
         <section class="docs-section" id="api-serializable-optional">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">SerializableOptional&lt;T&gt;</h2>
-          <p class="section-intro"><code>[Serializable] struct</code> in <code>Tutan.Functional.Unity</code>. Inspector-friendly counterpart to <code>Optional&lt;T&gt;</code>; implicitly converts both ways.</p>
+          <p class="section-intro"><code>[Serializable] struct</code> in <code>Tutan.Functional</code>. Inspector-friendly counterpart to <code>Optional&lt;T&gt;</code>; implicitly converts both ways.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -193,7 +202,7 @@
               <span class="api-group-name">SerializableOptionalDrawer</span>
               <span class="api-type-badge badge--static">editor</span>
             </div>
-            <p class="prose"><code>CustomPropertyDrawer</code> in <code>Tutan.Functional.Unity.Editor</code>, registered for all closed generics of <code>SerializableOptional&lt;&gt;</code> via <code>useForChildren: true</code>. UI Toolkit-based: a <code>Toggle</code> bound to the has-value flag next to a <code>PropertyField</code> for the inner value. The value field is enabled only while the toggle is on.</p>
+            <p class="prose"><code>CustomPropertyDrawer</code> in the <code>Tutan.Functional.Editor</code> assembly, registered for all closed generics of <code>SerializableOptional&lt;&gt;</code> via <code>useForChildren: true</code>. UI Toolkit-based: a <code>Toggle</code> bound to the has-value flag next to a <code>PropertyField</code> for the inner value. The value field is enabled only while the toggle is on.</p>
           </div>
         </section>
 
@@ -230,6 +239,13 @@
                   <div class="api-member-desc">Exhaustive pattern match. Forces handling both success and error cases.</div>
                 </div>
               </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">R Match&lt;TState,R&gt;(TState state, Func&lt;Error,TState,R&gt; onError, Func&lt;T,TState,R&gt; onSuccess)</div>
+                  <div class="api-member-desc">State-passing match — pass locals as <code>state</code> instead of capturing them in a closure. Also available as a void overload taking <code>Action</code>s.</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -255,6 +271,7 @@
                   <tr><td>AsEnumerable()</td><td>Zero or one element</td></tr>
                   <tr><td>ToOptional()</td><td>Discards the error, converts success to <code>Some</code></td></tr>
                   <tr><td>Map / Bind</td><td>Aliases for <code>Then</code> overloads</td></tr>
+                  <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads — avoid closure capture in hot paths</td></tr>
                   <tr><td>Select / SelectMany</td><td>LINQ query syntax support</td></tr>
                   <tr><td>ThenAsync / MatchAsync</td><td>UniTask async counterparts</td></tr>
                 </tbody>
@@ -410,6 +427,13 @@
                 <div class="api-member-content">
                   <div class="api-member-name">Optional&lt;T&gt; Lookup&lt;K,T&gt;(this IDictionary&lt;K,T&gt; dict, K key)</div>
                   <div class="api-member-desc">Safe dictionary access. Returns <code>None</code> on missing key.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Optional&lt;T&gt; Alive&lt;T&gt;(this Optional&lt;T&gt; opt) where T : UnityEngine.Object</div>
+                  <div class="api-member-desc">Re-checks Unity lifetime at point of use. Returns <code>None</code> if the wrapped object was destroyed after <code>Some</code> — the monadic analogue of <code>if (obj)</code>.</div>
                 </div>
               </div>
             </div>

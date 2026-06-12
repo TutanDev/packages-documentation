@@ -199,13 +199,13 @@
 <span class="cmt">// Subscriber — reacts to teleport events</span>
 <span class="kw">public class</span> <span class="type">FadeController</span> : <span class="type">MonoBehaviour</span>
 {
-    <span class="type">SubscriptionToken</span> _token;
+    <span class="type">Subscription</span> _subscription;
 
     <span class="kw">void</span> OnEnable()
-        => _token = <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerTeleported</span>&gt;(OnTeleported);
+        => _subscription = <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerTeleported</span>&gt;(OnTeleported);
 
     <span class="kw">void</span> OnDisable()
-        => <span class="type">EventBus</span>.Unsubscribe(_token);
+        => _subscription.Dispose();
 
     <span class="kw">void</span> OnTeleported(<span class="kw">ref</span> <span class="type">PlayerTeleported</span> msg)
         => StartFade(msg.Duration);
@@ -224,7 +224,44 @@
         </div>
       </article>
 
-      <!-- Example 2: Thread-Safe Enqueue -->
+      <!-- Example 2: Subscription Lifetimes -->
+      <article class="example">
+        <h3 class="example-title">Subscription Lifetimes</h3>
+        <p class="example-desc">When a subscription should simply live and die with its component, skip the handle field: <code>.AddTo(this)</code> disposes it automatically in <code>OnDestroy</code>. For plain-C# systems, collect several subscriptions in a <code>SubscriptionBag</code> and dispose them as a group.</p>
+        <div class="code-card code-card--msg">
+          <div class="code-card-header">
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-file">Lifetimes.cs</span>
+          </div>
+<pre class="code-block"><code><span class="cmt">// Tied to the GameObject — auto-unsubscribed on destroy</span>
+<span class="kw">public class</span> <span class="type">FadeController</span> : <span class="type">MonoBehaviour</span>
+{
+    <span class="kw">void</span> Awake()
+        => <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerTeleported</span>&gt;(OnTeleported).AddTo(<span class="kw">this</span>);
+
+    <span class="kw">void</span> OnTeleported(<span class="kw">ref</span> <span class="type">PlayerTeleported</span> msg)
+        => StartFade(msg.Duration);
+}
+
+<span class="cmt">// Plain-C# system — one bag, one Dispose</span>
+<span class="kw">public class</span> <span class="type">AnalyticsSystem</span> : <span class="type">IDisposable</span>
+{
+    <span class="kw">readonly</span> <span class="type">SubscriptionBag</span> _subscriptions = <span class="kw">new</span>();
+
+    <span class="kw">public</span> AnalyticsSystem()
+    {
+        <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerTeleported</span>&gt;(OnTeleport).AddTo(_subscriptions);
+        <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerScored</span>&gt;(OnScore).AddTo(_subscriptions);
+    }
+
+    <span class="kw">public void</span> Dispose() => _subscriptions.Dispose(); <span class="cmt">// unsubscribes both</span>
+}</code></pre>
+        </div>
+      </article>
+
+      <!-- Example 3: Thread-Safe Enqueue -->
       <article class="example">
         <h3 class="example-title">Thread-Safe Enqueue from a Worker Thread</h3>
         <p class="example-desc"><code>Enqueue</code> is thread-safe — push from network or decode threads, and the message is dispatched on the main thread during the next <code>DrainQueues()</code>.</p>
@@ -257,9 +294,9 @@
 <span class="cmt">// Main-thread subscriber — safe to touch Unity API</span>
 <span class="kw">public class</span> <span class="type">VideoTextureUpdater</span> : <span class="type">MonoBehaviour</span>
 {
-    <span class="type">SubscriptionToken</span> _token;
-    <span class="kw">void</span> OnEnable()  => _token = <span class="type">EventBus</span>.Subscribe&lt;<span class="type">FrameDecoded</span>&gt;(OnFrame);
-    <span class="kw">void</span> OnDisable() => <span class="type">EventBus</span>.Unsubscribe(_token);
+    <span class="type">Subscription</span> _subscription;
+    <span class="kw">void</span> OnEnable()  => _subscription = <span class="type">EventBus</span>.Subscribe&lt;<span class="type">FrameDecoded</span>&gt;(OnFrame);
+    <span class="kw">void</span> OnDisable() => _subscription.Dispose();
 
     <span class="kw">void</span> OnFrame(<span class="kw">ref</span> <span class="type">FrameDecoded</span> msg)
         => UpdateTexture(msg.FrameIndex, msg.Width, msg.Height);
@@ -267,10 +304,10 @@
         </div>
       </article>
 
-      <!-- Example 3: Commands (N:1) -->
+      <!-- Example 4: Commands (N:1) -->
       <article class="example">
         <h3 class="example-title">Commands — N:1 Dispatch</h3>
-        <p class="example-desc">A command has exactly one handler, declared once at the composition root via <code>CommandBus.TryInstall</code>. A duplicate or null handler is reported as a <code>false</code> return — it never throws.</p>
+        <p class="example-desc">A command has exactly one handler, declared once at the composition root via <code>CommandBus.Install</code>. A duplicate or null handler is reported in the returned <code>InstallResult</code> — it never throws.</p>
         <div class="code-card code-card--msg">
           <div class="code-card-header">
             <span class="code-card-dot" aria-hidden="true"></span>
@@ -298,43 +335,15 @@
 
     <span class="kw">void</span> Awake()
     {
-        <span class="kw">bool</span> ok = <span class="type">CommandBus</span>.TryInstall(<span class="kw">out string</span> error, r => r
+        <span class="kw">var</span> result = <span class="type">CommandBus</span>.Install(r => r
             .Handle&lt;<span class="type">PlaceOrder</span>&gt;(_orderHandler.Handle));
 
-        <span class="kw">if</span> (!ok) Debug.LogError($<span class="str">"Command install failed: {error}"</span>);
+        <span class="kw">if</span> (!result.Ok) Debug.LogError($<span class="str">"Command install failed: {result.Error}"</span>);
     }
 }
 
 <span class="cmt">// Caller — same publish API as EventBus</span>
 <span class="type">CommandBus</span>.Publish(<span class="kw">new</span> <span class="type">PlaceOrder</span> { ItemId = <span class="num">7</span>, Quantity = <span class="num">3</span> });</code></pre>
-        </div>
-      </article>
-
-      <!-- Example 4: Scene Transition Cleanup -->
-      <article class="example">
-        <h3 class="example-title">Scene Transition Cleanup</h3>
-        <p class="example-desc">Reset both buses before unloading a scene — this clears stale subscriptions from destroyed MonoBehaviours so they don't receive messages during the transition frame.</p>
-        <div class="code-card code-card--msg">
-          <div class="code-card-header">
-            <span class="code-card-dot" aria-hidden="true"></span>
-            <span class="code-card-dot" aria-hidden="true"></span>
-            <span class="code-card-dot" aria-hidden="true"></span>
-            <span class="code-card-file">SceneLoader.cs</span>
-          </div>
-<pre class="code-block"><code><span class="kw">public class</span> <span class="type">SceneLoader</span> : <span class="type">MonoBehaviour</span>
-{
-    <span class="kw">async void</span> LoadScene(<span class="kw">string</span> sceneName)
-    {
-        <span class="cmt">// Clear stale subscriptions before unloading.</span>
-        <span class="type">EventBus</span>.Reset();
-        <span class="type">CommandBus</span>.Reset();
-
-        <span class="kw">await</span> <span class="type">SceneManager</span>.LoadSceneAsync(sceneName);
-
-        <span class="cmt">// The new scene's OnEnable calls re-subscribe events; its</span>
-        <span class="cmt">// composition root re-runs CommandBus.TryInstall to rebind.</span>
-    }
-}</code></pre>
         </div>
       </article>
     </div>

@@ -50,6 +50,7 @@
             <a href="#guide-async" class="sidebar-link" data-pkg="func">Async Support</a>
             <a href="#guide-unity" class="sidebar-link" data-pkg="func">Unity Integration</a>
             <a href="#guide-serializable" class="sidebar-link" data-pkg="func">SerializableOptional&lt;T&gt;</a>
+            <a href="#guide-performance" class="sidebar-link" data-pkg="func">Performance &amp; Hot Paths</a>
           </div>
         </div>
 
@@ -63,7 +64,7 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--func-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v0.3.0</span>
+        <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v0.4.0</span>
         <h1 class="docs-hero-title">Null-Safe. Error-Safe.<br>Composable.</h1>
         <p class="docs-hero-desc">
           UP-Functional gives you <code>Optional&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, and composable extension methods that make absent values and errors impossible to ignore — without exceptions controlling normal flow.
@@ -191,7 +192,7 @@ player
 
           <div class="callout callout--tip">
             <strong>Unity fake-null</strong>
-            Unity's <code>UnityEngine.Object</code> equality overloads return <code>true</code> for destroyed objects even when the reference is non-null. <code>Some()</code> checks for this and returns <code>None</code> automatically — you don't need to guard against destroyed references.
+            Unity's <code>UnityEngine.Object</code> equality overloads return <code>true</code> for destroyed objects even when the reference is non-null. <code>Some()</code> checks for this and returns <code>None</code> automatically. The check happens <em>once, at creation</em> — an optional over a Unity object is scope-local, valid only within the frame/method that created it. If one outlives that scope, call <code>Alive()</code> to re-check at point of use (see <a href="#guide-unity">Unity Integration</a>).
           </div>
         </section>
 
@@ -417,6 +418,30 @@ item.Match(
 );</code></pre>
             </div>
           </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Object lifetimes: the scope-local rule</h3>
+            <p class="prose"><code>Optional&lt;T&gt;</code> is an immutable snapshot — <code>Some</code> checks Unity's fake-null <em>once, at creation</em> and does not track the object afterwards. If the wrapped <code>UnityEngine.Object</code> is destroyed later, the optional still reports <code>IsSome == true</code>. So treat an optional over a Unity object as <strong>scope-local</strong>: valid only within the frame/method that created it. When one has to live longer, either re-lift at point of use (store the raw reference and call <code>LookupComponent&lt;T&gt;()</code> where you consume it) or re-check with <code>Alive()</code> — the monadic analogue of <code>if (obj)</code>.</p>
+            <div class="code-card code-card--func">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Lifetimes.cs</span></div>
+<pre class="code-block"><code><span class="type">Optional</span>&lt;<span class="type">GameObject</span>&gt; cached = Some(enemy);
+<span class="type">Object</span>.Destroy(enemy);
+
+cached.IsSome;            <span class="cmt">// true — the snapshot is stale</span>
+cached.Alive().IsSome;    <span class="cmt">// false — Alive() re-checks Unity lifetime</span>
+
+<span class="cmt">// Holding an optional across frames? Alive() before consuming:</span>
+<span class="kw">private</span> <span class="type">Optional</span>&lt;<span class="type">Transform</span>&gt; _cachedTarget;
+
+<span class="kw">private void</span> Update()
+{
+    _cachedTarget
+        .Alive()                       <span class="cmt">// None if the target was destroyed</span>
+        .Then(t => Steer(t.position));
+}</code></pre>
+            </div>
+            <p class="prose"><code>Alive()</code> is constrained to <code>T : UnityEngine.Object</code>, so it doesn't exist (and costs nothing) for plain C# types — their snapshots can never go stale.</p>
+          </div>
         </section>
 
         <!-- ── Guide: SerializableOptional<T> ── -->
@@ -424,7 +449,7 @@ item.Match(
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">SerializableOptional&lt;T&gt;</h2>
           <p class="section-intro">
-            <code>Optional&lt;T&gt;</code> is a <code>readonly record struct</code> — Unity's serializer cannot store it. <code>SerializableOptional&lt;T&gt;</code> is a <code>[Serializable]</code> wrapper that survives serialization, ships in the <code>Tutan.Functional.Unity</code> assembly, and converts to and from <code>Optional&lt;T&gt;</code> implicitly.
+            <code>Optional&lt;T&gt;</code> is a <code>readonly record struct</code> — Unity's serializer cannot store it. <code>SerializableOptional&lt;T&gt;</code> is a <code>[Serializable]</code> wrapper that survives serialization and converts to and from <code>Optional&lt;T&gt;</code> implicitly. Like everything else, it lives in the <code>Tutan.Functional</code> namespace and runtime assembly.
           </p>
 
           <div class="sub-section">
@@ -433,7 +458,6 @@ item.Match(
             <div class="code-card code-card--func">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SpawnPoint.cs</span></div>
 <pre class="code-block"><code><span class="kw">using</span> Tutan.Functional;
-<span class="kw">using</span> Tutan.Functional.Unity;
 
 <span class="kw">public class</span> <span class="type">SpawnPoint</span> : <span class="type">MonoBehaviour</span>
 {
@@ -454,7 +478,56 @@ item.Match(
 
           <div class="callout callout--note">
             <strong>Assembly split</strong>
-            Runtime types live in <code>Tutan.Functional.Unity</code>; the drawer lives in <code>Tutan.Functional.Unity.Editor</code>. Add <code>Tutan.Functional.Unity</code> to your runtime <code>.asmdef</code> references — the editor assembly auto-loads in editor builds.
+            <code>SerializableOptional&lt;T&gt;</code> ships in the <code>Tutan.Functional</code> runtime assembly; the drawer lives in <code>Tutan.Functional.Editor</code>. Add <code>Tutan.Functional</code> to your runtime <code>.asmdef</code> references — the editor assembly auto-loads in editor builds.
+          </div>
+        </section>
+
+        <!-- ── Guide: Performance & Hot Paths ── -->
+        <section class="docs-section" id="guide-performance">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Performance &amp; Hot Paths</h2>
+          <p class="section-intro">
+            This is an <strong>allocation-conscious</strong> library, not a zero-allocation one. <code>Optional&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, and <code>Error</code> are structs — creating, returning, and matching them never touches the heap. The fluent operators are only as free as the lambdas you pass them.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">When pipelines allocate</h3>
+            <p class="prose">A lambda that closes over a local or <code>this</code> allocates a closure object and a delegate <em>every call</em>. A lambda that captures nothing is cached by the compiler and allocates once, ever.</p>
+            <div class="code-card code-card--func">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Closures.cs</span></div>
+<pre class="code-block"><code><span class="cmt">// Allocates per call: the lambda captures `origin`</span>
+<span class="type">Optional</span>&lt;<span class="kw">float</span>&gt; dist = maybeTarget.Map(t => <span class="type">Vector3</span>.Distance(t.position, origin));
+
+<span class="cmt">// No per-call allocation: nothing captured</span>
+<span class="type">Optional</span>&lt;<span class="type">Vector3</span>&gt; pos = maybeTarget.Map(t => t.position);</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Hot-path options</h3>
+            <p class="prose">System-level code — loading, validation, config, UI events — is the sweet spot; a closure allocation in code that runs once per click is irrelevant, so write for clarity. In per-frame hot paths (<code>Update</code>, physics callbacks, per-entity loops) you have three allocation-free options, in order of preference: keep lambdas capture-free, use the state-passing overloads, or exit the pipeline with the out-param accessors.</p>
+            <p class="prose">The state-passing overloads pass locals as an argument instead of capturing them. <code>Map</code>, <code>Bind</code>, <code>Then</code>, <code>Filter</code>, and <code>Match</code> all have <code>TState</code> forms on both <code>Optional&lt;T&gt;</code> and <code>Result&lt;T&gt;</code>, so a whole hot pipeline can stay capture-free end to end. Mark the lambdas <code>static</code> and the compiler <em>enforces</em> it.</p>
+            <div class="code-card code-card--func">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">HotPath.cs</span></div>
+<pre class="code-block"><code><span class="cmt">// `origin` travels as TState — `static` guarantees no capture</span>
+<span class="kw">float</span> dist = maybeTarget
+    .Alive()
+    .Map(origin, <span class="kw">static</span> (t, o) => <span class="type">Vector3</span>.Distance(t.position, o))
+    .Match(<span class="kw">float</span>.PositiveInfinity, <span class="kw">static</span> d => d, <span class="kw">static</span> (v, _) => v);
+
+<span class="cmt">// Need more than one local? Pack a value tuple — still no allocation</span>
+maybeTarget.Filter((minDist, origin),
+    <span class="kw">static</span> (t, s) => <span class="type">Vector3</span>.Distance(t.position, s.origin) > s.minDist);
+
+<span class="cmt">// Or exit the pipeline and use plain control flow</span>
+<span class="kw">if</span> (maybeTarget.HasValue(<span class="kw">out var</span> target))
+    Steer(target.position);</code></pre>
+            </div>
+          </div>
+
+          <div class="callout callout--note">
+            <strong>Two more gotchas</strong>
+            Method-group arguments (<code>.Map(Transform.GetPosition)</code>) also allocate a delegate per call under C# 10 — prefer an explicit capture-free lambda in hot paths. <code>Try</code> allocates only when an exception is actually thrown — the exceptional path pays, which is the right trade.
           </div>
         </section>
 

@@ -216,8 +216,8 @@ result
     <span class="kw">public float</span> Duration;
 }
 
-<span class="cmt">// Subscribe — store the token, no -= operator</span>
-<span class="type">SubscriptionToken</span> token = <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerTeleported</span>&gt;(
+<span class="cmt">// Subscribe — get a disposable Subscription, no -= operator</span>
+<span class="type">Subscription</span> subscription = <span class="type">EventBus</span>.Subscribe&lt;<span class="type">PlayerTeleported</span>&gt;(
     (<span class="kw">ref</span> <span class="type">PlayerTeleported</span> msg) =&gt; StartFade(msg.Duration));
 
 <span class="cmt">// Publish — zero copy via ref</span>
@@ -227,8 +227,8 @@ result
 <span class="cmt">// From any thread — handler still runs on main</span>
 <span class="type">EventBus</span>.Enqueue(msg);
 
-<span class="cmt">// Clean up</span>
-<span class="type">EventBus</span>.Unsubscribe(token);</code></pre>
+<span class="cmt">// Clean up by disposing — or .AddTo(this) to auto-dispose</span>
+subscription.Dispose();</code></pre>
         </div>
       </div>
       <div style="text-align:center;margin-top:48px">

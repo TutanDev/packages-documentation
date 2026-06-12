@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Messages — API Reference — Unity Framework</title>
-  <meta name="description" content="UP-Messages API Reference: complete type and member documentation for EventBus, CommandBus, IMessage, IEvent, ICommand, SubscriptionToken.">
+  <meta name="description" content="UP-Messages API Reference: complete type and member documentation for EventBus, CommandBus, IMessage, IEvent, ICommand, Subscription, SubscriptionBag.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -47,7 +47,7 @@
             <a href="#api-eventbus" class="sidebar-link" data-pkg="msg">EventBus</a>
             <a href="#api-commandbus" class="sidebar-link" data-pkg="msg">CommandBus</a>
             <a href="#api-handler" class="sidebar-link" data-pkg="msg">MessageHandler&lt;T&gt;</a>
-            <a href="#api-token" class="sidebar-link" data-pkg="msg">SubscriptionToken</a>
+            <a href="#api-subscription" class="sidebar-link" data-pkg="msg">Subscription / SubscriptionBag</a>
             <a href="#api-host" class="sidebar-link" data-pkg="msg">MessagesHost</a>
             <a href="#api-instrumentation" class="sidebar-link" data-pkg="msg">MessagesInstrumentation</a>
             <a href="#api-references" class="sidebar-link" data-pkg="msg">EventReference / CommandReference</a>
@@ -110,7 +110,7 @@
                 <span class="api-kind kind--field">marker</span>
                 <div class="api-member-content">
                   <div class="api-member-name">interface ICommand : IMessage</div>
-                  <div class="api-member-desc">Marker for N:1 intents. Exactly one handler is bound per command type, declared at the composition root via <code>CommandBus.TryInstall</code>. Name in imperative.</div>
+                  <div class="api-member-desc">Marker for N:1 intents. Exactly one handler is bound per command type, declared at the composition root via <code>CommandBus.Install</code>. Name in imperative.</div>
                 </div>
               </div>
             </div>
@@ -132,15 +132,8 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">SubscriptionToken Subscribe&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, IEvent</div>
-                  <div class="api-member-desc">Registers a handler. Returns an integer token for unsubscription. Main thread only.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--method">method</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">bool Unsubscribe(SubscriptionToken token)</div>
-                  <div class="api-member-desc">Removes the handler associated with the token. Returns <code>false</code> if already removed. Safe during dispatch.</div>
+                  <div class="api-member-name">Subscription Subscribe&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, IEvent</div>
+                  <div class="api-member-desc">Registers a handler. Returns a disposable <a href="#api-subscription"><code>Subscription</code></a> — disposing it is how you unsubscribe. Main thread only.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -161,7 +154,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">void Enqueue&lt;T&gt;(in T message) where T : unmanaged, IEvent</div>
-                  <div class="api-member-desc">Thread-safe enqueue. Channel creation uses a brief lock; the enqueue itself is lock-free via <code>ConcurrentQueue&lt;T&gt;</code>.</div>
+                  <div class="api-member-desc">Thread-safe enqueue. Channel lookup/creation goes through <code>ConcurrentDictionary.GetOrAdd</code>, the per-channel pending queue is lazily created with a compare-and-swap, and the message lands in a <code>ConcurrentQueue&lt;T&gt;</code>. Safe to race with main-thread calls and with concurrent <code>Enqueue</code> calls from other worker threads. Dispatched on the next <code>DrainQueues()</code>.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -189,7 +182,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">void Reset()</div>
-                  <div class="api-member-desc">Clears all subscriptions and queues. Use on scene transitions or test teardown.</div>
+                  <div class="api-member-desc">Clears all subscriptions and queues. Use on test teardown.</div>
                 </div>
               </div>
             </div>
@@ -200,7 +193,7 @@
         <section class="docs-section" id="api-commandbus">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">CommandBus</h2>
-          <p class="section-intro">Static N:1 facade in <code>Tutan.Messages</code>. Shares <code>Publish</code>, <code>Enqueue</code>, <code>DrainQueues</code>, and <code>Reset</code> with <code>EventBus</code>, but has no <code>Subscribe</code>/<code>Unsubscribe</code>: the single handler per <code>ICommand</code> type is declared once at the composition root via <code>TryInstall</code>.</p>
+          <p class="section-intro">Static N:1 facade in <code>Tutan.Messages</code>. Shares <code>Publish</code>, <code>Enqueue</code>, <code>DrainQueues</code>, and <code>Reset</code> with <code>EventBus</code>, but has no <code>Subscribe</code>: the single handler per <code>ICommand</code> type is declared once at the composition root via <code>Install</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -211,15 +204,22 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">bool TryInstall(out string error, Action&lt;CommandRegistry&gt; configure)</div>
-                  <div class="api-member-desc">Declares every command handler in one place. Returns <code>true</code> and atomically swaps in the new bindings on success. On a duplicate command type or null handler, returns <code>false</code>, sets <code>error</code> to a message naming the offending type(s), and leaves the live bus untouched. Calling it again rebuilds the bus from scratch.</div>
+                  <div class="api-member-name">InstallResult Install(Action&lt;CommandRegistry&gt; configure)</div>
+                  <div class="api-member-desc">Declares every command handler in one place. On success the new bindings are swapped in atomically. On a duplicate command type or a null handler the live bus is left untouched and the failure is reported in the result — never as an exception. Calling it again rebuilds the bus from scratch (composition-root semantics).</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">struct</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">readonly struct InstallResult { bool Ok; string Error; int HandlerCount; }</div>
+                  <div class="api-member-desc">Returned by <code>Install</code>. <code>Ok</code> is <code>true</code> when the bindings were validated and swapped in; <code>Error</code> names the offending command type(s) (<code>null</code> when <code>Ok</code>); <code>HandlerCount</code> is the number of handlers bound (0 on failure).</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">CommandRegistry Handle&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, ICommand</div>
-                  <div class="api-member-desc">Fluent builder method, available inside the <code>TryInstall</code> callback. Binds the single handler for command type <code>T</code>. Chain one <code>Handle&lt;T&gt;</code> per command.</div>
+                  <div class="api-member-desc">Fluent builder method, available inside the <code>Install</code> callback. Binds the single handler for command type <code>T</code>. Chain one <code>Handle&lt;T&gt;</code> per command.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -263,30 +263,62 @@
           </div>
         </section>
 
-        <!-- ── API: SubscriptionToken ── -->
-        <section class="docs-section" id="api-token">
+        <!-- ── API: Subscription / SubscriptionBag ── -->
+        <section class="docs-section" id="api-subscription">
           <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">SubscriptionToken</h2>
-          <p class="section-intro"><code>readonly struct</code> in <code>Tutan.Messages</code>. The only mechanism for unsubscription — no <code>-=</code> operator.</p>
+          <h2 class="section-title">Subscription / SubscriptionBag</h2>
+          <p class="section-intro">Subscription lifetime types in <code>Tutan.Messages</code>. <code>Subscribe</code> returns a <code>Subscription</code> — a disposable struct pairing the subscription's identity with the bus instance that issued it. Disposing it is the only mechanism for unsubscription — no <code>-=</code> operator. Hold it and dispose explicitly, collect several in a <code>SubscriptionBag</code>, or tie it to a GameObject's lifetime with <code>.AddTo(...)</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">SubscriptionToken</span>
+              <span class="api-group-name">Subscription</span>
               <span class="api-type-badge badge--struct">struct</span>
             </div>
             <div class="api-members">
               <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
+                <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">int Id { get; }</div>
-                  <div class="api-member-desc">Monotonically increasing integer identifier for the subscription.</div>
+                  <div class="api-member-name">void Dispose()</div>
+                  <div class="api-member-desc">Unsubscribes the handler. Idempotent, safe to call during dispatch (the handler is marked inactive and skipped for the remainder of the current dispatch cycle), and a harmless no-op after the issuing bus was <code>Reset()</code> — it can never remove an unrelated subscription from the replacement bus. Main thread only. Zero allocation: <code>Subscription</code> is a struct around an id plus an existing reference, so <code>Subscribe</code> allocates nothing beyond the handler entry itself.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">SubscriptionBag</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Dispose() / void Clear()</div>
+                  <div class="api-member-desc">Disposes every subscription added to the bag as a group. The bag is reusable after disposal — one bag per system instead of one handle field per subscription.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">AddTo extensions</span>
+              <span class="api-type-badge badge--static">static</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Subscription AddTo(this Subscription, SubscriptionBag bag)</div>
+                  <div class="api-member-desc">Adds the subscription to a <code>SubscriptionBag</code>; the bag's <code>Dispose()</code> releases it.</div>
                 </div>
               </div>
               <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
+                <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">bool IsValid { get; }</div>
-                  <div class="api-member-desc"><code>true</code> if the token references a non-default subscription. Does not check whether the subscription is still active.</div>
+                  <div class="api-member-name">Subscription AddTo(this Subscription, GameObject gameObject) / AddTo(this Subscription, Component component)</div>
+                  <div class="api-member-desc">Ties the subscription to a GameObject's lifetime: one hidden <code>SubscriptionAnchor</code> component is attached per GameObject and disposes its bag in <code>OnDestroy</code>. The common MonoBehaviour pattern collapses to <code>EventBus.Subscribe&lt;PlayerMoved&gt;(OnMoved).AddTo(this);</code> — no handle field, no <code>OnDestroy</code> override. The bag and the anchor component each allocate once at creation.</div>
                 </div>
               </div>
             </div>
@@ -325,7 +357,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">[RuntimeInitializeOnLoadMethod] static void Bootstrap()</div>
-                  <div class="api-member-desc">Creates a hidden persistent <code>[MessagesHost]</code> GameObject at <code>BeforeSceneLoad</code> so both buses are drained every <code>LateUpdate</code> with no setup. Define <code>TUTAN_MESSAGES_NO_AUTO_HOST</code> to skip spawning the host and drive draining yourself. Command handlers are bound explicitly at your composition root via <code>CommandBus.TryInstall</code> — there is no reflection-based auto-install.</div>
+                  <div class="api-member-desc">Creates a hidden persistent <code>[MessagesHost]</code> GameObject at <code>BeforeSceneLoad</code> so both buses are drained every <code>LateUpdate</code> with no setup. Define <code>TUTAN_MESSAGES_NO_AUTO_HOST</code> to skip spawning the host and drive draining yourself. Command handlers are bound explicitly at your composition root via <code>CommandBus.Install</code> — there is no reflection-based auto-install.</div>
                 </div>
               </div>
             </div>
@@ -348,14 +380,7 @@
                 <span class="api-kind kind--field">field</span>
                 <div class="api-member-content">
                   <div class="api-member-name">bool Enabled</div>
-                  <div class="api-member-desc">Master switch. When <code>false</code> every instrumentation hook short-circuits on the first branch (cost: one <code>bool</code> check per <code>Publish</code>).</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--field">field</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">bool CapturePayloads</div>
-                  <div class="api-member-desc">When <code>true</code>, message structs are boxed into records so they can be inspected. Adds one boxing allocation per <code>Publish</code>/<code>Enqueue</code>. Off by default; the Messages Console turns it on automatically while the window is open.</div>
+                  <div class="api-member-desc">Master switch. When <code>false</code> every instrumentation hook short-circuits on the first branch (cost: one <code>bool</code> check per <code>Publish</code>). While <code>true</code>, every <code>Publish</code>/<code>Enqueue</code> record carries the boxed payload (one boxing allocation per record) — payload capture is not a separate switch. The Messages Console sets this automatically while the window is open.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -373,7 +398,7 @@
         <section class="docs-section" id="api-references">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">EventReference / CommandReference</h2>
-          <p class="section-intro">Serializable wrappers in <code>Tutan.Messages</code> that let designers pick a message type and edit its payload from the Inspector. <strong>Not for runtime hot paths</strong> — publishing involves JSON deserialization, <code>Activator.CreateInstance</code>, boxing, and a reflected generic <code>Publish</code> invocation.</p>
+          <p class="section-intro">Serializable wrappers in <code>Tutan.Messages</code> that let designers pick a message type and edit its payload from the Inspector. <strong>Not for runtime hot paths</strong> — publishing involves JSON deserialization, <code>Activator.CreateInstance</code>, boxing, and a reflected generic <code>Publish</code> invocation. Message structs authored through a reference must be marked <code>[Serializable]</code> — the payload round-trips through <code>JsonUtility</code>, and a struct without the attribute silently keeps its default values.</p>
 
           <div class="api-group">
             <div class="api-group-header">
