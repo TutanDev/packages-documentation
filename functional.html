@@ -64,7 +64,7 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--func-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v0.4.0</span>
+        <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v0.4.1</span>
         <h1 class="docs-hero-title">Null-Safe. Error-Safe.<br>Composable.</h1>
         <p class="docs-hero-desc">
           UP-Functional gives you <code>Optional&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, and composable extension methods that make absent values and errors impossible to ignore — without exceptions controlling normal flow.
@@ -266,7 +266,7 @@ player
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">The Error Type</h2>
           <p class="section-intro">
-            <code>Error</code> is an immutable value type (16 bytes on 64-bit) that carries a message and optional nested or composite inner errors. It is the failure payload inside <code>Result&lt;T&gt;</code>.
+            <code>Error</code> is an immutable value type (24 bytes on 64-bit) that carries a message, an optional integer <code>Code</code>, and optional nested or composite inner errors. It is the failure payload inside <code>Result&lt;T&gt;</code>.
           </p>
 
           <div class="sub-section">
@@ -290,6 +290,20 @@ player
 
 <span class="cmt">// outer.Message     → "Could not load save"</span>
 <span class="cmt">// outer.InnerErrors → [{ "Disk read failed" }]</span></code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Error with a code — attach a machine-readable code</h3>
+            <p class="prose">The optional <code>Code</code> is an <code>int</code> (default <code>0</code> when unspecified). Use it when callers should branch on a stable code rather than parse the message — HTTP-style status codes, a domain error enum cast to <code>int</code>, and so on. <code>Code</code> participates in equality.</p>
+            <div class="code-card code-card--func">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Coded.cs</span></div>
+<pre class="code-block"><code><span class="type">Error</span> e = Error(<span class="str">"Save file not found"</span>, <span class="num">404</span>);
+
+<span class="cmt">// Combined with a nested cause</span>
+<span class="type">Error</span> outer = Error(<span class="str">"Could not load save"</span>, <span class="num">500</span>, inner);
+
+<span class="cmt">// e.Code → 404</span></code></pre>
             </div>
           </div>
 

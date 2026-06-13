@@ -121,6 +121,8 @@
                   <tr><td>HasValue(out T)</td><td>Out-param extraction; returns <code>false</code> for <code>None</code></td></tr>
                   <tr><td>ValueUnsafe()</td><td>Throws <code>InvalidOperationException</code> on <code>None</code></td></tr>
                   <tr><td>AsEnumerable()</td><td>Zero or one element; safe to iterate with foreach</td></tr>
+                  <tr><td>Bind(Func&lt;T,IEnumerable&lt;R&gt;&gt;)</td><td>Flat-maps into a sequence; empty when <code>None</code></td></tr>
+                  <tr><td>Traverse(Func&lt;T,IEnumerable&lt;R&gt;&gt;)</td><td>Distributes the <code>Optional</code> over a sequence-producing function</td></tr>
                   <tr><td>ToResult(Func&lt;Error&gt;)</td><td>Converts <code>None</code> to an error</td></tr>
                   <tr><td>Map / Bind</td><td>Aliases for <code>Then</code> overloads</td></tr>
                   <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads — avoid closure capture in hot paths</td></tr>
@@ -269,6 +271,7 @@
                   <tr><td>ValueUnsafe() / ErrorUnsafe()</td><td>Unsafe extraction; throw on wrong state</td></tr>
                   <tr><td>ForEach(Action&lt;T&gt;)</td><td>Side-effect, returns <code>Result&lt;Unit&gt;</code></td></tr>
                   <tr><td>AsEnumerable()</td><td>Zero or one element</td></tr>
+                  <tr><td>Bind(Func&lt;T,IEnumerable&lt;R&gt;&gt;)</td><td>Flat-maps into a sequence; empty on error</td></tr>
                   <tr><td>ToOptional()</td><td>Discards the error, converts success to <code>Some</code></td></tr>
                   <tr><td>Map / Bind</td><td>Aliases for <code>Then</code> overloads</td></tr>
                   <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads — avoid closure capture in hot paths</td></tr>
@@ -284,7 +287,7 @@
         <section class="docs-section" id="api-error">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">Error</h2>
-          <p class="section-intro"><code>readonly struct</code>, <code>IEquatable&lt;Error&gt;</code>. 16 bytes on 64-bit. Implicit cast from <code>string</code>.</p>
+          <p class="section-intro"><code>readonly struct</code>, <code>IEquatable&lt;Error&gt;</code>. 24 bytes on 64-bit. Implicit cast from <code>string</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -302,8 +305,22 @@
               <div class="api-member">
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
+                  <div class="api-member-name">Error(string message, int code)</div>
+                  <div class="api-member-desc">Error with a machine-readable code.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
                   <div class="api-member-name">Error(string message, Error inner)</div>
                   <div class="api-member-desc">Nested error — wraps a cause. Equivalent to <code>Exception.InnerException</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Error(string message, int code, Error inner)</div>
+                  <div class="api-member-desc">Nested error with a code.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -318,6 +335,13 @@
                 <div class="api-member-content">
                   <div class="api-member-name">string Message { get; }</div>
                   <div class="api-member-desc">Human-readable error description.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Code { get; }</div>
+                  <div class="api-member-desc">Optional machine-readable error code; <code>0</code> when unspecified. Participates in equality.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -383,7 +407,9 @@
                 <tr><td>Success&lt;T&gt;(T value)</td><td>Creates a successful Result. Returns <code>Error("Value is null")</code> for null references.</td></tr>
                 <tr><td>Success()</td><td>Creates a successful <code>Result&lt;Unit&gt;</code> with no value.</td></tr>
                 <tr><td>Error(string)</td><td>Simple error.</td></tr>
+                <tr><td>Error(string, int)</td><td>Error with a machine-readable code.</td></tr>
                 <tr><td>Error(string, Error)</td><td>Nested error — message + cause.</td></tr>
+                <tr><td>Error(string, int, Error)</td><td>Nested error with a code.</td></tr>
                 <tr><td>Error(IEnumerable&lt;Error&gt;)</td><td>Composite error.</td></tr>
                 <tr><td>Try&lt;T&gt;(Func&lt;T&gt;)</td><td>Wraps exceptions into <code>Error(ex.ToString())</code>.</td></tr>
                 <tr><td>Try(Action)</td><td>Same, for void actions.</td></tr>
