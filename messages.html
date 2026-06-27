@@ -64,7 +64,7 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--msg-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v1.2.1</span>
+        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v1.3.0</span>
         <h1 class="docs-hero-title">Zero-Allocation<br>Pub/Sub for XR</h1>
         <p class="docs-hero-desc">
           UP-Messages is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, disposable subscriptions, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
@@ -108,7 +108,7 @@
             <div class="step-num" style="border-color:var(--msg-color);color:var(--msg-color)">3</div>
             <div class="step-body">
               <div class="step-title">Publish your first event</div>
-              <div class="step-desc">Define an <code>unmanaged struct</code> implementing <code>IEvent</code>, subscribe with <code>EventBus.Subscribe&lt;T&gt;</code>, and publish with <code>EventBus.Publish(ref msg)</code>.</div>
+              <div class="step-desc">Define a <code>struct</code> implementing <code>IEvent</code>, subscribe with <code>EventBus.Subscribe&lt;T&gt;</code>, and publish with <code>EventBus.Publish(ref msg)</code>.</div>
             </div>
           </div>
         </div>
@@ -126,18 +126,18 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Defining Messages</h2>
           <p class="section-intro">
-            A message is any <code>unmanaged struct</code> implementing <code>IEvent</code> or <code>ICommand</code> (both extend <code>IMessage</code>). The <code>unmanaged</code> constraint guarantees no managed references — no <code>string</code>, no arrays, no class fields — making the struct blittable and invisible to the GC.
+            A message is any <code>struct</code> implementing <code>IEvent</code> or <code>ICommand</code> (both extend <code>IMessage</code>). Dispatch is allocation-free for any struct: the bus is generic over the message type and passes it by <code>ref</code>, so the message is never boxed or heap-stored. Reference-type fields (<code>string</code>, arrays, collections, class payloads) are permitted — see the caveats below.
           </p>
 
           <div class="sub-section">
-            <h3 class="sub-title">Correct messages</h3>
+            <h3 class="sub-title">Defining message structs</h3>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Messages.cs</span></div>
 <pre class="code-block"><code><span class="kw">using</span> Tutan.Messages;
 <span class="kw">using</span> Unity.Collections;
 <span class="kw">using</span> UnityEngine;
 
-<span class="cmt">// Correct — all fields are unmanaged</span>
+<span class="cmt">// Recommended — all fields are value types (no GC scan, safe across threads)</span>
 <span class="kw">public struct</span> <span class="type">HandTrackingLost</span> : <span class="type">IEvent</span>
 {
     <span class="kw">public int</span> HandIndex;       <span class="cmt">// 0 = left, 1 = right</span>
@@ -145,24 +145,25 @@
     <span class="kw">public float</span> Confidence;
 }
 
-<span class="cmt">// Use FixedString for string-like data</span>
+<span class="cmt">// Use FixedString to keep string-like data value-typed</span>
 <span class="kw">public struct</span> <span class="type">SceneLoaded</span> : <span class="type">IEvent</span>
 {
     <span class="kw">public int</span> SceneIndex;
     <span class="kw">public</span> <span class="type">FixedString64Bytes</span> SceneName;
 }
 
-<span class="cmt">// COMPILE ERROR — string is a managed reference</span>
-<span class="kw">public struct</span> <span class="type">BadMessage</span> : <span class="type">IEvent</span>
+<span class="cmt">// Allowed, with caveats — reference-type fields are permitted</span>
+<span class="kw">public struct</span> <span class="type">LogLine</span> : <span class="type">IEvent</span>
 {
-    <span class="kw">public string</span> Name; <span class="cmt">// won't compile: not unmanaged</span>
+    <span class="kw">public string</span> Text; <span class="cmt">// reference field: see the trade-offs below</span>
+    <span class="kw">public int</span> Level;
 }</code></pre>
             </div>
           </div>
 
           <div class="callout callout--tip">
-            <strong>Need string-like data?</strong>
-            Use <code>Unity.Collections.FixedString64Bytes</code> (from <code>com.unity.collections</code>) or store an integer handle that indexes into a separate lookup table. Both approaches keep the message blittable.
+            <strong>Reference-type fields are allowed but not free.</strong>
+            A message that holds a <code>string</code>, array, collection, or class reference still dispatches without allocating, but two caveats apply: while it sits in the deferred queue it is a GC root the collector must scan during the mark phase (a scan cost, not an allocation), and <code>Enqueue</code> copies the struct <em>shallowly</em>, so a worker thread shares any referenced object with the main thread that drains it — treat such payloads as immutable handoffs. Prefer value-only messages on hot or cross-thread paths. For string-like data, <code>Unity.Collections.FixedString64Bytes</code> (from <code>com.unity.collections</code>) or an integer handle keeps the message fully value-typed.
           </div>
         </section>
 

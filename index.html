@@ -156,8 +156,8 @@ result
         <span class="package-label package-label--msg">com.tutan.messages</span>
         <h2 class="package-title">Messages</h2>
         <p class="package-desc">
-          Standalone zero-allocation pub/sub. <code>unmanaged struct</code> messages dispatched by <code>ref</code>,
-          thread-safe enqueue from worker threads, integer subscription tokens — built for 72–120 Hz XR frame budgets.
+          Standalone zero-allocation pub/sub. <code>struct</code> messages dispatched by <code>ref</code>,
+          thread-safe enqueue from worker threads, disposable subscriptions — built for 72–120 Hz XR frame budgets.
         </p>
       </div>
       <div class="package-grid">
@@ -177,7 +177,7 @@ result
             </div>
             <div>
               <h3 class="feature-name">Zero-GC Dispatch</h3>
-              <p class="feature-desc"><code>ref T</code> handler signature avoids struct copies. Integer tokens avoid delegate-equality bugs. No allocations on the hot path.</p>
+              <p class="feature-desc"><code>ref T</code> handler signature avoids struct copies. Disposable subscriptions avoid delegate-equality bugs. No allocations on the hot path.</p>
             </div>
           </div>
           <div class="feature">
@@ -208,7 +208,7 @@ result
           </div>
 <pre class="code-block"><code><span class="kw">using</span> Tutan.Messages;
 
-<span class="cmt">// Define a message — must be unmanaged struct</span>
+<span class="cmt">// Define a message — must be a struct</span>
 <span class="kw">public struct</span> <span class="type">PlayerTeleported</span> : <span class="type">IEvent</span>
 {
     <span class="kw">public</span> <span class="type">Vector3</span> Origin;

@@ -66,7 +66,7 @@
         <section class="docs-section" id="api-imessage">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">IMessage / IEvent / ICommand</h2>
-          <p class="section-intro">Marker interfaces in <code>Tutan.Messages</code>. Implementing types must be <code>unmanaged struct</code>.</p>
+          <p class="section-intro">Marker interfaces in <code>Tutan.Messages</code>. Implementing types must be a <code>struct</code>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -132,28 +132,28 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">Subscription Subscribe&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, IEvent</div>
+                  <div class="api-member-name">Subscription Subscribe&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : struct, IEvent</div>
                   <div class="api-member-desc">Registers a handler. Returns a disposable <a href="#api-subscription"><code>Subscription</code></a> — disposing it is how you unsubscribe. Main thread only.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">void Publish&lt;T&gt;(ref T message) where T : unmanaged, IEvent</div>
+                  <div class="api-member-name">void Publish&lt;T&gt;(ref T message) where T : struct, IEvent</div>
                   <div class="api-member-desc">Dispatches immediately to all subscribers on the calling thread. Zero-copy via <code>ref</code>. Main thread only.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">void Publish&lt;T&gt;(T message) where T : unmanaged, IEvent</div>
+                  <div class="api-member-name">void Publish&lt;T&gt;(T message) where T : struct, IEvent</div>
                   <div class="api-member-desc">Convenience overload — one struct copy from caller to parameter. Acceptable for small messages where the <code>ref</code> call site is inconvenient.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">void Enqueue&lt;T&gt;(in T message) where T : unmanaged, IEvent</div>
+                  <div class="api-member-name">void Enqueue&lt;T&gt;(in T message) where T : struct, IEvent</div>
                   <div class="api-member-desc">Thread-safe enqueue. Channel lookup/creation goes through <code>ConcurrentDictionary.GetOrAdd</code>, the per-channel pending queue is lazily created with a compare-and-swap, and the message lands in a <code>ConcurrentQueue&lt;T&gt;</code>. Safe to race with main-thread calls and with concurrent <code>Enqueue</code> calls from other worker threads. Dispatched on the next <code>DrainQueues()</code>.</div>
                 </div>
               </div>
@@ -167,7 +167,7 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">int GetSubscriberCount&lt;T&gt;() where T : unmanaged, IEvent</div>
+                  <div class="api-member-name">int GetSubscriberCount&lt;T&gt;() where T : struct, IEvent</div>
                   <div class="api-member-desc">Number of active subscribers for message type <code>T</code>.</div>
                 </div>
               </div>
@@ -218,7 +218,7 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">CommandRegistry Handle&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : unmanaged, ICommand</div>
+                  <div class="api-member-name">CommandRegistry Handle&lt;T&gt;(MessageHandler&lt;T&gt; handler) where T : struct, ICommand</div>
                   <div class="api-member-desc">Fluent builder method, available inside the <code>Install</code> callback. Binds the single handler for command type <code>T</code>. Chain one <code>Handle&lt;T&gt;</code> per command.</div>
                 </div>
               </div>
@@ -255,7 +255,7 @@
               <div class="api-member">
                 <span class="api-kind kind--field">sig</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">void MessageHandler&lt;T&gt;(ref T message) where T : unmanaged, IMessage</div>
+                  <div class="api-member-name">void MessageHandler&lt;T&gt;(ref T message) where T : struct, IMessage</div>
                   <div class="api-member-desc">Receives the message by <code>ref</code> — no struct copy on dispatch. Handlers may mutate the message; subsequent handlers see the mutation in registration order.</div>
                 </div>
               </div>
