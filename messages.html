@@ -478,7 +478,7 @@
             </div>
             <div class="callout callout--warn" style="margin-top:12px">
               <strong>Not for runtime hot paths.</strong>
-              Publishing via a <code>MessageReference</code> involves <code>JsonUtility.FromJson</code>, <code>Activator.CreateInstance</code>, <strong>boxing the struct</strong>, and a reflected generic <code>Publish</code> invocation — the opposite of the zero-alloc dispatch path. Use it for editor/authoring workflows, debug buttons, and tooling — not per-frame gameplay dispatch.
+              Publishing via a <code>MessageReference</code> involves <code>JsonUtility.FromJson</code>, <code>Activator.CreateInstance</code>, <strong>boxing the struct</strong>, and dispatch through the non-generic <code>PublishBoxed</code> seam (one unbox inside the channel) — the opposite of the zero-alloc dispatch path. Use it for editor/authoring workflows, debug buttons, and tooling — not per-frame gameplay dispatch.
             </div>
             <div class="callout callout--note" style="margin-top:12px">
               <strong>Mark referenced structs <code>[Serializable]</code>.</strong>
@@ -494,7 +494,7 @@
 <pre class="code-block"><code>[<span class="type">EventType</span>]   <span class="kw">public string</span> eventType;    <span class="cmt">// dropdown of all IEvent types</span>
 [<span class="type">CommandType</span>] <span class="kw">public string</span> commandType;  <span class="cmt">// dropdown of all ICommand types</span></code></pre>
             </div>
-            <p class="prose" style="margin-top:12px">The inline reflection editor renders <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, <code>Vector3</code>, <code>Color</code>, and any <code>enum</code>. A field literally named <code>Timestamp</code> is skipped by the editor and auto-populated at publish time (<code>float</code> → <code>Time.time</code>, <code>double</code> → <code>(double)Time.time</code>, <code>long</code> → <code>DateTime.UtcNow.Ticks</code>).</p>
+            <p class="prose" style="margin-top:12px">The inline editor renders each field with its matching native UI-Toolkit control: <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>bool</code>, <code>string</code>, any <code>enum</code>, <code>Vector2</code>/<code>Vector3</code>/<code>Vector4</code>, <code>Vector2Int</code>/<code>Vector3Int</code>, <code>Color</code>, and <code>Quaternion</code> (edited as euler angles). Other types fall back to a disabled "unsupported type" label. Every field is authored explicitly — including a field named <code>Timestamp</code>; the reference publishes exactly the values you enter, with nothing populated implicitly at publish time.</p>
           </div>
         </section>
 

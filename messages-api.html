@@ -398,7 +398,7 @@
         <section class="docs-section" id="api-references">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">EventReference / CommandReference</h2>
-          <p class="section-intro">Serializable wrappers in <code>Tutan.Messages</code> that let designers pick a message type and edit its payload from the Inspector. <strong>Not for runtime hot paths</strong> — publishing involves JSON deserialization, <code>Activator.CreateInstance</code>, boxing, and a reflected generic <code>Publish</code> invocation. Message structs authored through a reference must be marked <code>[Serializable]</code> — the payload round-trips through <code>JsonUtility</code>, and a struct without the attribute silently keeps its default values.</p>
+          <p class="section-intro">Serializable wrappers in <code>Tutan.Messages</code> that let designers pick a message type and edit its payload from the Inspector. <strong>Not for runtime hot paths</strong> — publishing involves JSON deserialization, <code>Activator.CreateInstance</code>, and boxing the struct before it is dispatched through the non-generic <code>PublishBoxed</code> seam (one unbox inside the channel). Message structs authored through a reference must be marked <code>[Serializable]</code> — the payload round-trips through <code>JsonUtility</code>, and a struct without the attribute silently keeps its default values.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -410,7 +410,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">void Publish()</div>
-                  <div class="api-member-desc">Synthesizes the selected <code>IEvent</code> struct from inspector-edited fields and dispatches it via <code>EventBus</code>. Boxes the struct and uses reflection.</div>
+                  <div class="api-member-desc">Synthesizes the selected <code>IEvent</code> struct from inspector-edited fields and dispatches it via <code>EventBus</code>. Boxes the struct and dispatches it through the non-generic <code>PublishBoxed</code> seam (one unbox inside the channel).</div>
                 </div>
               </div>
             </div>
@@ -432,7 +432,7 @@
             </div>
           </div>
 
-          <p class="prose" style="margin-top:12px">The inline reflection editor renders <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, <code>Vector3</code>, <code>Color</code>, and any <code>enum</code>. A field literally named <code>Timestamp</code> is skipped and auto-populated at publish time (<code>float</code> → <code>Time.time</code>, <code>double</code> → <code>(double)Time.time</code>, <code>long</code> → <code>DateTime.UtcNow.Ticks</code>).</p>
+          <p class="prose" style="margin-top:12px">The inline editor renders each field with its matching native UI-Toolkit control: <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>bool</code>, <code>string</code>, any <code>enum</code>, <code>Vector2</code>/<code>Vector3</code>/<code>Vector4</code>, <code>Vector2Int</code>/<code>Vector3Int</code>, <code>Color</code>, and <code>Quaternion</code> (edited as euler angles). Other types fall back to a disabled "unsupported type" label. Every field is authored explicitly — including a field named <code>Timestamp</code>; the reference publishes exactly the values you enter, with nothing populated implicitly at publish time.</p>
         </section>
 
         <!-- ── API: [EventType] / [CommandType] attributes ── -->
