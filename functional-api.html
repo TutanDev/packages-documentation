@@ -248,6 +248,20 @@
                   <div class="api-member-desc">State-passing match — pass locals as <code>state</code> instead of capturing them in a closure. Also available as a void overload taking <code>Action</code>s.</div>
                 </div>
               </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">R Match&lt;R&gt;(this Result&lt;Unit&gt; result, Func&lt;Error,R&gt; onError, Func&lt;R&gt; onSuccess)</div>
+                  <div class="api-member-desc">On <code>Result&lt;Unit&gt;</code>: a parameterless success branch, so void results read as <code>() =&gt; …</code> instead of <code>_ =&gt; …</code>. Also available as a void overload taking <code>Action</code>s.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--op">op</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">operator true / operator false</div>
+                  <div class="api-member-desc">Truthy on success — enables <code>if (result)</code> and <code>&amp;&amp;</code> / <code>||</code> short-circuiting on the success branch.</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -267,6 +281,8 @@
                   <tr><td>Or(T fallback)</td><td>Returns value or fallback on error</td></tr>
                   <tr><td>OrElse(Func&lt;T&gt;)</td><td>Lazy fallback on error</td></tr>
                   <tr><td>OrElse(Func&lt;Error,T&gt;)</td><td>Lazy fallback with access to the error</td></tr>
+                  <tr><td>IfFail(Func&lt;Error,Result&lt;T&gt;&gt;)</td><td>Recovers an error into another <code>Result&lt;T&gt;</code>; passes success through</td></tr>
+                  <tr><td>IfFail(Action&lt;Error&gt;)</td><td>Side-effect on the error branch; passes the <code>Result</code> through unchanged</td></tr>
                   <tr><td>IsSuccess(out T)</td><td>Out-param extraction; returns <code>false</code> on error</td></tr>
                   <tr><td>ValueUnsafe() / ErrorUnsafe()</td><td>Unsafe extraction; throw on wrong state</td></tr>
                   <tr><td>ForEach(Action&lt;T&gt;)</td><td>Side-effect, returns <code>Result&lt;Unit&gt;</code></td></tr>
@@ -406,6 +422,7 @@
                 <tr><td>None</td><td>The absence sentinel. Implicitly converts to any <code>Optional&lt;T&gt;</code>.</td></tr>
                 <tr><td>Success&lt;T&gt;(T value)</td><td>Creates a successful Result. Returns <code>Error("Value is null")</code> for null references.</td></tr>
                 <tr><td>Success()</td><td>Creates a successful <code>Result&lt;Unit&gt;</code> with no value.</td></tr>
+                <tr><td>Fail(...) / Fail&lt;T&gt;(...)</td><td>Failure factories — the partner of <code>Success()</code>; from a <code>string</code> or an <code>Error</code>.</td></tr>
                 <tr><td>Error(string)</td><td>Simple error.</td></tr>
                 <tr><td>Error(string, int)</td><td>Error with a machine-readable code.</td></tr>
                 <tr><td>Error(string, Error)</td><td>Nested error — message + cause.</td></tr>

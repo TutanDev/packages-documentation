@@ -64,7 +64,7 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--func-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v0.4.1</span>
+        <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v1.0.0</span>
         <h1 class="docs-hero-title">Null-Safe. Error-Safe.<br>Composable.</h1>
         <p class="docs-hero-desc">
           UP-Functional gives you <code>Optional&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, and composable extension methods that make absent values and errors impossible to ignore — without exceptions controlling normal flow.
@@ -88,19 +88,26 @@
           <div class="step">
             <div class="step-num" style="border-color:var(--func-color);color:var(--func-color)">1</div>
             <div class="step-body">
-              <div class="step-title">Install the package</div>
-              <div class="step-desc">Open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, navigate to <code>Packages/com.tutan.functional/package.json</code>.</div>
+              <div class="step-title">Install UniTask (required)</div>
+              <div class="step-desc">Functional has a hard dependency on <strong>UniTask</strong> (<code>com.cysharp.unitask</code>) — the package does not compile without it. Add its Git URL to your project's <code>Packages/manifest.json</code> first: <code>https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask</code>.</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num" style="border-color:var(--func-color);color:var(--func-color)">2</div>
+            <div class="step-body">
+              <div class="step-title">Install the package</div>
+              <div class="step-desc">Open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, navigate to <code>Packages/com.tutan.functional/package.json</code>. Then add <code>Tutan.Functional</code> to your assembly's <code>.asmdef</code> references.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--func-color);color:var(--func-color)">3</div>
             <div class="step-body">
               <div class="step-title">Import the F module</div>
               <div class="step-desc">Add <code>using static Tutan.Functional.F;</code> to any file to bring <code>Some()</code>, <code>None</code>, <code>Success()</code>, <code>Error()</code>, and <code>Try()</code> into scope.</div>
             </div>
           </div>
           <div class="step">
-            <div class="step-num" style="border-color:var(--func-color);color:var(--func-color)">3</div>
+            <div class="step-num" style="border-color:var(--func-color);color:var(--func-color)">4</div>
             <div class="step-body">
               <div class="step-title">Replace your first null check</div>
               <div class="step-desc">Change <code>go.GetComponent&lt;Health&gt;()</code> to <code>go.LookupComponent&lt;Health&gt;()</code> and chain <code>.Then()</code>, <code>.Or()</code>, and <code>.Match()</code> instead of null guards.</div>
@@ -239,19 +246,27 @@ player
 
           <div class="sub-section">
             <h3 class="sub-title">Recovering from errors</h3>
-            <p class="prose">Use <code>.Or(fallback)</code> to provide a default on error, or <code>.OrElse(error => compute(error))</code> to inspect the error and compute a recovery value.</p>
+            <p class="prose"><code>.Or(fallback)</code> and <code>.OrElse(error => …)</code> unwrap to a plain value. When you want to stay in <code>Result</code> space — recover into another <code>Result&lt;T&gt;</code>, or just observe the error and pass the original through — use <code>.IfFail(…)</code>.</p>
             <div class="code-card code-card--func">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Recovery.cs</span></div>
-<pre class="code-block"><code><span class="cmt">// Fallback to default config if load fails</span>
+<pre class="code-block"><code><span class="cmt">// Unwrap to a value — eager fallback</span>
 <span class="type">PlayerConfig</span> config = LoadConfig(path)
     .Or(<span class="type">PlayerConfig</span>.Default);
 
-<span class="cmt">// Log the error, return fallback</span>
+<span class="cmt">// Unwrap to a value — inspect the error first</span>
 <span class="type">PlayerConfig</span> config2 = LoadConfig(path)
     .OrElse(err => {
         Debug.LogWarning(err.Message);
         <span class="kw">return</span> <span class="type">PlayerConfig</span>.Default;
-    });</code></pre>
+    });
+
+<span class="cmt">// Stay in Result space — recover into another Result&lt;T&gt;</span>
+<span class="type">Result</span>&lt;<span class="type">PlayerConfig</span>&gt; recovered = LoadConfig(path)
+    .IfFail(err => LoadConfig(backupPath));
+
+<span class="cmt">// Or just observe the error and pass the Result through unchanged</span>
+LoadConfig(path)
+    .IfFail(err => Debug.LogWarning(err.Message));</code></pre>
             </div>
           </div>
 
@@ -384,8 +399,8 @@ result
           </div>
 
           <div class="callout callout--note">
-            <strong>Async extensions require UniTask</strong>
-            <code>ThenAsync</code>, <code>MatchAsync</code>, and <code>TryAsync</code> return <code>UniTask&lt;T&gt;</code>. Add the UniTask package to your project to use these methods.
+            <strong>UniTask is a required dependency</strong>
+            The async operators — <code>ThenAsync</code>, <code>MatchAsync</code>, <code>TryAsync</code> — return <code>UniTask&lt;T&gt;</code>, but UniTask is a hard dependency of the <em>entire</em> package, not just this async surface: Functional does not compile without <code>com.cysharp.unitask</code> installed. See <a href="#getting-started">Getting Started</a>.
           </div>
         </section>
 
