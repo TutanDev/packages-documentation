@@ -64,7 +64,7 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--msg-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v1.3.0</span>
+        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v0.19.0</span>
         <h1 class="docs-hero-title">Zero-Allocation<br>Pub/Sub for XR</h1>
         <p class="docs-hero-desc">
           UP-Messages is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, disposable subscriptions, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
@@ -488,7 +488,7 @@
 
           <div class="sub-section">
             <h3 class="sub-title">The <code>[EventType]</code> / <code>[CommandType]</code> attributes</h3>
-            <p class="prose">If you only need the <em>type</em> (not a payload), decorate a <code>string</code> field with <code>[EventType]</code> or <code>[CommandType]</code> to get a dropdown that stores the selected <code>AssemblyQualifiedName</code>. Resolve at runtime with <code>Type.GetType(eventType)</code>.</p>
+            <p class="prose">If you only need the <em>type</em> (not a payload), decorate a <code>string</code> field with <code>[EventType]</code> or <code>[CommandType]</code> to get a dropdown that stores the selected <code>AssemblyQualifiedName</code>. Resolve at runtime with <code>Type.GetType(eventType)</code>. Note that a bare <code>Type.GetType</code> returns <code>null</code> once the assembly's identity has drifted since the name was serialized (a rename or version bump); for long-lived serialized data, fall back to scanning loaded assemblies on a <code>null</code> result, the same drift-tolerant resolution <code>MessageReference.GetMessageType()</code> uses internally.</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">TypePicker.cs</span></div>
 <pre class="code-block"><code>[<span class="type">EventType</span>]   <span class="kw">public string</span> eventType;    <span class="cmt">// dropdown of all IEvent types</span>
