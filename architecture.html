@@ -357,7 +357,7 @@
 
           <div class="sub-section">
             <h3 class="sub-title">[Publishes] and [SubscribesTo]</h3>
-            <p class="prose">Declare which message types a class publishes or subscribes to. These are validated by the MSGBUS rules and visualized in the dependency graph. Only Managers should publish events; Managers and Clients may subscribe.</p>
+            <p class="prose">Declare which message types a class publishes or subscribes to. These are validated by the MSGBUS rules. Only Managers should publish events; Managers and Clients may subscribe.</p>
             <div class="code-card code-card--arch">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SessionTypes.cs</span></div>
 <pre class="code-block"><code><span class="cmt">// Manager publishes events when state changes</span>
@@ -474,7 +474,7 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Custom Rules</h2>
           <p class="section-intro">
-            Implement <code>IArchitectureRule</code> to add project-specific validation. Custom rules receive the full registry and return <code>ValidationResult</code> structs — no changes to the package required.
+            Implement <code>IArchitectureRule</code> to add project-specific validation. Custom rules receive the full graph and return <code>ValidationResult</code> structs — no changes to the package required.
           </p>
 
           <div class="sub-section">
@@ -484,7 +484,7 @@
 <pre class="code-block"><code><span class="kw">public interface</span> <span class="type">IArchitectureRule</span>
 {
     <span class="kw">string</span> RuleId { <span class="kw">get</span>; }
-    IEnumerable&lt;<span class="type">ValidationResult</span>&gt; Validate(<span class="type">ArchitectureRegistry</span> registry);
+    IEnumerable&lt;<span class="type">ValidationResult</span>&gt; Validate(<span class="type">ArchitectureGraph</span> graph);
 }</code></pre>
             </div>
           </div>
@@ -499,9 +499,9 @@
 {
     <span class="kw">public string</span> RuleId => <span class="str">"CUSTOM001"</span>;
 
-    <span class="kw">public</span> IEnumerable&lt;<span class="type">ValidationResult</span>&gt; Validate(<span class="type">ArchitectureRegistry</span> registry)
+    <span class="kw">public</span> IEnumerable&lt;<span class="type">ValidationResult</span>&gt; Validate(<span class="type">ArchitectureGraph</span> graph)
     {
-        <span class="kw">foreach</span> (<span class="kw">var</span> kvp <span class="kw">in</span> registry.TypeMap)
+        <span class="kw">foreach</span> (<span class="kw">var</span> kvp <span class="kw">in</span> graph.TypeMap)
         {
             <span class="kw">var</span> type = kvp.Key;
             <span class="kw">var</span> info = kvp.Value;

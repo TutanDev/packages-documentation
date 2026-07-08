@@ -46,7 +46,7 @@
             <a href="#api-layer-attrs" class="sidebar-link" data-pkg="arch">Layer Attributes</a>
             <a href="#api-behavioral-attrs" class="sidebar-link" data-pkg="arch">Behavioral Attributes</a>
             <a href="#api-topology" class="sidebar-link" data-pkg="arch">LayerTopology</a>
-            <a href="#api-registry" class="sidebar-link" data-pkg="arch">ArchitectureRegistry</a>
+            <a href="#api-graph" class="sidebar-link" data-pkg="arch">ArchitectureGraph</a>
             <a href="#api-validation" class="sidebar-link" data-pkg="arch">Validation Types</a>
             <a href="#api-editor" class="sidebar-link" data-pkg="arch">Editor Tools</a>
           </div>
@@ -258,15 +258,15 @@
           </div>
         </section>
 
-        <!-- ── API: ArchitectureRegistry ── -->
-        <section class="docs-section" id="api-registry">
+        <!-- ── API: ArchitectureGraph ── -->
+        <section class="docs-section" id="api-graph">
           <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">ArchitectureRegistry</h2>
+          <h2 class="section-title">ArchitectureGraph</h2>
           <p class="section-intro">Editor-only. Scans loaded assemblies and builds the dependency graph. Read by all validation rules.</p>
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">ArchitectureRegistry</span>
+              <span class="api-group-name">ArchitectureGraph</span>
               <span class="api-type-badge badge--class">class</span>
             </div>
             <div class="api-members">
@@ -345,8 +345,8 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">List&lt;ValidationResult&gt; Validate(ArchitectureRegistry registry)</div>
-                  <div class="api-member-desc">Runs all rules against a pre-scanned registry.</div>
+                  <div class="api-member-name">List&lt;ValidationResult&gt; Validate(ArchitectureGraph graph)</div>
+                  <div class="api-member-desc">Runs all rules against a pre-scanned graph.</div>
                 </div>
               </div>
             </div>
@@ -424,7 +424,6 @@
               <thead><tr><th>Window</th><th>Menu Path</th><th>Description</th></tr></thead>
               <tbody>
                 <tr><td>ArchitectureSettingsProvider</td><td>Edit → Project Settings → Architecture</td><td>Unified panel — configure enforcement mode and utility assemblies, then run validation inline. Violations list with severity filter, search, and a detail pane showing the rule's <em>Why</em> and a <em>Fix suggestion</em>. Settings asset is auto-created on first visit.</td></tr>
-                <tr><td>DependencyGraphWindow</td><td>Window → Architecture → Dependency Graph</td><td>Interactive layer-banded graph. Nodes grouped by layer, edges colored by validity. Filter by layer and kind. Toggle <em>Violations Only</em>. Single-click to ping in Project; double-click to open script.</td></tr>
                 <tr><td>ValidationWindow</td><td>Window → Architecture → Validation</td><td>Tabbed window — <em>Violations</em> list with rule IDs and source types; <em>Use Cases</em> tab with BFS chains and USECASE results.</td></tr>
               </tbody>
             </table>
