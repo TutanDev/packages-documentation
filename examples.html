@@ -117,8 +117,7 @@
     <span class="kw">public void</span> Initialize()
     {
         <span class="type">Result</span>&lt;<span class="type">PlayerConfig</span>&gt; result =
-            Try(() => JsonUtility.FromJson&lt;<span class="type">PlayerConfig</span>&gt;(configJson))
-                .Filter(cfg => cfg != <span class="kw">null</span>)
+            Try(() => JsonUtility.FromJson&lt;<span class="type">PlayerConfig</span>&gt;(configJson))   <span class="cmt">// null → Error("Value is null")</span>
                 .Then(cfg => Validate(cfg));
 
         result.Match(
@@ -307,7 +306,7 @@
       <!-- Example 4: Commands (N:1) -->
       <article class="example">
         <h3 class="example-title">Commands — N:1 Dispatch</h3>
-        <p class="example-desc">A command has exactly one handler, declared once at the composition root via <code>CommandBus.Install</code>. A duplicate or null handler is reported in the returned <code>InstallResult</code> — it never throws.</p>
+        <p class="example-desc">A command has at most one handler, declared once at the composition root via <code>CommandBus.Install</code>. A duplicate or null handler is reported in the returned <code>InstallResult</code> — it never throws. A successful <code>Install</code> discards commands queued before it, so give the installer an early Script Execution Order, or install from a <code>BeforeSceneLoad</code> <code>[RuntimeInitializeOnLoadMethod]</code>.</p>
         <div class="code-card code-card--msg">
           <div class="code-card-header">
             <span class="code-card-dot" aria-hidden="true"></span>
@@ -325,7 +324,10 @@
 <span class="kw">public class</span> <span class="type">OrderHandler</span> : <span class="type">MonoBehaviour</span>
 {
     <span class="kw">public void</span> Handle(<span class="kw">ref</span> <span class="type">PlaceOrder</span> cmd)
-        => ProcessOrder(cmd.ItemId, cmd.Quantity);
+    {
+        <span class="cmt">// The only handler: CommandBus.Install rejects a second one</span>
+        ProcessOrder(cmd.ItemId, cmd.Quantity);
+    }
 }
 
 <span class="cmt">// Composition root — declare every command handler in one place.</span>

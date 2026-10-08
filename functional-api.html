@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Functional — API Reference — Unity Framework</title>
-  <meta name="description" content="UP-Functional API Reference: complete type and member documentation for Optional&lt;T&gt;, Result&lt;T&gt;, Error, and the F module.">
+  <meta name="description" content="Tutan Functional API Reference: complete type and member documentation for Optional&lt;T&gt;, Result&lt;T&gt;, Error, and the F module.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -100,6 +100,13 @@
                   <div class="api-member-desc">State-passing match — pass locals as <code>state</code> instead of capturing them in a closure. Also available as a void overload taking <code>Action</code>s.</div>
                 </div>
               </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string ToString()</div>
+                  <div class="api-member-desc"><code>"Some: {value}"</code> or <code>"None"</code>. Record-struct value equality (<code>==</code>, <code>Equals</code>, <code>GetHashCode</code>) compares presence and value. <code>NoneType</code> is the empty struct behind <code>F.None</code>.</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -125,10 +132,13 @@
                   <tr><td>Traverse(Func&lt;T,IEnumerable&lt;R&gt;&gt;)</td><td>Distributes the <code>Optional</code> over a sequence-producing function</td></tr>
                   <tr><td>ToResult(Func&lt;Error&gt;)</td><td>Converts <code>None</code> to an error</td></tr>
                   <tr><td>Map / Bind</td><td>Aliases for <code>Then</code> overloads</td></tr>
+                  <tr><td>Map(Func&lt;T1,T2,R&gt;) / Map(Func&lt;T1,T2,T3,R&gt;)</td><td>Curried map of a 2- or 3-argument function, fixing the first argument</td></tr>
+                  <tr><td>Map(this NoneType, Func&lt;T,R&gt;)</td><td>Mapping over <code>None</code> is <code>None</code></td></tr>
+                  <tr><td>Apply(Optional&lt;T&gt; arg)</td><td>Applies a lifted function to a lifted value; overloads for 2-9-argument lifted functions partially apply the first argument</td></tr>
                   <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads — avoid closure capture in hot paths</td></tr>
                   <tr><td>ToOptional(this T? nullable)</td><td>Converts a nullable struct to <code>Optional&lt;T&gt;</code></td></tr>
                   <tr><td>Select / Where / SelectMany</td><td>LINQ query syntax support</td></tr>
-                  <tr><td>ThenAsync / MatchAsync</td><td>UniTask async counterparts</td></tr>
+                  <tr><td>ThenAsync / MatchAsync</td><td>UniTask async counterparts, plus <code>Then</code> / <code>Match</code> on <code>UniTask&lt;Optional&lt;T&gt;&gt;</code> for sync steps in async chains. <code>MapAsync</code> / <code>BindAsync</code> are the underlying primitives. Requires <code>TUTAN_UNITASK</code>; see <a href="functional.html#guide-async">Async</a></td></tr>
                 </tbody>
               </table>
             </div>
@@ -204,7 +214,7 @@
               <span class="api-group-name">SerializableOptionalDrawer</span>
               <span class="api-type-badge badge--static">editor</span>
             </div>
-            <p class="prose"><code>CustomPropertyDrawer</code> in the <code>Tutan.Functional.Editor</code> assembly, registered for all closed generics of <code>SerializableOptional&lt;&gt;</code> via <code>useForChildren: true</code>. UI Toolkit-based: a <code>Toggle</code> bound to the has-value flag next to a <code>PropertyField</code> for the inner value. The value field is enabled only while the toggle is on.</p>
+            <p class="prose"><code>CustomPropertyDrawer</code> in the <code>Tutan.Functional.Editor</code> assembly, registered for the open generic <code>SerializableOptional&lt;&gt;</code>, so it applies to every closed <code>SerializableOptional&lt;T&gt;</code>. Renders a toggle bound to <code>_hasValue</code> next to the <code>_value</code> field, which is enabled only while the toggle is on. It implements UI Toolkit (<code>CreatePropertyGUI</code>) plus an IMGUI fallback (<code>OnGUI</code>, <code>GetPropertyHeight</code>) for inspectors drawn with IMGUI.</p>
           </div>
         </section>
 
@@ -212,7 +222,7 @@
         <section class="docs-section" id="api-result">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">Result&lt;T&gt;</h2>
-          <p class="section-intro"><code>readonly record struct</code> in <code>Tutan.Functional</code>.</p>
+          <p class="section-intro"><code>readonly record struct</code> in <code>Tutan.Functional</code>. Built via <code>Success(value)</code> or an implicit cast from <code>T</code> or <code>Error</code>. <code>default(Result&lt;T&gt;)</code> is an <strong>error</strong> carrying <code>default(Error)</code> (<code>Message == null</code>, <code>ToString() == ""</code>), so a zeroed struct never masquerades as success.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -259,7 +269,14 @@
                 <span class="api-kind kind--op">op</span>
                 <div class="api-member-content">
                   <div class="api-member-name">operator true / operator false</div>
-                  <div class="api-member-desc">Truthy on success — enables <code>if (result)</code> and <code>&amp;&amp;</code> / <code>||</code> short-circuiting on the success branch.</div>
+                  <div class="api-member-desc">Truthy on success - enables <code>if (result)</code>, <code>while (result)</code> and <code>result ? a : b</code>. <code>&amp;&amp;</code> / <code>||</code> are <strong>not</strong> supported (there is no <code>operator &amp;</code> / <code>|</code>).</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string ToString()</div>
+                  <div class="api-member-desc"><code>"Success: {value}"</code> or <code>"Error: {message}"</code>. Record-struct value equality (<code>==</code>, <code>Equals</code>, <code>GetHashCode</code>) compares outcome, value and error.</div>
                 </div>
               </div>
             </div>
@@ -290,9 +307,11 @@
                   <tr><td>Bind(Func&lt;T,IEnumerable&lt;R&gt;&gt;)</td><td>Flat-maps into a sequence; empty on error</td></tr>
                   <tr><td>ToOptional()</td><td>Discards the error, converts success to <code>Some</code></td></tr>
                   <tr><td>Map / Bind</td><td>Aliases for <code>Then</code> overloads</td></tr>
+                  <tr><td>Map(Func&lt;T1,T2,R&gt;) / Map(Func&lt;T1,T2,T3,R&gt;)</td><td>Curried map of a 2- or 3-argument function, fixing the first argument</td></tr>
+                  <tr><td>Apply(Result&lt;T&gt; arg)</td><td>Applies a lifted function to a lifted value; overloads for 2-9-argument lifted functions partially apply the first argument</td></tr>
                   <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads — avoid closure capture in hot paths</td></tr>
                   <tr><td>Select / SelectMany</td><td>LINQ query syntax support</td></tr>
-                  <tr><td>ThenAsync / MatchAsync</td><td>UniTask async counterparts</td></tr>
+                  <tr><td>ThenAsync / MatchAsync</td><td>UniTask async counterparts, plus <code>Then</code> / <code>Match</code> on <code>UniTask&lt;Result&lt;T&gt;&gt;</code> for sync steps in async chains. <code>MapAsync</code> / <code>BindAsync</code> are the underlying primitives. Requires <code>TUTAN_UNITASK</code>; see <a href="functional.html#guide-async">Async</a></td></tr>
                 </tbody>
               </table>
             </div>
@@ -371,7 +390,28 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">IEnumerable&lt;Error&gt; AsEnumerable()</div>
-                  <div class="api-member-desc">Returns <code>{ this }</code> for simple/nested; returns inner errors for composite. Use for logging all failures.</div>
+                  <div class="api-member-desc">Returns <code>{ this }</code> for simple and nested errors; returns the direct inner errors (one level, not recursive) for a composite. Use for logging all failures.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--op">op</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">implicit operator Error(string message)</div>
+                  <div class="api-member-desc">Implicit cast from <code>string</code>. An <code>Error</code> in turn converts implicitly to any <code>Result&lt;T&gt;</code>, but <code>string</code> → <code>Result&lt;T&gt;</code> does not compile (two user-defined conversions).</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">override string ToString()</div>
+                  <div class="api-member-desc">Returns <code>Message</code> (or <code>string.Empty</code> for <code>default</code>).</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool Equals(Error other) / == / !=</div>
+                  <div class="api-member-desc">Deep equality - compares <code>Message</code>, <code>Code</code>, composite/nested shape, and all inner errors.</div>
                 </div>
               </div>
             </div>
@@ -406,13 +446,14 @@
               </div>
             </div>
           </div>
+          <p class="prose" style="margin-top:12px">Both combinators also have an <code>IEnumerable&lt;Validator&lt;T&gt;&gt;</code> overload.</p>
         </section>
 
         <!-- ── API: F Module ── -->
         <section class="docs-section" id="api-f">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">F Module</h2>
-          <p class="section-intro">Static functions in <code>Tutan.Functional.F</code>. Bring into scope with <code>using static Tutan.Functional.F;</code>.</p>
+          <p class="section-intro">Static functions in <code>Tutan.Functional.F</code>. Bring into scope with <code>using static Tutan.Functional.F;</code> (or a <code>global using static</code> in your own assembly, which needs C# 10 there). <code>Unit</code> below is <code>System.ValueTuple</code>; the package's <code>Unit</code> alias is internal to its assembly, so add <code>using Unit = System.ValueTuple;</code> in your own files.</p>
 
           <div class="table-wrap">
             <table class="docs-table">
@@ -420,9 +461,10 @@
               <tbody>
                 <tr><td>Some&lt;T&gt;(T value)</td><td>Wraps a value. Returns <code>None</code> for null / destroyed Unity objects.</td></tr>
                 <tr><td>None</td><td>The absence sentinel. Implicitly converts to any <code>Optional&lt;T&gt;</code>.</td></tr>
-                <tr><td>Success&lt;T&gt;(T value)</td><td>Creates a successful Result. Returns <code>Error("Value is null")</code> for null references.</td></tr>
+                <tr><td>Success&lt;T&gt;(T value)</td><td>Creates a successful Result. Returns <code>Error("Value is null")</code> for null references and destroyed Unity objects.</td></tr>
                 <tr><td>Success()</td><td>Creates a successful <code>Result&lt;Unit&gt;</code> with no value.</td></tr>
-                <tr><td>Fail(...) / Fail&lt;T&gt;(...)</td><td>Failure factories — the partner of <code>Success()</code>; from a <code>string</code> or an <code>Error</code>.</td></tr>
+                <tr><td>Fail(Error) / Fail(string)</td><td>Creates a failed <code>Result&lt;Unit&gt;</code>, the partner of <code>Success()</code>.</td></tr>
+                <tr><td>Fail&lt;T&gt;(Error) / Fail&lt;T&gt;(string)</td><td>Creates a failed <code>Result&lt;T&gt;</code>; explicit alternative to the implicit <code>Error</code> → <code>Result&lt;T&gt;</code> cast.</td></tr>
                 <tr><td>Error(string)</td><td>Simple error.</td></tr>
                 <tr><td>Error(string, int)</td><td>Error with a machine-readable code.</td></tr>
                 <tr><td>Error(string, Error)</td><td>Nested error — message + cause.</td></tr>
@@ -430,11 +472,15 @@
                 <tr><td>Error(IEnumerable&lt;Error&gt;)</td><td>Composite error.</td></tr>
                 <tr><td>Try&lt;T&gt;(Func&lt;T&gt;)</td><td>Wraps exceptions into <code>Error(ex.ToString())</code>.</td></tr>
                 <tr><td>Try(Action)</td><td>Same, for void actions.</td></tr>
-                <tr><td>TryAsync&lt;T&gt;(Func&lt;UniTask&lt;T&gt;&gt;)</td><td>Async exception wrapping.</td></tr>
-                <tr><td>Pipe&lt;T,R&gt;(T, Func&lt;T,R&gt;)</td><td>Left-to-right function application.</td></tr>
-                <tr><td>Tee(Action) / Tee&lt;T&gt;(Action&lt;T&gt;)</td><td>Lifts side-effect for use in pipelines.</td></tr>
-                <tr><td>Curry / CurryFirst</td><td>Function currying and partial application.</td></tr>
+                <tr><td>TryAsync&lt;T&gt;(Func&lt;UniTask&lt;T&gt;&gt;)</td><td>Async version of <code>Try</code>. Requires <code>TUTAN_UNITASK</code>.</td></tr>
+                <tr><td>TryAsync(Func&lt;UniTask&gt;)</td><td>Async version for async actions, returning <code>UniTask&lt;Result&lt;Unit&gt;&gt;</code>. Requires <code>TUTAN_UNITASK</code>.</td></tr>
+                <tr><td>Pipe&lt;T,R&gt;(this T, Func&lt;T,R&gt;)</td><td>Left-to-right function application.</td></tr>
+                <tr><td>Pipe&lt;T&gt;(this T, Action&lt;T&gt;)</td><td>Runs the action on the input and returns the input.</td></tr>
+                <tr><td>Tee(Action) / Tee&lt;T&gt;(Action&lt;T&gt;)</td><td>Lifts a side-effect for use in pipelines; <code>Tee&lt;T&gt;</code> passes <code>T</code> through unchanged.</td></tr>
+                <tr><td>Curry</td><td>Curries a 2- or 3-argument function.</td></tr>
+                <tr><td>CurryFirst</td><td>Fixes the first argument; the remainder stay as a tuple (3-9 argument overloads).</td></tr>
                 <tr><td>Unit()</td><td>Returns the empty value (<code>default(ValueTuple)</code>).</td></tr>
+                <tr><td>List&lt;T&gt;(params T[] items)</td><td>Creates an <code>IEnumerable&lt;T&gt;</code> from inline values.</td></tr>
               </tbody>
             </table>
           </div>
@@ -512,12 +558,94 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">Map / Bind / ForEach</div>
-                  <div class="api-member-desc">Aliases for <code>Select</code>, <code>SelectMany</code>, and side-effect iteration.</div>
+                  <div class="api-member-name">R Match&lt;T,R&gt;(this IEnumerable&lt;T&gt; list, Func&lt;R&gt; Empty, Func&lt;T,IEnumerable&lt;T&gt;,R&gt; Otherwise)</div>
+                  <div class="api-member-desc">Structural list match: <code>Empty</code> for an empty sequence, otherwise head and tail.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IEnumerable&lt;T&gt; DropWhile&lt;T&gt;(this IEnumerable&lt;T&gt; source, Func&lt;T,bool&gt; pred)</div>
+                  <div class="api-member-desc">Skips leading elements matching the predicate.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Func&lt;T, IEnumerable&lt;T&gt;&gt; Return&lt;T&gt;()</div>
+                  <div class="api-member-desc">Wraps a value in a singleton sequence.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IEnumerable&lt;R&gt; Map&lt;T,R&gt;(this IEnumerable&lt;T&gt; list, Func&lt;T,R&gt; func)</div>
+                  <div class="api-member-desc">Alias for <code>Select</code>. Curried overloads for 2- and 3-argument functions return <code>IEnumerable&lt;Func&lt;…&gt;&gt;</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IEnumerable&lt;R&gt; Bind&lt;T,R&gt;(this IEnumerable&lt;T&gt; list, Func&lt;T,IEnumerable&lt;R&gt;&gt; func)</div>
+                  <div class="api-member-desc">Alias for <code>SelectMany</code>. An overload taking <code>Func&lt;T,Optional&lt;R&gt;&gt;</code> flat-maps and filters out <code>None</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IEnumerable&lt;Unit&gt; ForEach&lt;T&gt;(this IEnumerable&lt;T&gt; ts, Action&lt;T&gt; action)</div>
+                  <div class="api-member-desc">Side-effect over the sequence. Lazy: nothing runs until the result is enumerated.</div>
                 </div>
               </div>
             </div>
           </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">ActionExtensions</span>
+              <span class="api-type-badge badge--static">extensions</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Func&lt;Unit&gt; ToFunc(this Action action)</div>
+                  <div class="api-member-desc">Lifts <code>Action</code> to <code>Func&lt;Unit&gt;</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Func&lt;T, Unit&gt; ToFunc&lt;T&gt;(this Action&lt;T&gt; action)</div>
+                  <div class="api-member-desc">Lifts <code>Action&lt;T&gt;</code> to <code>Func&lt;T, Unit&gt;</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group" id="api-unitaskf">
+            <div class="api-group-header">
+              <span class="api-group-name">UniTaskF</span>
+              <span class="api-type-badge badge--static">static</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void UniTaskF.Void&lt;T1,T2&gt;(Func&lt;T1,T2,UniTaskVoid&gt; asyncAction, T1 arg1, T2 arg2)</div>
+                  <div class="api-member-desc">Fire-and-forget launch with explicit arguments instead of a capturing closure (2-5 argument overloads).</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">UniTask UniTaskF.WaitUntil&lt;TState&gt;(Func&lt;TState,bool&gt; predicate, TState state, PlayerLoopTiming timing = Update, CancellationToken ct = default)</div>
+                  <div class="api-member-desc">State-passing <code>WaitUntil</code>. The state is held strongly - cancel via the token.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="prose" style="margin-top:12px"><code>UniTaskF</code> requires <code>TUTAN_UNITASK</code>. It replaces the pre-1.0.0 <code>UniTask.Void</code> / <code>UniTask.WaitUntil</code> helpers with the same signatures; see <a href="functional.html#guide-async">Async</a>.</p>
         </section>
 
       </div><!-- .docs-content -->

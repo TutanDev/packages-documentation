@@ -383,10 +383,19 @@
   font-size: 0.875em;
 }
 
+/* Long inline identifiers break instead of overflowing phone-width screens */
+.docs-content :not(pre) > code { overflow-wrap: break-word; }
+
 .prose strong {
   color: var(--text-primary);
   font-weight: 600;
 }
+
+ul.prose { padding-left: 20px; }
+
+ul.prose li { margin-bottom: 6px; }
+
+ul.prose li::marker { color: var(--text-muted); }
 
 /* --- Step List --- */
 .steps { margin: 24px 0 8px; text-align: left; }
@@ -473,16 +482,24 @@
 
 .callout--warn {
   background: rgba(249,115,22,0.05);
-  border-color: var(--util-color);
+  border-color: #f97316;
   color: var(--text-secondary);
 }
 
 .callout strong {
-  display: block;
   color: var(--text-primary);
   font-weight: 600;
+}
+
+.callout > strong:first-child {
+  display: block;
   margin-bottom: 4px;
 }
+
+.docs-hero .callout { text-align: left; }
+
+/* A section ending in a code card needs the same breathing room above the divider as one ending in a callout */
+.docs-section .code-card:last-child { margin-bottom: 20px; }
 
 /* --- Tables --- */
 .table-wrap {
@@ -566,7 +583,7 @@ table.docs-table {
   border-radius: 4px;
 }
 
-.badge--class  { background: rgba(249,115,22,0.12); color: var(--util-color); }
+.badge--class  { background: rgba(249,115,22,0.12); color: #f97316; }
 .badge--attr   { background: rgba(168,85,247,0.12); color: #a855f7; }
 .badge--enum   { background: rgba(251,191,36,0.12); color: #fbbf24; }
 .badge--static { background: rgba(148,163,184,0.1); color: var(--text-secondary); }
@@ -606,12 +623,12 @@ table.docs-table {
 
 .kind--method  { background: rgba(59,130,246,0.12); color: var(--arch-color); }
 .kind--prop    { background: rgba(34,197,94,0.12); color: var(--func-color); }
-.kind--ctor    { background: rgba(249,115,22,0.1); color: var(--util-color); }
+.kind--ctor    { background: rgba(249,115,22,0.1); color: #f97316; }
 .kind--field   { background: rgba(148,163,184,0.1); color: var(--text-secondary); }
 .kind--event   { background: rgba(168,85,247,0.12); color: #a855f7; }
 .kind--op      { background: rgba(236,72,153,0.12); color: #ec4899; }
 
-.api-member-content {}
+.api-member-content { min-width: 0; }
 
 .api-member-name {
   font-family: var(--font-code);

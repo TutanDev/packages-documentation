@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Functional — Unity Framework</title>
-  <meta name="description" content="UP-Functional: Optional&lt;T&gt;, Result&lt;T&gt;, and composable functional primitives for null-safe, error-safe Unity code.">
+  <meta name="description" content="Tutan Functional: Optional&lt;T&gt;, Result&lt;T&gt;, and composable functional primitives for null-safe, error-safe Unity code.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -67,7 +67,7 @@
         <span class="docs-hero-badge docs-hero-badge--func">com.tutan.functional · v1.0.0</span>
         <h1 class="docs-hero-title">Null-Safe. Error-Safe.<br>Composable.</h1>
         <p class="docs-hero-desc">
-          UP-Functional gives you <code>Optional&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, and composable extension methods that make absent values and errors impossible to ignore — without exceptions controlling normal flow.
+          Tutan Functional gives you <code>Optional&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, and composable extension methods that make absent values and errors impossible to ignore - without exceptions controlling normal flow.
         </p>
         <div class="docs-hero-stats">
           <div>
@@ -79,8 +79,8 @@
             <span class="docs-stat-label">Extensions</span>
           </div>
           <div>
-            <span class="docs-stat-value" style="color:var(--func-color)">Full</span>
-            <span class="docs-stat-label">Async Support</span>
+            <span class="docs-stat-value" style="color:var(--func-color)">Opt-in</span>
+            <span class="docs-stat-label">UniTask Async</span>
           </div>
         </div>
 
@@ -88,22 +88,22 @@
           <div class="step">
             <div class="step-num" style="border-color:var(--func-color);color:var(--func-color)">1</div>
             <div class="step-body">
-              <div class="step-title">Install UniTask (required)</div>
-              <div class="step-desc">Functional has a hard dependency on <strong>UniTask</strong> (<code>com.cysharp.unitask</code>) — the package does not compile without it. Add its Git URL to your project's <code>Packages/manifest.json</code> first: <code>https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask</code>.</div>
+              <div class="step-title">Install the package</div>
+              <div class="step-desc">From the <strong>Asset Store</strong>: <em>Window › Package Manager › My Assets › Tutan Functional › Install</em>. Or via <strong>Git URL</strong>: add <code>"com.tutan.functional": "https://github.com/TutanDev/com.tutan.functional.git"</code> to <code>Packages/manifest.json</code>. Or <strong>embedded</strong>: copy the package folder into your project's <code>Packages/</code> directory.</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num" style="border-color:var(--func-color);color:var(--func-color)">2</div>
             <div class="step-body">
-              <div class="step-title">Install the package</div>
-              <div class="step-desc">Open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, navigate to <code>Packages/com.tutan.functional/package.json</code>. Then add <code>Tutan.Functional</code> to your assembly's <code>.asmdef</code> references.</div>
+              <div class="step-title">Optional: install UniTask for the async API</div>
+              <div class="step-desc"><strong>UniTask</strong> (<code>com.cysharp.unitask</code>) enables <code>ThenAsync</code>, <code>TryAsync</code>, <code>UniTaskF</code>, and the rest of the <a href="#guide-async">async surface</a>. Everything else compiles and works without it. Installed as a UPM package (Git URL or OpenUPM), it sets the <code>TUTAN_UNITASK</code> define automatically. Copied into <code>Assets/</code>, add <code>TUTAN_UNITASK</code> to <em>Project Settings › Player › Scripting Define Symbols</em> yourself.</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num" style="border-color:var(--func-color);color:var(--func-color)">3</div>
             <div class="step-body">
-              <div class="step-title">Import the F module</div>
-              <div class="step-desc">Add <code>using static Tutan.Functional.F;</code> to any file to bring <code>Some()</code>, <code>None</code>, <code>Success()</code>, <code>Error()</code>, and <code>Try()</code> into scope.</div>
+              <div class="step-title">Reference and import</div>
+              <div class="step-desc"><code>Assembly-CSharp</code> references <code>Tutan.Functional</code> automatically; an assembly with its own <code>.asmdef</code> must add it to its references. Then add <code>using Tutan.Functional;</code> and <code>using static Tutan.Functional.F;</code> to bring <code>Some()</code>, <code>None</code>, <code>Success()</code>, <code>Error()</code>, and <code>Try()</code> into scope.</div>
             </div>
           </div>
           <div class="step">
@@ -113,6 +113,11 @@
               <div class="step-desc">Change <code>go.GetComponent&lt;Health&gt;()</code> to <code>go.LookupComponent&lt;Health&gt;()</code> and chain <code>.Then()</code>, <code>.Or()</code>, and <code>.Match()</code> instead of null guards.</div>
             </div>
           </div>
+        </div>
+
+        <div class="callout callout--note" style="margin-top:24px">
+          <strong>Global usings and <code>Unit</code> are yours to declare</strong>
+          C# <code>global using</code> directives only apply inside the assembly that declares them, so the package cannot bring <code>F</code> into scope for you. To skip the per-file using, add <code>global using static Tutan.Functional.F;</code> once in a <code>GlobalUsings.cs</code> of your own assembly. That needs C# 10 there: add a <code>csc.rsp</code> with <code>-langversion:10</code> next to its <code>.asmdef</code>. The same goes for <code>Unit</code>: it is <code>System.ValueTuple</code>, and the package's alias is internal, so declare <code>using Unit = System.ValueTuple;</code> yourself.
         </div>
       </section>
 
@@ -233,8 +238,9 @@ player
             <p class="prose"><code>Then()</code> applies a function only on success. If any step returns an error, the rest of the chain is short-circuited — you handle the error once at the end with <code>Match()</code>.</p>
             <div class="code-card code-card--func">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Pipeline.cs</span></div>
-<pre class="code-block"><code>Try(() => <span class="type">JsonUtility</span>.FromJson&lt;<span class="type">PlayerConfig</span>&gt;(json))
-    .Filter(cfg => cfg != <span class="kw">null</span>)
+<pre class="code-block"><code><span class="cmt">// No null check needed: Try routes the value through Success,</span>
+<span class="cmt">// which turns null into Error("Value is null").</span>
+Try(() => <span class="type">JsonUtility</span>.FromJson&lt;<span class="type">PlayerConfig</span>&gt;(json))
     .Then(cfg => Validate(cfg))
     .Then(cfg => Save(cfg))
     .Match(
@@ -270,6 +276,33 @@ LoadConfig(path)
             </div>
           </div>
 
+          <div class="sub-section">
+            <h3 class="sub-title">Void results (<code>Result&lt;Unit&gt;</code>)</h3>
+            <p class="prose">When an operation succeeds or fails but carries no value, return <code>Result&lt;Unit&gt;</code>. Build it with <code>Success()</code> / <code>Fail(...)</code> and match it with a parameterless success branch. A <code>Result&lt;T&gt;</code> is also truthy on success, so <code>if (result)</code> reads naturally.</p>
+            <div class="code-card code-card--func">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveScore.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Functional;
+<span class="kw">using static</span> Tutan.Functional.F;
+<span class="kw">using</span> Unit = System.ValueTuple;   <span class="cmt">// the package's Unit alias is internal to its own assembly</span>
+
+<span class="kw">public</span> <span class="type">Result</span>&lt;Unit&gt; SaveScore(<span class="kw">int</span> score)
+{
+    <span class="kw">if</span> (score &lt; <span class="num">0</span>)
+        <span class="kw">return</span> Fail(<span class="str">"Score cannot be negative"</span>);
+
+    <span class="cmt">// ... persist ...</span>
+    <span class="kw">return</span> Success();
+}
+
+SaveScore(score).Match(
+    onError:   e  => Debug.LogError(e.Message),
+    onSuccess: () => Debug.Log(<span class="str">"Saved"</span>));   <span class="cmt">// no throwaway Unit argument</span>
+
+<span class="kw">if</span> (SaveScore(score))
+    Debug.Log(<span class="str">"Saved"</span>);</code></pre>
+            </div>
+          </div>
+
           <div class="callout callout--tip">
             <strong>Optional vs Result</strong>
             Use <code>Optional&lt;T&gt;</code> when "not found" is a normal, expected state. Use <code>Result&lt;T&gt;</code> when failure needs an explanation — parsing errors, IO failures, validation failures.
@@ -288,10 +321,16 @@ LoadConfig(path)
             <h3 class="sub-title">Simple error</h3>
             <div class="code-card code-card--func">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SimpleError.cs</span></div>
-<pre class="code-block"><code><span class="type">Error</span> e = Error(<span class="str">"Save file not found"</span>);
+<pre class="code-block"><code><span class="type">Error</span> e1 = <span class="kw">new</span> <span class="type">Error</span>(<span class="str">"Save file not found"</span>);
+<span class="cmt">// or via the F module helper:</span>
+<span class="type">Error</span> e2 = Error(<span class="str">"Save file not found"</span>);
+<span class="cmt">// or implicitly from string:</span>
+<span class="type">Error</span> e3 = <span class="str">"Save file not found"</span>;
 
-<span class="cmt">// Implicit cast from string</span>
-<span class="type">Result</span>&lt;<span class="type">SaveData</span>&gt; result = Error(<span class="str">"Save file not found"</span>);</code></pre>
+<span class="cmt">// An Error converts implicitly to any Result&lt;T&gt;:</span>
+<span class="type">Result</span>&lt;<span class="type">SaveData</span>&gt; result = Error(<span class="str">"Save file not found"</span>);
+<span class="cmt">// Result&lt;SaveData&gt; bad = "Save file not found";  // does not compile:</span>
+<span class="cmt">// string → Error → Result is two user-defined conversions</span></code></pre>
             </div>
           </div>
 
@@ -324,7 +363,7 @@ LoadConfig(path)
 
           <div class="sub-section">
             <h3 class="sub-title">Composite error — collects multiple failures</h3>
-            <p class="prose">Pass a collection of errors to create a composite that joins all messages. This is what <code>HarvestErrors</code> produces when multiple validators fail simultaneously.</p>
+            <p class="prose">Pass a collection of errors to create a composite that joins all messages with <code>"; "</code>. This is what <code>HarvestErrors</code> produces when multiple validators fail simultaneously. <code>AsEnumerable()</code> flattens an error for logging: a composite yields its inner errors (one level, not recursive), while a simple or nested error yields <code>{ this }</code>, so a nested error keeps its high-level message and you reach the cause through <code>InnerErrors</code>.</p>
             <div class="code-card code-card--func">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Composite.cs</span></div>
 <pre class="code-block"><code><span class="type">Error</span> composite = Error(<span class="kw">new</span>[] {
@@ -367,7 +406,14 @@ LoadConfig(path)
 harvest(config).Match(
     onError:   e => Debug.LogError(e.Message),
     onSuccess: c => Apply(c)
-);</code></pre>
+);
+<span class="cmt">// On failure, e.AsEnumerable() yields one Error per failing validator</span>
+<span class="cmt">// (a validator that itself returns a composite contributes each of its parts).</span></code></pre>
+          </div>
+
+          <div class="callout callout--tip">
+            <strong>Which combinator, and where</strong>
+            Prefer <code>HarvestErrors</code> at startup or in editor tooling, where showing every problem in one pass saves iteration time. Prefer <code>FailFast</code> in user-facing interactions where only the first error matters; it also skips the remaining validators. Neither is allocation-free (closures, LINQ, and the error list are allocated per call), so keep validation out of per-frame code.
           </div>
         </section>
 
@@ -376,31 +422,57 @@ harvest(config).Match(
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Async Support</h2>
           <p class="section-intro">
-            Every operation on <code>Optional&lt;T&gt;</code> and <code>Result&lt;T&gt;</code> has async counterparts built on UniTask. Mix sync and async steps freely — the types handle the adaptation.
+            The core operators on <code>Optional&lt;T&gt;</code> and <code>Result&lt;T&gt;</code> (<code>Map</code>, <code>Bind</code>, <code>Then</code>, <code>Match</code>, <code>Try</code>) have async counterparts built on UniTask, so async pipelines look structurally identical to sync ones. Mix sync and async steps freely - the types handle the adaptation.
           </p>
 
-          <div class="code-card code-card--func">
-            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AsyncPipeline.cs</span></div>
-<pre class="code-block"><code><span class="cmt">// Async exception wrapping</span>
-<span class="type">Result</span>&lt;<span class="type">SaveData</span>&gt; result = <span class="kw">await</span> TryAsync(async () =>
-{
-    <span class="kw">var</span> json = <span class="kw">await</span> File.ReadAllTextAsync(path);
-    <span class="kw">return</span> <span class="type">JsonUtility</span>.FromJson&lt;<span class="type">SaveData</span>&gt;(json);
-});
-
-<span class="cmt">// Mixed sync/async chain</span>
-result
-    .Then(data => data.Normalize())          <span class="cmt">// sync map</span>
-    .ThenAsync(data => Upload(data))          <span class="cmt">// async bind</span>
-    .Match(
-        onError:   e => Log(e.Message),
-        onSuccess: _ => Log(<span class="str">"Uploaded"</span>)
-    );</code></pre>
+          <div class="callout callout--note">
+            <strong>UniTask is optional</strong>
+            The core library (<code>Optional&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, <code>Error</code>, validation, utilities) compiles without UniTask. The async surface on this page compiles only when the <code>TUTAN_UNITASK</code> scripting define is set. Installing UniTask as a UPM package (<code>com.cysharp.unitask</code>, via Git URL or OpenUPM) sets it automatically through the assembly definition's <em>Version Defines</em>. If you copied UniTask into <code>Assets/</code> (e.g. from the <code>.unitypackage</code> release), Version Defines can't see it, so add <code>TUTAN_UNITASK</code> yourself in <em>Project Settings › Player › Scripting Define Symbols</em>.
           </div>
 
-          <div class="callout callout--note">
-            <strong>UniTask is a required dependency</strong>
-            The async operators — <code>ThenAsync</code>, <code>MatchAsync</code>, <code>TryAsync</code> — return <code>UniTask&lt;T&gt;</code>, but UniTask is a hard dependency of the <em>entire</em> package, not just this async surface: Functional does not compile without <code>com.cysharp.unitask</code> installed. See <a href="#getting-started">Getting Started</a>.
+          <div class="sub-section">
+            <h3 class="sub-title">Why UniTask, not <code>Task&lt;T&gt;</code></h3>
+            <p class="prose">Unity installs a <code>UnitySynchronizationContext</code>, so a <code>Task</code> awaited on the main thread resumes there. But continuations run on thread-pool threads when the await starts off the main thread or uses <code>ConfigureAwait(false)</code>, and touching <code>UnityEngine</code> objects there throws <code>UnityException</code>. <code>Task</code> also allocates per operation. UniTask continuations are struct-based, low-allocation, and resume on the Unity player loop.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Async pipelines</h3>
+            <p class="prose">Use <code>TryAsync</code> at every async boundary that might throw, <code>ThenAsync</code> to keep chains flat, and the sync <code>Then</code> overloads on <code>UniTask&lt;…&gt;</code> to interleave cheap synchronous steps. Any step that returns an error skips the rest. Always <code>await</code> the final <code>UniTask</code> - forgetting to await silently swallows errors.</p>
+            <div class="code-card code-card--func">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AsyncPipeline.cs</span></div>
+<pre class="code-block"><code><span class="cmt">// Chained async operations with error short-circuit</span>
+<span class="kw">public async</span> <span class="type">UniTask</span>&lt;<span class="type">Result</span>&lt;<span class="type">LeaderboardEntry</span>&gt;&gt; FetchTopScoreAsync(<span class="kw">string</span> playerId)
+{
+    <span class="kw">return await</span> TryAsync(() => FetchPlayerAsync(playerId))
+        .ThenAsync(player => FetchScoreAsync(player.Id))
+        .ThenAsync(score => BuildLeaderboardEntryAsync(score));
+}
+
+<span class="cmt">// Mixed sync and async steps in one chain</span>
+<span class="type">Optional</span>&lt;<span class="type">Enemy</span>&gt; result = <span class="kw">await</span> Some(<span class="str">"Prefabs/Boss"</span>)
+    .ThenAsync(LoadPrefabAsync)                    <span class="cmt">// async: UniTask&lt;Optional&lt;GameObject&gt;&gt;</span>
+    .Then(go => go.GetComponent&lt;<span class="type">Enemy</span>&gt;())          <span class="cmt">// sync:  UniTask&lt;Optional&lt;Enemy&gt;&gt;</span>
+    .Then(e => Debug.Log($<span class="str">"Spawned: {e.name}"</span>));  <span class="cmt">// side-effect: passes the optional through</span></code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title"><code>UniTaskF</code> - closure-free <code>Void</code> and <code>WaitUntil</code></h3>
+            <p class="prose"><code>UniTaskF</code> (namespace <code>Tutan.Functional</code>) provides state-passing counterparts of two UniTask built-ins, so hot-path launches and polling stay closure-free. <code>Void</code> launches fire-and-forget work with 2-5 explicit arguments instead of a capturing closure; <code>WaitUntil</code> hands its predicate the state as an argument.</p>
+            <div class="code-card code-card--func">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">HitFlash.cs</span></div>
+<pre class="code-block"><code><span class="cmt">// No closure: `this` and `damage` travel as arguments</span>
+<span class="type">UniTaskF</span>.Void(<span class="kw">static</span> (self, dmg) => self.FlashAsync(dmg), <span class="kw">this</span>, damage);
+
+<span class="cmt">// No closure: poll a field via state</span>
+<span class="kw">await</span> <span class="type">UniTaskF</span>.WaitUntil(<span class="kw">static</span> hp => hp.Current &lt;= <span class="num">0</span>, healthComponent, cancellationToken: token);</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">Unlike UniTask's <code>WaitUntilValueChanged</code>, the state in <code>WaitUntil</code> is held strongly (no <code>WeakReference</code>); tie the wait to the object's lifetime with a <code>CancellationToken</code> such as <code>this.GetCancellationTokenOnDestroy()</code>.</p>
+          </div>
+
+          <div class="callout callout--warn">
+            <strong>Migrating from before 1.0.0</strong>
+            These helpers used to be <code>UniTask.Void</code> / <code>UniTask.WaitUntil</code>, injected into UniTask's own assembly through an <code>.asmref</code>. That couldn't be made conditional on UniTask being installed, so they moved to <code>UniTaskF</code> with the same signatures. Migrate by renaming the receiver.
           </div>
         </section>
 
@@ -456,8 +528,9 @@ item.Match(
 <pre class="code-block"><code><span class="type">Optional</span>&lt;<span class="type">GameObject</span>&gt; cached = Some(enemy);
 <span class="type">Object</span>.Destroy(enemy);
 
-cached.IsSome;            <span class="cmt">// true — the snapshot is stale</span>
-cached.Alive().IsSome;    <span class="cmt">// false — Alive() re-checks Unity lifetime</span>
+<span class="cmt">// After the frame ends (Destroy is deferred):</span>
+Debug.Log(cached.IsSome);          <span class="cmt">// True  - the snapshot is stale</span>
+Debug.Log(cached.Alive().IsSome);  <span class="cmt">// False - Alive() re-checks Unity lifetime</span>
 
 <span class="cmt">// Holding an optional across frames? Alive() before consuming:</span>
 <span class="kw">private</span> <span class="type">Optional</span>&lt;<span class="type">Transform</span>&gt; _cachedTarget;
@@ -469,7 +542,7 @@ cached.Alive().IsSome;    <span class="cmt">// false — Alive() re-checks Unity
         .Then(t => Steer(t.position));
 }</code></pre>
             </div>
-            <p class="prose"><code>Alive()</code> is constrained to <code>T : UnityEngine.Object</code>, so it doesn't exist (and costs nothing) for plain C# types — their snapshots can never go stale.</p>
+            <p class="prose" style="margin-top:12px"><code>Alive()</code> is constrained to <code>T : UnityEngine.Object</code>, so it doesn't exist (and costs nothing) for plain C# types — their snapshots can never go stale.</p>
           </div>
         </section>
 
@@ -483,26 +556,38 @@ cached.Alive().IsSome;    <span class="cmt">// false — Alive() re-checks Unity
 
           <div class="sub-section">
             <h3 class="sub-title">Declare an inspector-friendly field</h3>
-            <p class="prose">Add the field as <code>SerializableOptional&lt;T&gt;</code>, then read it as <code>Optional&lt;T&gt;</code> at the call site. The conversion is implicit — no manual unwrapping at the API boundary.</p>
+            <p class="prose">Add the field as <code>SerializableOptional&lt;T&gt;</code>, then convert it to <code>Optional&lt;T&gt;</code> as early as possible. Implicit casts work in both directions, so the field can be passed to any <code>Optional&lt;T&gt;</code> parameter. Implicit conversions don't apply to extension-method receivers, though: call <code>.ToOptional()</code> before chaining <code>Then</code>/<code>Map</code>/…</p>
             <div class="code-card code-card--func">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SpawnPoint.cs</span></div>
-<pre class="code-block"><code><span class="kw">using</span> Tutan.Functional;
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">EnemySpawner.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> UnityEngine;
+<span class="kw">using</span> Tutan.Functional;
 
-<span class="kw">public class</span> <span class="type">SpawnPoint</span> : <span class="type">MonoBehaviour</span>
+<span class="kw">public class</span> <span class="type">EnemySpawner</span> : <span class="type">MonoBehaviour</span>
 {
-    [<span class="type">SerializeField</span>] <span class="kw">private</span> <span class="type">SerializableOptional</span>&lt;<span class="type">Transform</span>&gt; overrideTarget;
+    [<span class="type">SerializeField</span>] <span class="kw">private</span> <span class="type">SerializableOptional</span>&lt;<span class="type">Transform</span>&gt; overrideSpawn;
+    [<span class="type">SerializeField</span>] <span class="kw">private</span> <span class="type">SerializableOptional</span>&lt;<span class="kw">int</span>&gt; startingWaveOverride;
 
-    <span class="kw">public</span> <span class="type">Vector3</span> Resolve() =>
-        ((<span class="type">Optional</span>&lt;<span class="type">Transform</span>&gt;) overrideTarget)
+    <span class="kw">private void</span> Start()
+    {
+        <span class="type">Vector3</span> spawn = overrideSpawn
+            .ToOptional()
             .Then(t => t.position)
             .Or(transform.position);
+
+        <span class="kw">int</span> wave = startingWaveOverride.ToOptional().Or(<span class="num">1</span>);
+    }
 }</code></pre>
             </div>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Inspector behaviour</h3>
-            <p class="prose"><code>SerializableOptionalDrawer</code> is a UI Toolkit <code>PropertyDrawer</code> registered for every closed generic. It renders a <code>Toggle</code> bound to the <em>has value</em> flag plus a <code>PropertyField</code> for the inner value — the value field is enabled only while the toggle is on.</p>
+            <p class="prose"><code>SerializableOptionalDrawer</code> is registered for the open generic <code>SerializableOptional&lt;&gt;</code>, so it applies to every closed <code>SerializableOptional&lt;T&gt;</code>. It implements UI Toolkit (<code>CreatePropertyGUI</code>) with an IMGUI fallback (<code>OnGUI</code>) for inspectors still drawn with IMGUI, and renders a row containing a toggle bound to the <em>has value</em> flag plus the inner value field, which is enabled only while the toggle is on. Inspector authors get a clear "use this value / leave it unset" UX without the wrapped value acting as a magic default.</p>
+          </div>
+
+          <div class="callout callout--tip">
+            <strong>Keep it at the serialization boundary</strong>
+            Use <code>SerializableOptional&lt;T&gt;</code> only for <code>[SerializeField]</code> and <code>ScriptableObject</code> data, and keep the rest of the pipeline in terms of <code>Optional&lt;T&gt;</code>. Don't expose it from public APIs - it's a serialization concern, not a domain concern.
           </div>
 
           <div class="callout callout--note">
@@ -556,7 +641,7 @@ maybeTarget.Filter((minDist, origin),
 
           <div class="callout callout--note">
             <strong>Two more gotchas</strong>
-            Method-group arguments (<code>.Map(Transform.GetPosition)</code>) also allocate a delegate per call under C# 10 — prefer an explicit capture-free lambda in hot paths. <code>Try</code> allocates only when an exception is actually thrown — the exceptional path pays, which is the right trade.
+            Method-group arguments (<code>.Map(GetPosition)</code> with <code>static Vector3 GetPosition(Transform t) =&gt; t.position;</code>) also allocate a delegate per call under C# 10 - prefer an explicit capture-free lambda in hot paths. <code>Try</code> allocates when an exception is actually thrown (<code>ex.ToString()</code>); that's the exceptional path paying, which is the right trade.
           </div>
         </section>
 

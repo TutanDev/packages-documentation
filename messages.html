@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Messages — Unity Framework</title>
-  <meta name="description" content="UP-Messages: standalone zero-allocation pub/sub message bus for Unity. Struct messages, ref dispatch, thread-safe enqueue — built for 72–120 Hz XR frame budgets.">
+  <meta name="description" content="Tutan Messages: standalone zero-allocation pub/sub message bus for Unity. Struct messages, ref dispatch, thread-safe enqueue — built for 72–120 Hz XR frame budgets.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -64,10 +64,10 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--msg-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v0.19.0</span>
+        <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v1.0.0</span>
         <h1 class="docs-hero-title">Zero-Allocation<br>Pub/Sub for XR</h1>
         <p class="docs-hero-desc">
-          UP-Messages is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, disposable subscriptions, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
+          Tutan Messages is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, disposable subscriptions, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
         </p>
         <div class="docs-hero-stats">
           <div>
@@ -86,7 +86,7 @@
 
         <div class="callout callout--note" style="margin-top:8px">
           <strong>Standalone package</strong>
-          Messages ships independently of the rest of the Framework — <code>com.tutan.messages</code> has no dependencies beyond <code>UnityEngine</code> and <code>Unity.Profiling</code>, and is also available on the Unity Asset Store as a self-contained product.
+          Messages ships independently of the rest of the Framework and is also available on the Unity Asset Store as a self-contained product. It needs Unity 6000.3 LTS or newer and is pure C#: no native plugins, any render pipeline, any platform Unity targets. On Web there are no worker threads, so <code>Enqueue</code> is simply a deferred same-thread dispatch. The runtime uses the built-in <strong>JSONSerialize</strong> module (enabled by default) for <code>EventReference</code> / <code>CommandReference</code> payloads. The <strong>Test Framework</strong> (<code>com.unity.test-framework</code>) and its NUnit package are declared dependencies because the package ships its EditMode tests; those compile only when the package is listed in your project's <code>testables</code>.
         </div>
 
         <div class="steps" style="margin-top:28px">
@@ -94,7 +94,7 @@
             <div class="step-num" style="border-color:var(--msg-color);color:var(--msg-color)">1</div>
             <div class="step-body">
               <div class="step-title">Install the package</div>
-              <div class="step-desc">Open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, navigate to <code>Packages/com.tutan.messages/package.json</code>. Or install the Asset Store release.</div>
+              <div class="step-desc">Install the Asset Store release from <em>Window › Package Manager › My Assets › Tutan Messages</em>. Or open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, and navigate to <code>Packages/com.tutan.messages/package.json</code>.</div>
             </div>
           </div>
           <div class="step">
@@ -115,7 +115,7 @@
 
         <div class="callout callout--tip" style="margin-top:24px">
           <strong>Runnable sample — Basic Publish / Subscribe</strong>
-          One self-contained sample ships with the package — import it from <strong>Package Manager → Messages → Samples → Import</strong>. It is a live score clicker in a single scene where a button publishes commands, a background thread <code>Enqueue</code>s commands off the main thread, and the score UI listens for events. Open the sample scene and press Play — no configuration needed. It exercises the CommandBus (N:1), the EventBus (N:M), composition-root handler binding via <code>CommandBus.Install</code>, and thread-safe <code>Enqueue</code>/drain all in one place.
+          One self-contained sample ships with the package — import it from <strong>Package Manager → Tutan Messages → Samples → Import</strong>. It is a live score clicker in a single scene where a button publishes commands, a background thread <code>Enqueue</code>s commands off the main thread, and the score UI listens for events. Open the sample scene and press Play — no configuration needed. It exercises the CommandBus (N:1), the EventBus (N:M), composition-root handler binding via <code>CommandBus.Install</code>, and thread-safe <code>Enqueue</code>/drain all in one place. It requires uGUI (<code>com.unity.ugui</code>, present by default) and works with any render pipeline and either input backend. On Web players the background thread is replaced by a coroutine.
         </div>
       </section>
 
@@ -126,7 +126,7 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Defining Messages</h2>
           <p class="section-intro">
-            A message is any <code>struct</code> implementing <code>IEvent</code> or <code>ICommand</code> (both extend <code>IMessage</code>). Dispatch is allocation-free for any struct: the bus is generic over the message type and passes it by <code>ref</code>, so the message is never boxed or heap-stored. Reference-type fields (<code>string</code>, arrays, collections, class payloads) are permitted — see the caveats below.
+            A message is any <code>struct</code> implementing <code>IEvent</code> or <code>ICommand</code> (both extend <code>IMessage</code>). Dispatch is allocation-free for any struct: the bus is generic over the message type and passes it by <code>ref</code>, so the message is never boxed. A queued message is copied into a reusable per-type <code>ConcurrentQueue</code> buffer, again without a per-message allocation. Reference-type fields (<code>string</code>, arrays, collections, class payloads) are permitted — see the caveats below.
           </p>
 
           <div class="sub-section">
@@ -163,7 +163,7 @@
 
           <div class="callout callout--tip">
             <strong>Reference-type fields are allowed but not free.</strong>
-            A message that holds a <code>string</code>, array, collection, or class reference still dispatches without allocating, but two caveats apply: while it sits in the deferred queue it is a GC root the collector must scan during the mark phase (a scan cost, not an allocation), and <code>Enqueue</code> copies the struct <em>shallowly</em>, so a worker thread shares any referenced object with the main thread that drains it — treat such payloads as immutable handoffs. Prefer value-only messages on hot or cross-thread paths. For string-like data, <code>Unity.Collections.FixedString64Bytes</code> (from <code>com.unity.collections</code>) or an integer handle keeps the message fully value-typed.
+            A message that holds a <code>string</code>, array, collection, or class reference still dispatches without allocating, but two caveats apply: while it sits in the deferred queue it is reachable from the bus, so the collector must trace its reference fields during the mark phase for as long as it waits to be drained (a scan cost, not an allocation), and <code>Enqueue</code> copies the struct <em>shallowly</em>, so a worker thread shares any referenced object with the main thread that drains it — treat such payloads as immutable handoffs. Prefer value-only messages on hot or cross-thread paths. For string-like data, <code>Unity.Collections.FixedString64Bytes</code> (from <code>com.unity.collections</code>) or an integer handle keeps the message fully value-typed.
           </div>
         </section>
 
@@ -180,12 +180,14 @@
               <thead><tr><th>Type</th><th>Cardinality</th><th>Naming</th><th>Use For</th></tr></thead>
               <tbody>
                 <tr><td>IEvent</td><td>N publishers, N subscribers</td><td>Past tense — <code>PlayerScored</code>, <code>OrderPlaced</code></td><td>Notifying the world that something happened</td></tr>
-                <tr><td>ICommand</td><td>N publishers, 1 subscriber</td><td>Imperative — <code>MovePlayer</code>, <code>PlaceOrder</code></td><td>Requesting that something be done</td></tr>
+                <tr><td>ICommand</td><td>N publishers, at most 1 handler</td><td>Imperative — <code>MovePlayer</code>, <code>PlaceOrder</code></td><td>Requesting that something be done</td></tr>
               </tbody>
             </table>
           </div>
 
-          <p class="prose">Command handlers are declared once at the composition root via <code>CommandBus.Install</code>, each command type bound exactly once with <code>.Handle&lt;T&gt;(…)</code>. That is the runtime enforcement of CQRS's "one writer per command" rule: a duplicate (or null) handler is reported in the returned <code>InstallResult</code> — <code>Ok</code> is <code>false</code> and <code>Error</code> names the offending type — and the live bus is left untouched. It never throws.</p>
+          <p class="prose">Command handlers are declared once at the composition root via <code>CommandBus.Install</code>, each command type bound at most once with <code>.Handle&lt;T&gt;(…)</code>. That is the runtime enforcement of CQRS's "one writer per command" rule: a duplicate (or null) handler is reported in the returned <code>InstallResult</code> — <code>Ok</code> is <code>false</code> and <code>Error</code> names the offending type — and the live bus is left untouched. It never throws.</p>
+
+          <p class="prose" style="margin-top:12px">Binding is not required: publishing or enqueuing a command that has no handler is a silent no-op. For commands that must be handled, assert <code>CommandBus.GetSubscriberCount&lt;T&gt;() == 1</code> once after <code>Install</code>.</p>
 
           <p class="prose" style="margin-top:12px">A command handler is just a plain method matching <code>MessageHandler&lt;T&gt;</code> (<code>void Handle(ref T)</code>) — no interface to implement, no base class. Any object can supply one: a <code>MonoBehaviour</code>, a plain C# manager, or a service from your DI container. Because you new them up yourself at the composition root, handlers are free to take whatever dependencies they need.</p>
 
@@ -281,6 +283,11 @@
             <p class="prose" style="margin-top:12px">Prefer <code>.AddTo(this)</code> when the subscription lives as long as the component, the bag for plain-C# systems, and an explicit handle field when the lifetime is genuinely dynamic. All three are the same <code>Subscription</code> underneath — and <code>Subscribe</code> allocates nothing beyond the handler entry itself.</p>
           </div>
 
+          <div class="callout callout--warn">
+            <strong><code>AddTo</code> on a never-activated GameObject</strong>
+            <code>AddTo(this)</code> / <code>AddTo(gameObject)</code> dispose the subscription from the hidden <code>SubscriptionAnchor</code>'s <code>OnDestroy</code>. Unity only calls <code>OnDestroy</code> on components whose GameObject has been active at least once, so a subscription anchored to a GameObject that is created inactive and destroyed without ever being activated (a pooled instance, a disabled prefab instance) is <strong>not</strong> disposed - its handler keeps running against a destroyed object. Hold the <code>Subscription</code> (or use a <code>SubscriptionBag</code>) for those lifetimes.
+          </div>
+
           <p class="prose">The handler signature uses <code>ref T</code> — this eliminates the struct copy that <code>Action&lt;T&gt;</code> would force on every dispatch. Handlers <em>may</em> mutate the message (e.g., set a <code>Consumed</code> flag), and subsequent handlers will observe the mutation.</p>
         </section>
 
@@ -353,6 +360,7 @@
 {
     <span class="kw">public void</span> Handle(<span class="kw">ref</span> <span class="type">PlaceOrder</span> cmd)
     {
+        <span class="cmt">// The only handler: CommandBus.Install rejects a second one</span>
         ProcessOrder(cmd.ItemId, cmd.Quantity);
     }
 }
@@ -381,8 +389,8 @@
             <table class="docs-table">
               <thead><tr><th>API</th><th>Thread</th><th>Notes</th></tr></thead>
               <tbody>
-                <tr><td>Publish / Subscribe / Subscription.Dispose / DrainQueues</td><td>Main thread only</td><td>Lock-free reads via <code>ConcurrentDictionary&lt;Type, ChannelBase&gt;</code>. In the editor and development builds, off-thread calls log an error; release builds compile the check out</td></tr>
-                <tr><td>Enqueue</td><td>Thread-safe</td><td>Lookup via <code>ConcurrentDictionary.GetOrAdd</code>; the per-channel pending queue is lazily created with an <code>Interlocked.CompareExchange</code>, and the message lands in a <code>ConcurrentQueue&lt;T&gt;</code>. Safe to race against any main-thread call and against concurrent <code>Enqueue</code> calls — including the very first <code>Enqueue</code> of a message type</td></tr>
+                <tr><td>Publish / Subscribe / Subscription.Dispose / DrainQueues</td><td>Main thread only</td><td>Lock-free reads via <code>ConcurrentDictionary&lt;Type, ChannelBase&gt;</code>. In the editor (edit mode and Play Mode) and in development builds, an off-thread call logs an error naming the offending call; release builds compile the check out</td></tr>
+                <tr><td>Enqueue</td><td>Thread-safe</td><td>Lookup via <code>ConcurrentDictionary.GetOrAdd</code>; the per-channel pending queue is lazily created with an <code>Interlocked.CompareExchange</code>, and the message lands in a <code>ConcurrentQueue&lt;T&gt;</code>. Safe to race against any main-thread call and against concurrent <code>Enqueue</code> calls — including the very first <code>Enqueue</code> of a message type. The copy into the queue is shallow: treat reference-typed payloads as immutable handoffs</td></tr>
               </tbody>
             </table>
           </div>
@@ -394,7 +402,7 @@
 
           <div class="callout callout--warn" style="margin-top:12px">
             <strong>One carve-out: Reset / Install</strong>
-            <code>Reset()</code> (and <code>CommandBus.Install</code>) replaces the bus instance wholesale. A worker-thread <code>Enqueue</code> racing that swap can land its message in the discarded bus, where it is dropped along with the rest of the cleared state. Quiesce worker threads before resetting or re-installing — both are composition-root operations, not steady-state ones.
+            <code>Reset()</code> (and <code>CommandBus.Install</code>) replaces the bus instance wholesale. A worker-thread <code>Enqueue</code> racing that swap can land its message in the discarded bus, where it is dropped along with the rest of the cleared state. Quiesce worker threads before resetting or re-installing — both are composition-root operations, not steady-state ones. Even without a race, messages already queued when the swap happens are discarded, not dispatched (see <a href="#guide-install-order">Install before anything enqueues</a>).
           </div>
         </section>
 
@@ -409,13 +417,42 @@
           <div class="sub-section">
             <h3 class="sub-title">Queue draining (automatic)</h3>
             <p class="prose">At startup <code>MessagesBootstrap</code> always spawns a hidden, persistent <code>[MessagesHost]</code> GameObject at <code>BeforeSceneLoad</code>. It survives scene loads and calls <code>DrainQueues()</code> for both buses every <code>LateUpdate</code>. No prefab to drag in, no toggle, no setup.</p>
-            <p class="prose" style="margin-top:12px">If you would rather own the drain loop, define <code>TUTAN_MESSAGES_NO_AUTO_HOST</code> to suppress the auto-spawned host, then either attach <code>MessagesHost</code> to a persistent GameObject yourself, or call <code>EventBus.DrainQueues()</code> / <code>CommandBus.DrainQueues()</code> from your own update logic (a PlayerLoop callback, a manager, etc.).</p>
+            <p class="prose" style="margin-top:12px">If you would rather own the drain loop, define <code>TUTAN_MESSAGES_NO_AUTO_HOST</code> to suppress the auto-spawned host, then either attach <code>MessagesHost</code> to a persistent GameObject yourself, or call <code>CommandBus.DrainQueues()</code> / <code>EventBus.DrainQueues()</code> from your own update logic (a PlayerLoop callback, a manager, etc.). A custom loop should also call <code>MessagesInstrumentation.SyncFrame(Time.frameCount)</code> once per frame on the main thread, as the host does: it stamps the frame number onto instrumentation records, which the Messages Console's frame column and <code>Record.Frame</code> rely on. The call is <code>[Conditional]</code>, so it is stripped from release builds.</p>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">CustomDrainLoop.cs</span></div>
+<pre class="code-block"><code><span class="kw">void</span> DrainMessages() <span class="cmt">// your own once-per-frame callback, on the main thread</span>
+{
+    <span class="type">MessagesInstrumentation</span>.SyncFrame(<span class="type">Time</span>.frameCount);
+    <span class="type">CommandBus</span>.DrainQueues();
+    <span class="type">EventBus</span>.DrainQueues();
+}</code></pre>
+            </div>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Binding command handlers (explicit)</h3>
             <p class="prose">Command handlers are declared once, at your composition root, through <code>CommandBus.Install</code>. The N:1 rule is validated there and reported in the returned <code>InstallResult</code> — on a duplicate command type or a null handler, <code>Ok</code> is <code>false</code>, <code>Error</code> names the offender, and the live bus is left untouched (it never throws).</p>
             <p class="prose" style="margin-top:12px">A handler is just a method matching <code>MessageHandler&lt;T&gt;</code> (<code>void Handle(ref T)</code>), so any object — a <code>MonoBehaviour</code>, a plain C# manager, a DI-resolved service — can supply one. Because you new them up yourself, handlers are free to take whatever dependencies they need; there is no discovery scan imposing a parameterless-constructor rule. Call <code>Install</code> again to rebuild the bus from scratch (composition-root semantics) — previously installed handlers are replaced wholesale.</p>
+            <p class="prose" style="margin-top:12px"><code>Install</code> does not require every command type to be bound: a command with no handler is silently dropped. For commands that must be handled, assert <code>CommandBus.GetSubscriberCount&lt;T&gt;() == 1</code> once after <code>Install</code>.</p>
+          </div>
+
+          <div class="sub-section" id="guide-install-order">
+            <h3 class="sub-title">Install before anything enqueues</h3>
+            <p class="prose">A successful <code>Install</code>, like <code>Reset</code>, replaces the bus, so commands still queued for the next drain are discarded - including on the first install. The editor and development builds log a warning naming the discarded command types. Install from a <code>BeforeSceneLoad</code> <code>[RuntimeInitializeOnLoadMethod]</code>, or from a bootstrap object with an early Script Execution Order: the <code>Awake</code> order of objects in a scene is undefined, so another object's <code>Awake</code> may enqueue first. If commands queued before a re-install matter, call <code>CommandBus.DrainQueues()</code> first.</p>
+            <div class="code-card code-card--msg">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">GameBootstrap.cs</span></div>
+<pre class="code-block"><code><span class="kw">static class</span> <span class="type">GameBootstrap</span>
+{
+    [<span class="type">RuntimeInitializeOnLoadMethod</span>(<span class="type">RuntimeInitializeLoadType</span>.BeforeSceneLoad)]
+    <span class="kw">static void</span> InstallCommands()
+    {
+        <span class="kw">var</span> movement = <span class="kw">new</span> <span class="type">MovementManager</span>();
+        <span class="kw">var</span> result = <span class="type">CommandBus</span>.Install(r =&gt; r
+            .Handle&lt;<span class="type">MovePlayer</span>&gt;(movement.Handle));
+        <span class="kw">if</span> (!result.Ok) <span class="type">Debug</span>.LogError(result.Error);
+    }
+}</code></pre>
+            </div>
           </div>
         </section>
 
@@ -424,35 +461,40 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Editor Tooling</h2>
           <p class="section-intro">
-            Editor-only instrumentation for inspecting bus traffic, plus inspector-friendly serialized wrappers for wiring messages without writing publisher code. Every instrumentation hook is gated behind <code>[Conditional("UNITY_EDITOR")]</code> and <code>[Conditional("TUTAN_MESSAGES_DEBUG")]</code> — the C# compiler strips all call sites in release player builds.
+            Two kinds of tooling. <strong>Editor-only:</strong> the Messages Console window and the inspector drawers live in the <code>Tutan.Messages.Editor</code> assembly and are never compiled into a player; the instrumentation hooks the Console reads are gated behind <code>[Conditional("UNITY_EDITOR")]</code> and <code>[Conditional("TUTAN_MESSAGES_DEBUG")]</code>, so the C# compiler strips every call site in release player builds. <strong>Runtime types:</strong> <code>EventReference</code> / <code>CommandReference</code>, the <code>[EventType]</code> / <code>[CommandType]</code> attributes and <code>MessageTypeResolver</code> live in the runtime assembly and work in player builds - they are meant for authoring and tooling, not hot paths.
           </p>
 
           <div class="sub-section">
             <h3 class="sub-title">Messages Console</h3>
-            <p class="prose">Open <strong>Window → Tutan → Messages Console</strong> for a virtualized log of recent <code>Subscribe</code>, <code>Unsubscribe</code>, <code>Publish</code>, <code>Enqueue</code>, and (optionally) drain operations with timestamp, frame, bus (E/C), op, and type. Selecting a row shows the message type, its payload, and — for <code>Publish</code>/<code>Enqueue</code> rows — the subscribers captured at the moment the message was sent.</p>
-            <p class="prose" style="margin-top:12px">Toolbar: <strong>Pause</strong>, <strong>Clear</strong>, <strong>Events / Commands</strong> toggles, per-op toggles (<strong>Publish / Enqueue / Subscribe·Unsubscribe / Drain</strong>), and a full-type-name search field. Drain records are off by default because they are noisy. While the window is open, struct payloads are boxed into records automatically so they can be inspected (one allocation per <code>Publish</code>/<code>Enqueue</code>); this is on whenever the window is open and incurs no cost once it is closed.</p>
+            <p class="prose">Open <strong>Window → Tutan → Messages Console</strong> for a virtualized log of recent <code>Subscribe</code>, <code>Unsubscribe</code>, <code>Publish</code>, <code>Enqueue</code>, and (optionally) drain operations with timestamp, frame, bus (E/C), op, and type. A queued message appears twice: as an <code>Enqueue</code> row when it is sent, and as a <code>Publish</code> row when the drain dispatches it. Selecting a row pretty-prints the payload, handler details, and (for <code>Publish</code>/<code>Enqueue</code> rows) the subscribers as they were <strong>at the moment the message was sent</strong>. That list is a snapshot frozen into the record at fire time, not a live query. The message type and each subscriber are clickable rows: click to ping the script, double-click to open it (a lambda handler resolves to the script of the class that declares it).</p>
+            <p class="prose" style="margin-top:12px">Toolbar: <strong>Pause</strong> (freeze the view; records keep arriving in the buffer), <strong>Clear</strong> (empty the ring buffer), <strong>Auto-scroll</strong> (keep the newest record in view), a search field that filters by full type name, and the filter toggles <strong>Events</strong> / <strong>Commands</strong> and <strong>Publish</strong> / <strong>Enqueue</strong> / <strong>Subs</strong> (Subscribe·Unsubscribe) / <strong>Drains</strong>. Drain records are off by default because they are noisy. Filter choices persist across domain reloads, and reopening the window lists the records still in the ring buffer.</p>
+            <p class="prose" style="margin-top:12px">While the window is open, every recorded <code>Publish</code>/<code>Enqueue</code> makes a few small allocations: the boxed payload, so it can be inspected, plus a snapshot of the subscribers. A drained queued message is recorded (and boxed) again as a <code>Publish</code>. Recording is on automatically whenever the window is open and costs nothing beyond a <code>bool</code> check once the window is closed.</p>
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title">Enabling in development builds</h3>
-            <p class="prose">In the editor the console is always available (<code>UNITY_EDITOR</code> is always defined). To capture on-device in development player builds, add <code>TUTAN_MESSAGES_DEBUG</code> to <strong>Project Settings → Player → Scripting Define Symbols</strong> for the target platform.</p>
-            <p class="prose" style="margin-top:12px">When the console window is closed, <code>MessagesInstrumentation.Enabled</code> is set to <code>false</code> and every hook short-circuits on the first branch — so even with the define present, an empty/closed window costs roughly one <code>bool</code> check per <code>Publish</code>. With the toggle off, every <code>[Conditional]</code> call site is stripped at compile time and the ~256 KB record ring buffer is never allocated.</p>
+            <h3 class="sub-title">Runtime cost and development builds</h3>
+            <p class="prose">The hooks are <code>[Conditional]</code>, so when neither define is set the compiler strips every call site, including the per-frame <code>SyncFrame</code> call in <code>MessagesHost</code>. The ~256 KB record ring buffer is only allocated by the first recorded operation, so it is never allocated in a release player. <strong>In release player builds the bus runs exactly as before - no branches, no allocations, no buffer.</strong></p>
+            <p class="prose" style="margin-top:12px">In the editor the console is always available (<code>UNITY_EDITOR</code> is always defined). To compile the hooks into a <strong>development build</strong> (so QA can capture on-device), add <code>TUTAN_MESSAGES_DEBUG</code> to <strong>Project Settings → Player → Scripting Define Symbols</strong> for the target platform. When the console window is closed, <code>MessagesInstrumentation.Enabled</code> is set back to <code>false</code> and every hook short-circuits on the first branch - so even with the defines present, an empty/closed window costs roughly one <code>bool</code> check per <code>Publish</code>.</p>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Programmatic access</h3>
-            <p class="prose"><code>MessagesInstrumentation</code> is public and can drive custom diagnostics or in-game overlays:</p>
+            <p class="prose"><code>MessagesInstrumentation</code> is public runtime API - the Console window is just one consumer of it. Read the ring buffer yourself to drive an in-game debug overlay, dump a trace to a log, or ship records to telemetry from a standalone, mobile, or XR device build, where the editor Console can't reach:</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">DiagnosticsOverlay.cs</span></div>
 <pre class="code-block"><code><span class="type">MessagesInstrumentation</span>.Enabled = <span class="kw">true</span>;
 
 <span class="cmt">// Payload capture is not a separate switch — while Enabled, every</span>
-<span class="cmt">// Publish/Enqueue record carries the boxed payload.</span>
+<span class="cmt">// Publish/Enqueue record carries the boxed payload and a subscriber snapshot.</span>
 
 <span class="cmt">// Snapshot the ring buffer (allocates a copy; keep off the hot path).</span>
 <span class="kw">var</span> records = <span class="type">MessagesInstrumentation</span>.Snapshot();
 <span class="kw">foreach</span> (<span class="kw">var</span> r <span class="kw">in</span> records)
     <span class="type">Debug</span>.Log($<span class="str">"{r.Bus} {r.Op} {r.MessageType?.Name}"</span>);</code></pre>
+            </div>
+            <div class="callout callout--warn" style="margin-top:12px">
+              <strong><code>Enabled</code> only produces records where the hooks are compiled in.</strong>
+              In a normal release player build, where neither <code>UNITY_EDITOR</code> nor <code>TUTAN_MESSAGES_DEBUG</code> is defined, every recording call site is stripped, so setting <code>Enabled = true</code> is a <strong>silent no-op</strong> and <code>Snapshot()</code> stays empty. To use this API outside the editor, build with <code>TUTAN_MESSAGES_DEBUG</code>. It is a development / QA capability, not something to flip on in a shipping build. If you drain the queues from your own loop, also call <code>SyncFrame</code> once per frame (see <a href="#guide-bootstrap">Auto-bootstrap</a>).
             </div>
           </div>
 
@@ -476,6 +518,8 @@
     }
 }</code></pre>
             </div>
+            <p class="prose" style="margin-top:12px">In the Inspector you get a type dropdown, a native UI-Toolkit field editor for the struct's public fields, and a small <strong>▶</strong> button that synthesizes and publishes the message immediately - handy for poking subscribers. ▶ publishes a fresh copy of the stored reference, so a <code>Publish()</code> override on an <code>EventReference</code> / <code>CommandReference</code> subclass runs with that subclass's serialized fields, as at runtime. The drawers follow undo/redo, prefab reverts and edits made in other inspectors. Arrays and lists (<code>EventReference[]</code>, <code>List&lt;CommandReference&gt;</code>) are supported, each element getting the same drawer. With several objects selected, the type dropdown writes to all of them; the payload can be edited, and ▶ used, only while every selected object holds the same type and payload.</p>
+            <p class="prose" style="margin-top:12px">The drawers are UI Toolkit only: they render in the default Inspector (UI Toolkit since Unity 2022.2) but not inside a custom IMGUI editor that draws the field with <code>EditorGUILayout.PropertyField</code>.</p>
             <div class="callout callout--warn" style="margin-top:12px">
               <strong>Not for runtime hot paths.</strong>
               Publishing via a <code>MessageReference</code> involves <code>JsonUtility.FromJson</code>, <code>Activator.CreateInstance</code>, <strong>boxing the struct</strong>, and dispatch through the non-generic <code>PublishBoxed</code> seam (one unbox inside the channel) — the opposite of the zero-alloc dispatch path. Use it for editor/authoring workflows, debug buttons, and tooling — not per-frame gameplay dispatch.
@@ -488,13 +532,21 @@
 
           <div class="sub-section">
             <h3 class="sub-title">The <code>[EventType]</code> / <code>[CommandType]</code> attributes</h3>
-            <p class="prose">If you only need the <em>type</em> (not a payload), decorate a <code>string</code> field with <code>[EventType]</code> or <code>[CommandType]</code> to get a dropdown that stores the selected <code>AssemblyQualifiedName</code>. Resolve at runtime with <code>Type.GetType(eventType)</code>. Note that a bare <code>Type.GetType</code> returns <code>null</code> once the assembly's identity has drifted since the name was serialized (a rename or version bump); for long-lived serialized data, fall back to scanning loaded assemblies on a <code>null</code> result, the same drift-tolerant resolution <code>MessageReference.GetMessageType()</code> uses internally.</p>
+            <p class="prose">If you only need the <em>type</em> (not a payload), decorate a <code>string</code> field with <code>[EventType]</code> or <code>[CommandType]</code> to get a dropdown that stores the selected <code>AssemblyQualifiedName</code>, and resolve it at runtime with <code>MessageTypeResolver.Resolve</code>:</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">TypePicker.cs</span></div>
-<pre class="code-block"><code>[<span class="type">EventType</span>]   <span class="kw">public string</span> eventType;    <span class="cmt">// dropdown of all IEvent types</span>
-[<span class="type">CommandType</span>] <span class="kw">public string</span> commandType;  <span class="cmt">// dropdown of all ICommand types</span></code></pre>
+<pre class="code-block"><code>[<span class="type">EventType</span>]   <span class="kw">public string</span> eventType;    <span class="cmt">// dropdown of all IEvent structs</span>
+[<span class="type">CommandType</span>] <span class="kw">public string</span> commandType;  <span class="cmt">// dropdown of all ICommand structs</span>
+
+<span class="type">Type</span> type = <span class="type">MessageTypeResolver</span>.Resolve(eventType); <span class="cmt">// null if deleted/renamed</span></code></pre>
             </div>
-            <p class="prose" style="margin-top:12px">The inline editor renders each field with its matching native UI-Toolkit control: <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>bool</code>, <code>string</code>, any <code>enum</code>, <code>Vector2</code>/<code>Vector3</code>/<code>Vector4</code>, <code>Vector2Int</code>/<code>Vector3Int</code>, <code>Color</code>, and <code>Quaternion</code> (edited as euler angles). Other types fall back to a disabled "unsupported type" label. Every field is authored explicitly — including a field named <code>Timestamp</code>; the reference publishes exactly the values you enter, with nothing populated implicitly at publish time.</p>
+            <p class="prose" style="margin-top:12px">Prefer it over a bare <code>Type.GetType(eventType)</code>, which returns <code>null</code> once the type's assembly has been renamed (e.g. the script moved into or out of an <code>.asmdef</code>) since the name was serialized. The resolver falls back to looking up the namespace-qualified name in every loaded assembly - the same resolution <code>MessageReference.GetMessageType()</code> and the inspector drawers use. Resolve once (at load time), not per frame: the fallback path scans loaded assemblies.</p>
+            <p class="prose" style="margin-top:12px">Only structs appear in the dropdown - the bus is constrained to <code>where T : struct</code>, so a class implementing <code>IEvent</code> / <code>ICommand</code> could never be published. Open generic structs (e.g. <code>EntityChanged&lt;T&gt;</code>) are not listed either: without type arguments they can't be instantiated or published.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Supported field types in the inline editor</h3>
+            <p class="prose">The inline editor renders each field with its matching native UI-Toolkit control: <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>bool</code>, <code>string</code>, any <code>enum</code>, <code>Vector2</code>/<code>Vector3</code>/<code>Vector4</code>, <code>Vector2Int</code>/<code>Vector3Int</code>, <code>Color</code>, and <code>Quaternion</code> (edited as euler angles). Only fields <code>JsonUtility</code> serializes can be authored: <code>readonly</code> and <code>[NonSerialized]</code> public fields are listed as disabled "not serialized" rows. Other types render as a disabled "unsupported type" label and keep their default/serialized value; to edit them, serialize the message struct as an ordinary field on your own MonoBehaviour and publish it from code. Every field is authored explicitly — including a field named <code>Timestamp</code>; the reference publishes exactly the values you enter, with nothing populated implicitly at publish time.</p>
           </div>
         </section>
 
@@ -503,7 +555,7 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Performance &amp; Edge Cases</h2>
           <p class="section-intro">
-            Every operation on the dispatch hot path is zero-allocation and amortized O(1) or O(n) in subscriber count. Pre-warm channels at startup to eliminate the initial growth of the backing <code>List&lt;T&gt;</code>.
+            Every operation on the dispatch hot path is zero-allocation and amortized O(1) or O(n) in subscriber count. Pre-warm channels at startup to remove first-use allocation.
           </p>
 
           <div class="table-wrap">
@@ -511,14 +563,17 @@
               <thead><tr><th>Operation</th><th>Allocation</th><th>Complexity</th><th>Notes</th></tr></thead>
               <tbody>
                 <tr><td>Publish</td><td>Zero</td><td>O(n) subscribers</td><td><code>ref</code> dispatch, no delegate combine</td></tr>
-                <tr><td>Enqueue</td><td>Amortized</td><td>O(1)</td><td>Queue may grow; pre-warm to avoid</td></tr>
+                <tr><td>Enqueue</td><td>Amortized</td><td>O(1)</td><td>Queue grows; pre-warm to avoid</td></tr>
                 <tr><td>Subscribe</td><td>Amortized</td><td>O(1)</td><td><code>List.Add</code>; one-time per subscription</td></tr>
                 <tr><td>Subscription.Dispose</td><td>Zero</td><td>O(n) subscribers</td><td>Linear scan by internal id</td></tr>
-                <tr><td>DrainQueues</td><td>Zero</td><td>O(channels × msgs)</td><td>One dictionary iteration per frame</td></tr>
-                <tr><td>Channel lookup</td><td>Zero</td><td>O(1)</td><td><code>Dictionary&lt;Type, ChannelBase&gt;</code></td></tr>
+                <tr><td>DrainQueues</td><td>Zero</td><td>O(channels × msgs)</td><td>Iterates a cached channel list; rebuilt only when a new channel type appears</td></tr>
+                <tr><td>Channel lookup</td><td>Zero</td><td>O(1)</td><td>Lock-free <code>ConcurrentDictionary&lt;Type, ChannelBase&gt;</code> read</td></tr>
               </tbody>
             </table>
           </div>
+
+          <p class="prose">"Amortized" means the backing collection may grow: the subscriber <code>List&lt;T&gt;</code> on <code>Subscribe</code>, and the per-type <code>ConcurrentQueue&lt;T&gt;</code> (which grows by adding segments) when the queued backlog exceeds anything seen before. A steady backlog reuses the existing segment, so this settles after warm-up. The first <code>Subscribe</code>/<code>Enqueue</code> of a message type also allocates that type's channel.</p>
+          <p class="prose" style="margin-top:12px">These figures describe the bus itself. In the editor, while the Messages Console is open (or whenever <code>MessagesInstrumentation.Enabled</code> is true), each recorded <code>Publish</code>/<code>Enqueue</code> also allocates its record's boxed payload and subscriber snapshot. Profile with the window closed.</p>
 
           <div class="sub-section">
             <h3 class="sub-title">Pre-warming</h3>
@@ -533,13 +588,30 @@
     <span class="type">EventBus</span>.Subscribe&lt;<span class="type">HandGesture</span>&gt;((<span class="kw">ref</span> <span class="type">HandGesture</span> _) =&gt; { }).Dispose();
     <span class="type">EventBus</span>.Subscribe&lt;<span class="type">FrameDecoded</span>&gt;((<span class="kw">ref</span> <span class="type">FrameDecoded</span> _) =&gt; { }).Dispose();
     <span class="cmt">// ... repeat for all message types used in the application</span>
+
+    <span class="cmt">// Queued types: one Enqueue creates the channel's ConcurrentQueue. Do it</span>
+    <span class="cmt">// before anything subscribes (the drain then dispatches to nobody), and note</span>
+    <span class="cmt">// that DrainQueues also flushes anything else already queued.</span>
+    <span class="type">EventBus</span>.Enqueue(<span class="kw">default</span>(<span class="type">FrameDecoded</span>));
+    <span class="type">EventBus</span>.DrainQueues();
 }</code></pre>
             </div>
+            <p class="prose" style="margin-top:12px">The <code>Subscribe(...).Dispose()</code> lambdas above allocate their delegates once, at warm-up - that is the point of doing it in <code>Awake</code>. Pre-warming does not cover everything:</p>
+            <ul class="prose">
+              <li><strong>Subscriber lists grow.</strong> A type's subscriber list starts with room for 8 entries, so a 9th entry (and every doubling after it) reallocates the list. Disposed entries keep their slot until the list is compacted.</li>
+              <li><strong>Queues grow with the backlog.</strong> The queue adds segments whenever the backlog exceeds anything seen before. To pre-size it, enqueue about twice your expected peak backlog once at startup, then drain: segments double in size, so this leaves one large enough to hold the peak.</li>
+              <li><strong>Handler delegates are allocated at the call site.</strong> Converting a method group or a capturing lambda to <code>MessageHandler&lt;T&gt;</code> allocates a delegate every time the conversion runs - subscribe at startup, not per frame.</li>
+            </ul>
           </div>
 
           <div class="callout callout--note">
             <strong>Reentrant publish, subscribe/dispose during dispatch</strong>
-            All three are safe. A depth counter ensures list compaction never runs while an outer dispatch is still iterating. Handlers added during dispatch will not see the current message; subscriptions disposed during dispatch are skipped for the rest of the cycle. Exceptions in a handler are caught via <code>Debug.LogException</code> and dispatch continues. Drains are bounded too: a handler that enqueues the same message type during dispatch extends the <em>next</em> frame's drain, not the current one, so a self-perpetuating handler cannot hang the frame.
+            All three are safe. A depth counter ensures list compaction never runs while an outer dispatch is still iterating. Handlers added during dispatch will not see the current message; subscriptions disposed during dispatch are skipped for the rest of the cycle, and their delegate is released so anything the closure captures can be collected. Exceptions in a handler are caught via <code>Debug.LogException</code> and dispatch continues. Drains are bounded too: a handler that enqueues the same message type during dispatch extends the <em>next</em> frame's drain, not the current one, so a self-perpetuating handler cannot hang the frame. A handler that calls <code>DrainQueues</code> itself does not start a nested drain of the channel already being drained - that channel is skipped and the call drains the other message types.
+          </div>
+
+          <div class="callout callout--warn" style="margin-top:12px">
+            <strong>Resets and installs</strong>
+            <code>EventBus</code> and <code>CommandBus</code> reset themselves at <code>SubsystemRegistration</code> so state never leaks between play sessions when Domain Reload is disabled: edit-mode subscriptions and handlers installed before entering Play mode are dropped, so subscribe and install at <code>BeforeSceneLoad</code> or later. A <code>Subscription</code> taken before a <code>Reset()</code> or <code>Install</code> targets the discarded bus, so disposing it is a harmless no-op. Do not call <code>Install</code> from inside a command handler: the drain in progress still delivers the rest of that command type's backlog to the replaced handler, and only the other types' queues are discarded.
           </div>
         </section>
 
