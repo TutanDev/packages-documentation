@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Unity Framework - Professional Unity Packages</title>
-  <meta name="description" content="Unity packages for professional projects: functional primitives (Optional/Result) and a zero-allocation message bus.">
+  <meta name="description" content="Unity packages for professional projects: functional primitives (Optional/Result), a zero-allocation message bus, and a structured log that allocates nothing.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,6 +27,7 @@
       <div class="nav-links">
         <a href="#functional" class="nav-link">Functional</a>
         <a href="#messages" class="nav-link">Messages</a>
+        <a href="#logging" class="nav-link">Logging</a>
       </div>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -44,8 +45,9 @@
         <span class="hero-title-accent">The Right Way</span>
       </h1>
       <p class="hero-subtitle">
-        Two focused packages for professional Unity development:
-        null-safe functional primitives and a zero-allocation message bus.
+        Three focused packages for professional Unity development:
+        null-safe functional primitives, a zero-allocation message bus,
+        and a structured log that allocates nothing.
       </p>
       <div class="hero-actions">
         <a href="#functional" class="btn btn--primary">Explore Packages</a>
@@ -58,6 +60,10 @@
         <a href="#messages" class="hero-package hero-package--msg">
           <span class="hero-package-dot" aria-hidden="true"></span>
           Messages
+        </a>
+        <a href="#logging" class="hero-package hero-package--log">
+          <span class="hero-package-dot" aria-hidden="true"></span>
+          Logging
         </a>
       </div>
     </div>
@@ -233,6 +239,92 @@ subscription.Dispose();</code></pre>
       </div>
       <div style="text-align:center;margin-top:48px">
         <a href="messages.html" class="btn btn--cta btn--cta--msg">Explore</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Logging Package -->
+  <section class="package package--alt" id="logging">
+    <div class="container">
+      <div class="package-header">
+        <span class="package-label package-label--log">com.tutan.logging</span>
+        <h2 class="package-title">Logging</h2>
+        <p class="package-desc">
+          A structured log for Unity 6. Records are typed data, not text: an event is declared once as a <code>static partial</code> method,
+          a source generator writes the method a program calls, and an error brings the records that led to it.
+        </p>
+      </div>
+      <div class="package-grid package-grid--reverse">
+        <div class="code-card code-card--log">
+          <div class="code-card-header">
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-file">SaveLog.cs</span>
+          </div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Logging;
+
+<span class="cmt">// Declare once - the generator writes log.Saving and log.Saved</span>
+[<span class="attr">LogCategory</span>(<span class="str">"game.save"</span>)]
+<span class="kw">internal static partial class</span> <span class="type">SaveLog</span>
+{
+    [<span class="attr">LogScope</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Saving slot {Slot}"</span>)]
+    <span class="kw">static partial void</span> Saving(<span class="kw">int</span> slot);
+
+    [<span class="attr">LogEvent</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Saved slot {Slot} as {File}"</span>)]
+    <span class="kw">static partial void</span> Saved(<span class="kw">int</span> slot, <span class="kw">string</span> file);
+}
+
+<span class="cmt">// Write through the Log the code was handed</span>
+<span class="kw">using</span> <span class="type">LogScope</span> saving = _log.Saving(slot);
+saving.Log.Saved(slot, file);
+
+<span class="cmt">// Test against records as values</span>
+<span class="type">MemoryRecord</span> saved = logged.Events
+    .Single(r =&gt; r.Event == <span class="type">SaveLog</span>.<span class="type">Events</span>.Saved);
+<span class="type">Assert</span>.That(saved.Field(<span class="str">"Slot"</span>), <span class="type">Is</span>.EqualTo(<span class="num">3</span>));</code></pre>
+        </div>
+        <div class="feature-list">
+          <div class="feature">
+            <div class="feature-icon feature-icon--log" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Declared Events</h3>
+              <p class="feature-desc">A declaration names the event's fields and nothing else. The generator writes a <code>Log</code> extension method beside it, with the call site the compiler fills in.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--log" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">No Allocation at the Call</h3>
+              <p class="feature-desc">An event that is off costs one compare. One that is on copies its values into three fixed rings under a short lock; strings and exceptions are kept by reference.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--log" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Clickable Call Sites</h3>
+              <p class="feature-desc">A Console row ends with a link to the file and line that wrote it, and double-clicking the row opens it. Every record also carries <code>Time.frameCount</code>.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--log" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Backlog &amp; JSON Lines</h3>
+              <p class="feature-desc">A sink writes the latest records below its level that share an error's scope before the error, marked as context. One self-describing JSON lines file per session, with the oldest pruned.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:48px">
+        <a href="logging.html" class="btn btn--cta btn--cta--log">Explore</a>
       </div>
     </div>
   </section>

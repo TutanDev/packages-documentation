@@ -386,7 +386,7 @@
           </p>
 
           <div class="table-wrap">
-            <table class="docs-table">
+            <table class="docs-table docs-table--wrap">
               <thead><tr><th>API</th><th>Thread</th><th>Notes</th></tr></thead>
               <tbody>
                 <tr><td>Publish / Subscribe / Subscription.Dispose / DrainQueues</td><td>Main thread only</td><td>Lock-free reads via <code>ConcurrentDictionary&lt;Type, ChannelBase&gt;</code>. In the editor (edit mode and Play Mode) and in development builds, an off-thread call logs an error naming the offending call; release builds compile the check out</td></tr>

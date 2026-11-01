@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logging - Unity Framework</title>
+  <meta name="description" content="Tutan Logging: a structured log for Unity 6. Events declared once as partial methods, written by a source generator, captured into fixed rings without allocating, and drained once a frame to the Unity Console and a JSON lines file.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles.css">
+  <link rel="stylesheet" href="src/docs.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/favicon/favicon-32x32.png" alt="" class="nav-logo-icon" aria-hidden="true">
+        Unity Framework
+      </a>
+    </div>
+  </nav>
+  <div class="docs-shell">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to home
+        </a>
+        <span class="sidebar-pkg-id sidebar-pkg-id--log">com.tutan.logging</span>
+        <div class="sidebar-pkg-name">Logging</div>
+      </div>
+      <nav class="sidebar-nav" aria-label="Page sections">
+        <a href="#getting-started" class="sidebar-direct" data-pkg="log">Getting Started</a>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Basics
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#guide-quickstart" class="sidebar-link" data-pkg="log">Quick Start</a>
+            <a href="#guide-compose" class="sidebar-link" data-pkg="log">Composition Root</a>
+          </div>
+        </div>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Events &amp; Scopes
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#guide-events" class="sidebar-link" data-pkg="log">Declaring Events</a>
+            <a href="#guide-fields" class="sidebar-link" data-pkg="log">Fields &amp; Templates</a>
+            <a href="#guide-scopes" class="sidebar-link" data-pkg="log">Scopes</a>
+            <a href="#guide-generator" class="sidebar-link" data-pkg="log">Generated Code &amp; Catalog</a>
+            <a href="#guide-diagnostics" class="sidebar-link" data-pkg="log">Generator Diagnostics</a>
+          </div>
+        </div>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Store &amp; Rules
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#guide-store" class="sidebar-link" data-pkg="log">The Store</a>
+            <a href="#guide-log" class="sidebar-link" data-pkg="log">The Log Handle</a>
+            <a href="#guide-rules" class="sidebar-link" data-pkg="log">Rules &amp; Rate Limits</a>
+          </div>
+        </div>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Sinks
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#guide-drain" class="sidebar-link" data-pkg="log">Drain &amp; Backlog</a>
+            <a href="#guide-console" class="sidebar-link" data-pkg="log">Unity Console</a>
+            <a href="#guide-file" class="sidebar-link" data-pkg="log">JSON Lines File</a>
+            <a href="#guide-memory" class="sidebar-link" data-pkg="log">Tests &amp; Custom Sinks</a>
+          </div>
+        </div>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Unity
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#guide-pump" class="sidebar-link" data-pkg="log">Pump &amp; Bridge</a>
+            <a href="#guide-links" class="sidebar-link" data-pkg="log">Console Links &amp; Builds</a>
+          </div>
+        </div>
+
+        <a href="logging-api.html" class="sidebar-direct" data-pkg="log">API Reference →</a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="docs-main">
+
+      <!-- ── Getting Started Hero ── -->
+      <section class="docs-hero" id="getting-started">
+        <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--log-glow) 0%, transparent 70%)" aria-hidden="true"></div>
+        <span class="docs-hero-badge docs-hero-badge--log">com.tutan.logging · v0.1.0</span>
+        <h1 class="docs-hero-title">Structured Logging<br>Without Allocating</h1>
+        <p class="docs-hero-desc">
+          Tutan Logging keeps records as typed data, not text. An event is declared once as a <code>static partial</code> method, and a source generator writes the method a program calls. Records are drained once a frame to the Unity Console, with a link to the line that wrote them, and to a JSON lines file. An error brings the records that led to it.
+        </p>
+        <div class="docs-hero-stats">
+          <div>
+            <span class="docs-stat-value" style="color:var(--log-color)">Zero</span>
+            <span class="docs-stat-label">GC Allocs</span>
+          </div>
+          <div>
+            <span class="docs-stat-value" style="color:var(--log-color)">1</span>
+            <span class="docs-stat-label">Compare When Off</span>
+          </div>
+          <div>
+            <span class="docs-stat-value" style="color:var(--log-color)">3</span>
+            <span class="docs-stat-label">Sinks</span>
+          </div>
+        </div>
+
+        <div class="callout callout--note" style="margin-top:8px">
+          <strong>Requirements</strong>
+          Unity 6000.1 or later, and <code>com.tutan.functional</code> 1.0.0. The drain has no thread of its own, so nothing in the package needs threads. The generator runs on every assembly that references <code>Tutan.Logging</code>: <code>Assembly-CSharp</code> references it automatically, and an assembly with its own <code>.asmdef</code> adds <code>Tutan.Logging</code> to its references. The code it writes is C# 9, so no <code>csc.rsp</code> is needed.
+        </div>
+
+        <div class="steps" style="margin-top:28px">
+          <div class="step">
+            <div class="step-num" style="border-color:var(--log-color);color:var(--log-color)">1</div>
+            <div class="step-body">
+              <div class="step-title">Install the package</div>
+              <div class="step-desc">Add <code>com.tutan.logging</code> and its one dependency, <code>com.tutan.functional</code>, to <code>Packages/manifest.json</code> by their git URLs.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--log-color);color:var(--log-color)">2</div>
+            <div class="step-body">
+              <div class="step-title">Declare an event</div>
+              <div class="step-desc">In a top-level <code>static partial</code> class marked <code>[LogCategory]</code>, declare a <code>static partial void</code> method with no body, marked <code>[LogEvent]</code>. Its parameters are the event's fields.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--log-color);color:var(--log-color)">3</div>
+            <div class="step-body">
+              <div class="step-title">Compose</div>
+              <div class="step-desc">The composition root makes a <code>LogStore</code> and a <code>LogDrain</code> with its sinks, installs <code>LogPump</code>, attaches <code>UnityLogBridge</code>, and hands <code>store.Log</code> to the code it composes.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--log-color);color:var(--log-color)">4</div>
+            <div class="step-body">
+              <div class="step-title">Write through a <code>Log</code></div>
+              <div class="step-desc">Code that logs takes a <code>Log</code>, as it takes any other dependency, and calls the method the generator wrote: <code>log.Saved(3, elapsed)</code>.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout--tip" style="margin-top:24px">
+          <strong>No static logger</strong>
+          There is no static logger, no <code>Log.Default</code>, and no store that makes itself. A <code>Log</code> is a dependency like any other, handed in by the composition root. A test hands the same code a <code>MemoryLog</code> and asserts on what it logged as values.
+        </div>
+      </section>
+
+      <div class="docs-content">
+
+        <!-- ── Basics: Quick Start ── -->
+        <section class="docs-section" id="guide-quickstart">
+          <div class="section-eyebrow">Basics</div>
+          <h2 class="section-title">Quick Start</h2>
+          <p class="section-intro">
+            <code>Debug.Log</code> formats text at the call, allocates, captures a stack trace for every line, and keeps nothing a filter or a backlog can use. This package keeps records as typed data instead. An event that is off costs one compare. An event that is on copies its values into fixed rings and allocates nothing. Formatting waits for a reader: the Unity Console once a frame, a JSON lines file, or a test.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Install</h3>
+            <p class="prose">Add the package and its one dependency to <code>Packages/manifest.json</code>:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">manifest.json</span></div>
+<pre class="code-block"><code>{
+  <span class="str">"dependencies"</span>: {
+    <span class="str">"com.tutan.functional"</span>: <span class="str">"https://github.com/TutanDev/com.tutan.functional.git"</span>,
+    <span class="str">"com.tutan.logging"</span>: <span class="str">"https://github.com/TutanDev/com.tutan.logging.git"</span>
+  }
+}</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px"><code>Tutan.Logging</code> is auto-referenced, so <code>Assembly-CSharp</code> sees it. An assembly with its own <code>.asmdef</code> adds <code>Tutan.Logging</code> to its references, and the generator runs on it from then on.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Declare an event</h3>
+            <p class="prose">Events are declared in a top-level <code>static partial</code> class that names their category:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveLog.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> System;
+<span class="kw">using</span> Tutan.Logging;
+
+[<span class="attr">LogCategory</span>(<span class="str">"game.save"</span>)]
+<span class="kw">internal static partial class</span> <span class="type">SaveLog</span>
+{
+    [<span class="attr">LogEvent</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Saved slot {Slot} in {Elapsed}"</span>)]
+    <span class="kw">static partial void</span> Saved(<span class="kw">int</span> slot, <span class="type">TimeSpan</span> elapsed);
+
+    [<span class="attr">LogScope</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Saving slot {Slot}"</span>)]
+    <span class="kw">static partial void</span> Saving(<span class="kw">int</span> slot);
+}</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">A declaration has no body and no access modifier. Its parameters are the event's fields, and its template names them in holes. The generator writes, beside it, the method a program calls:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveLog.g.cs</span></div>
+<pre class="code-block"><code><span class="cmt">// What the generator writes, in outline.</span>
+<span class="kw">public static void</span> Saved(<span class="kw">this</span> <span class="type">Log</span> log, <span class="kw">int</span> slot, <span class="type">TimeSpan</span> elapsed,
+    [<span class="attr">CallerFilePath</span>] <span class="kw">string</span> callerFile = <span class="str">""</span>, [<span class="attr">CallerLineNumber</span>] <span class="kw">int</span> callerLine = <span class="num">0</span>);
+
+<span class="kw">public static</span> <span class="type">LogScope</span> Saving(<span class="kw">this</span> <span class="type">Log</span> log, <span class="kw">int</span> slot,
+    [<span class="attr">CallerFilePath</span>] <span class="kw">string</span> callerFile = <span class="str">""</span>, [<span class="attr">CallerLineNumber</span>] <span class="kw">int</span> callerLine = <span class="num">0</span>);</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">So <code>log.Saved(3, elapsed)</code> binds to the generated extension, and the compiler fills in the call site.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Write through a <code>Log</code></h3>
+            <p class="prose">Code that logs takes a <code>Log</code>, as it takes any other dependency:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveManager.cs</span></div>
+<pre class="code-block"><code><span class="kw">public sealed class</span> <span class="type">SaveManager</span>
+{
+    <span class="kw">private readonly</span> <span class="type">Log</span> _log;
+
+    <span class="kw">public</span> SaveManager(<span class="type">Log</span> log) =&gt; _log = log;
+
+    <span class="kw">public void</span> Save(<span class="kw">int</span> slot)
+    {
+        <span class="kw">using</span> <span class="type">LogScope</span> saving = _log.Saving(slot);
+        <span class="kw">var</span> watch = System.Diagnostics.<span class="type">Stopwatch</span>.StartNew();
+        <span class="cmt">// ...write the file...</span>
+        saving.Log.Saved(slot, watch.Elapsed);
+    }
+}</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">What is written through <code>saving.Log</code> is under the scope, and disposing <code>saving</code> writes the record that closes it, with how long it was open.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Test</h3>
+            <p class="prose">A test hands the code a <code>MemoryLog</code>, which captures every level by default, and asserts on records as values:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveManagerTests.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> System.Linq;
+<span class="kw">using</span> NUnit.Framework;
+<span class="kw">using</span> Tutan.Logging;
+
+<span class="kw">public class</span> <span class="type">SaveManagerTests</span>
+{
+    [<span class="attr">Test</span>]
+    <span class="kw">public void</span> Saving_says_the_slot()
+    {
+        <span class="kw">using var</span> logged = <span class="kw">new</span> <span class="type">MemoryLog</span>();
+
+        <span class="kw">new</span> <span class="type">SaveManager</span>(logged.Log).Save(<span class="num">3</span>);
+
+        <span class="type">MemoryRecord</span> saved = logged.Events.Single(r =&gt; r.Event == <span class="type">SaveLog</span>.<span class="type">Events</span>.Saved);
+        <span class="type">Assert</span>.That(saved.Field(<span class="str">"Slot"</span>), <span class="type">Is</span>.EqualTo(<span class="num">3</span>));
+        <span class="type">Assert</span>.That(saved.Scope, <span class="type">Is</span>.Not.EqualTo(<span class="num">0</span>));
+    }
+}</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px"><code>SaveLog.Events.Saved</code> is the event's spec, which the generator writes into a nested <code>Events</code> class. Code that wants nothing logged is handed <code>Log.Discard</code>. A <code>default</code> <code>Log</code> was never handed a store, and its first event throws, so a forgotten dependency fails loudly instead of logging nowhere.</p>
+          </div>
+        </section>
+
+        <!-- ── Basics: Composition Root ── -->
+        <section class="docs-section" id="guide-compose">
+          <div class="section-eyebrow">Basics</div>
+          <h2 class="section-title">Composition Root</h2>
+          <p class="section-intro">
+            The composition root makes the store, the drain and its sinks, installs the pump and attaches the bridge. Each of those returns what undoes it, so the root owns teardown too. The code it composes receives a <code>Log</code>.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">How the pieces fit</span></div>
+<pre class="code-block"><code>code ── log.Saved(3, file) ──▶ LogStore (fixed rings) ◀── LogPump stamps the frame (EarlyUpdate)
+                                     │
+                                     ▼  LogPump pumps the drain (end of PostLateUpdate)
+                                 LogDrain ──▶ UnityConsoleSink   (rows with links)
+                                     │──────▶ JsonLinesSink      (a file per session)
+                                     └──────▶ MemorySink         (tests)
+
+Debug.Log ── UnityLogBridge ──▶ LogStore</code></pre>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">One way to write it</h3>
+            <p class="prose">How the root is reached, and how a <code>MonoBehaviour</code> receives its <code>Log</code>, is the application's choice; the package ships no locator.</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">GameRoot.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> System;
+<span class="kw">using</span> System.Collections.Generic;
+<span class="kw">using</span> Tutan.Functional;
+<span class="kw">using</span> Tutan.Logging;
+<span class="kw">using</span> UnityEngine;
+
+<span class="kw">public sealed class</span> <span class="type">GameRoot</span> : <span class="type">MonoBehaviour</span>
+{
+    <span class="kw">private readonly</span> <span class="type">List</span>&lt;<span class="type">IDisposable</span>&gt; _teardown = <span class="kw">new</span> <span class="type">List</span>&lt;<span class="type">IDisposable</span>&gt;();
+
+    <span class="kw">private void</span> Awake()
+    {
+        <span class="type">LogRules</span> rules = <span class="type">LogRules</span>.Parse(<span class="str">"debug; game.save=trace"</span>).Match(
+            error =&gt; { <span class="type">Debug</span>.LogWarning(<span class="str">$"Log rules: {error.Message}"</span>); <span class="kw">return</span> <span class="type">LogRules</span>.Default; },
+            parsed =&gt; parsed);
+        <span class="kw">var</span> store = <span class="kw">new</span> <span class="type">LogStore</span>(rules);
+
+        <span class="kw">var</span> sinks = <span class="kw">new</span> <span class="type">List</span>&lt;(<span class="type">ILogSink</span>, <span class="type">LogSinkOptions</span>)&gt;
+        {
+            (<span class="kw">new</span> <span class="type">UnityConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Information, Backlog: <span class="num">20</span>)),
+        };
+        <span class="type">LogFile</span>.Session(store).Match(
+            error =&gt; <span class="type">Debug</span>.LogWarning(<span class="str">$"No log file: {error.Message}"</span>),
+            file =&gt; sinks.Add((file, <span class="kw">new</span> <span class="type">LogSinkOptions</span>(
+                <span class="type">LogLevel</span>.Debug, Backlog: <span class="num">100</span>, Redact: <span class="type">LogRedaction</span>.HomeFolder))));
+
+        <span class="kw">var</span> drain = <span class="kw">new</span> <span class="type">LogDrain</span>(store, sinks.ToArray());
+        _teardown.Add(drain);
+        _teardown.Add(<span class="type">LogPump</span>.Install(drain));
+        _teardown.Add(<span class="type">UnityLogBridge</span>.Attach(store.Log));
+
+        <span class="kw">var</span> saves = <span class="kw">new</span> <span class="type">SaveManager</span>(store.Log);
+        <span class="cmt">// ...hand saves, and store.Log, to what needs them...</span>
+    }
+
+    <span class="kw">private void</span> OnDestroy()
+    {
+        <span class="kw">for</span> (<span class="kw">int</span> i = _teardown.Count - <span class="num">1</span>; i &gt;= <span class="num">0</span>; i--)
+            _teardown[i].Dispose();
+    }
+}</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">Teardown runs in reverse: the bridge detaches, the pump leaves the PlayerLoop, and the drain writes what is left and closes the file.</p>
+          </div>
+
+          <div class="callout callout--note">
+            <strong>Planned for Version 2</strong>
+            A <code>LogFilter</code> and a <code>LogView</code>, drawn by an Editor window and a runtime overlay, and a <code>LogArchive</code> to read a session's file back, are planned and not in this version.
+          </div>
+        </section>
+
+        <!-- ── Events: Declaring Events ── -->
+        <section class="docs-section" id="guide-events">
+          <div class="section-eyebrow">Events &amp; Scopes</div>
+          <h2 class="section-title">Declaring Events</h2>
+          <p class="section-intro">
+            An event is something a program says: a save written, a level loaded, a connection lost. It is declared once, and the generator writes the method a program calls.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The category class</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogCategory</span>(<span class="str">"game.save"</span>)]
+<span class="kw">internal static partial class</span> <span class="type">SaveLog</span>
+{
+    <span class="cmt">// declarations</span>
+}</code></pre>
+            </div>
+            <ul class="prose" style="margin-top:16px">
+              <li>The class is top-level, <code>static</code>, <code>partial</code> and not generic, because what the generator writes beside its declarations are extension methods of <code>Log</code>.</li>
+              <li><code>[LogCategory]</code> names the category of every event the class declares: one or more lowercase words of letters and digits, each starting with a letter, joined by dots, as <code>game.save</code>.</li>
+              <li>A category is one class's. Two classes of one assembly declaring one category is a compile error (TLOG0009), and two assemblies doing it is a conflict the catalog reports at runtime.</li>
+              <li>The class's own accessibility holds the generated methods: an <code>internal</code> class keeps its events to its assembly.</li>
+            </ul>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The declaration</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogEvent</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Saved slot {Slot} in {Elapsed}"</span>)]
+<span class="kw">static partial void</span> Saved(<span class="kw">int</span> slot, <span class="type">TimeSpan</span> elapsed);</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">A declaration is a <code>static partial void</code> method with no body and no access modifier. It is a signature the generator reads: C# allows a partial method without a body only when it has no access modifier and returns <code>void</code>. Its parameters are the event's fields, in the order the call writes them. A parameter is passed by value, with no default and no <code>params</code>, and a declaration never takes the <code>Log</code>, which the generator adds. The names <code>Events</code> and <code>RegisterLogEvents</code> are the generator's own, and a declaration cannot use them.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The key</h3>
+            <p class="prose">An event's key is its category and its name, <code>game.save/Saved</code>, which is what rules, files and the catalog name it by. The name is the method's, unless the attribute gives one, which keeps the key when the method is renamed:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">CombatLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogEvent</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Struck"</span>, Name = <span class="str">"Struck"</span>)]
+<span class="kw">static partial void</span> Strike();</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">A name is an ASCII letter or <code>_</code>, followed by letters, digits and <code>_</code>. Two events of one class with one key is a compile error (TLOG0004).</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The level</h3>
+            <p class="prose"><code>LogLevel</code> runs <code>Trace</code>, <code>Debug</code>, <code>Information</code>, <code>Warning</code>, <code>Error</code>, <code>Critical</code>. <code>None</code> is a threshold that nothing passes, and an event cannot be declared at it.</p>
+            <p class="prose">Most events have one level, given by the attribute. An event whose level each call chooses, as for messages the program hears from elsewhere, leaves the level out of the attribute and takes exactly one <code>LogLevel</code> parameter, which is not a field:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">NetLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogEvent</span>(<span class="str">"Heard {Message}"</span>)]
+<span class="kw">static partial void</span> Heard(<span class="type">LogLevel</span> level, <span class="kw">string</span> message);
+
+log.Heard(<span class="type">LogLevel</span>.Warning, <span class="str">"careful"</span>);</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">A rate limit</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AiLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogEvent</span>(<span class="type">LogLevel</span>.Warning, <span class="str">"No path to {Target}"</span>, PerSecond = <span class="num">5</span>)]
+<span class="kw">static partial void</span> NoPath(<span class="type">Vector3</span> target);</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px"><code>PerSecond</code> is how many records of the event a store keeps a second, at most. The rest are counted, not kept, and the next record kept says how many were dropped before it. It answers a warning that fires every frame. 0, the default, is no limit, and a rule can override either way (see <a href="#guide-rules">Rules &amp; Rate Limits</a>).</p>
+          </div>
+        </section>
+
+        <!-- ── Events: Fields & Templates ── -->
+        <section class="docs-section" id="guide-fields">
+          <div class="section-eyebrow">Events &amp; Scopes</div>
+          <h2 class="section-title">Fields &amp; Templates</h2>
+          <p class="section-intro">
+            A value is copied into the store when it is logged, so a reader sees it as it was. A reference to anything but a string, which cannot change, or an exception would be read as it is when it is read, so other reference types are refused (TLOG0002). An event has at most 32 fields (TLOG0010).
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Declared as</th><th>Held as</th><th>Formatted as</th></tr></thead>
+              <tbody>
+                <tr><td>bool</td><td>copied</td><td><code>true</code> or <code>false</code></td></tr>
+                <tr><td>char</td><td>copied</td><td>the char</td></tr>
+                <tr><td>sbyte, byte, short, ushort</td><td>copied</td><td>the number, invariant culture</td></tr>
+                <tr><td>int, uint, long, ulong</td><td>copied</td><td>the number, invariant culture</td></tr>
+                <tr><td>float, double, decimal</td><td>copied</td><td>the number, invariant culture</td></tr>
+                <tr><td>Guid</td><td>copied</td><td><code>D</code> by default</td></tr>
+                <tr><td>DateTime, DateTimeOffset</td><td>copied</td><td>ISO 8601 (<code>O</code>) by default</td></tr>
+                <tr><td>TimeSpan</td><td>copied</td><td><code>c</code> by default</td></tr>
+                <tr><td>an enum</td><td>copied as a <code>long</code></td><td>its name; a <code>[Flags]</code> value as names joined by <code> | </code>; <code>D</code> or <code>X</code> for the number</td></tr>
+                <tr><td>string</td><td>by reference</td><td>the string; <code>null</code> when null</td></tr>
+                <tr><td>Exception</td><td>by reference</td><td>its type's name and its message</td></tr>
+                <tr><td>ReadOnlySpan&lt;char&gt;</td><td>copied, at most 1024 chars</td><td>the chars, ending in <code>...</code> when cut</td></tr>
+                <tr><td>unmanaged IFormattable</td><td>copied, at most 256 bytes, checked at registration</td><td>its own <code>ToString(format, InvariantCulture)</code>, as for <code>Vector3</code></td></tr>
+                <tr><td>Optional&lt;T&gt;, T?</td><td>copied, with a presence flag</td><td>the value, or <code>none</code>; of any of these but spans</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="prose">Formatting a struct of the program's own type allocates the string its <code>ToString</code> returns, when a reader formats it, never at the call.</p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Field names</h3>
+            <p class="prose">A field is named as the template's hole spells it, or, when no hole names it, as its parameter with the first letter made upper case. So <code>Saved(int slot, string file)</code> with the template <code>Saved slot {Slot}</code> has the fields <code>Slot</code> and <code>File</code>. Two parameters whose names differ only in case are refused, since a hole matches its parameter ignoring case.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Personal fields and tags</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AccountLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogEvent</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Signed in as {Email}"</span>)]
+<span class="kw">static partial void</span> SignedIn([<span class="attr">Personal</span>] <span class="kw">string</span> email, [<span class="attr">LogTag</span>(<span class="str">"path"</span>)] <span class="kw">string</span> folder);</code></pre>
+            </div>
+            <ul class="prose" style="margin-top:16px">
+              <li><code>[Personal]</code> marks a field that can name a person. The store keeps it, and a sink whose options redact personal fields writes <code>[personal]</code> instead.</li>
+              <li><code>[LogTag]</code> says what a field is beyond its type, for a reader that offers to act on it: a console that turns a field tagged <code>asset</code> into a button that pings the asset.</li>
+            </ul>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Templates</h3>
+            <p class="prose">A template is the message, with holes that name fields:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Hole</th><th>Writes</th></tr></thead>
+                <tbody>
+                  <tr><td>{Slot}</td><td>the field <code>Slot</code></td></tr>
+                  <tr><td>{Slot,6}</td><td>padded on the left to 6 chars</td></tr>
+                  <tr><td>{Name,-6}</td><td>padded on the right to 6 chars</td></tr>
+                  <tr><td>{Ratio:0.00}</td><td>with the format handed to the value's own formatting</td></tr>
+                  <tr><td>{{ and }}</td><td>a literal brace</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">A hole names a parameter, ignoring case, or the declaration is refused (TLOG0001). A template that does not parse, as an unclosed brace, is refused too (TLOG0007). A parameter no hole names is still a field: it is in the record, the file and the tests, just not in the message. Formatting is in the invariant culture, so a message reads the same on every machine.</p>
+          </div>
+        </section>
+
+        <!-- ── Events: Scopes ── -->
+        <section class="docs-section" id="guide-scopes">
+          <div class="section-eyebrow">Events &amp; Scopes</div>
+          <h2 class="section-title">Scopes</h2>
+          <p class="section-intro">
+            A scope is an operation with a beginning and an end, and the records written while it is open are under it. It is declared as an event is, with <code>[LogScope]</code>, which always has a level, and the method the generator writes returns a <code>LogScope</code>.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogScope</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Saving slot {Slot}"</span>)]
+<span class="kw">static partial void</span> Saving(<span class="kw">int</span> slot);
+
+<span class="cmt">// At the call:</span>
+<span class="kw">using</span> <span class="type">LogScope</span> saving = log.Saving(slot);
+saving.Log.Saved(slot, elapsed);   <span class="cmt">// under "Saving slot 3"</span></code></pre>
+          </div>
+
+          <ul class="prose" style="margin-top:16px">
+            <li>Opening it writes a record with its fields, whose sequence becomes the scope's <code>Id</code>.</li>
+            <li>What is written through <code>saving.Log</code> is under the scope, and nothing else is, on any thread. There is no ambient state, so nothing is lost across an <code>await</code> or a UniTask continuation.</li>
+            <li>Disposing it writes the record that closes it, which says how long the scope was open. Disposing it twice, or disposing a copy, closes it once.</li>
+            <li>Scopes nest: a scope opened through <code>saving.Log</code> is under <code>saving</code>.</li>
+            <li>A scope that is off, because its event is off or a limit dropped it, has <code>IsOn</code> false and hands back the <code>Log</code> it was opened from. Disposing it does nothing.</li>
+          </ul>
+
+          <div class="callout callout--tip">
+            <strong>Work that outlives the call</strong>
+            Work that outlives the call that opened the scope is handed <code>saving.Log</code>, and whoever finishes the work disposes <code>saving</code>, so the closing says how long the whole took. A record written through the <code>Log</code> of a scope that has closed is still under that scope: the handle says which scope, and closing it cannot reach the copies.
+          </div>
+        </section>
+
+        <!-- ── Events: Generated Code & Catalog ── -->
+        <section class="docs-section" id="guide-generator">
+          <div class="section-eyebrow">Events &amp; Scopes</div>
+          <h2 class="section-title">Generated Code &amp; Catalog</h2>
+          <p class="section-intro">
+            The generator runs on every assembly that references <code>Tutan.Logging</code>. A declaration it cannot write for is a compile error, listed in <a href="#guide-diagnostics">Generator Diagnostics</a>.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">What the generator writes</h3>
+            <p class="prose">For each class, beside its declarations, one <code>public static</code> extension method of <code>Log</code> per declaration, with the declaration's parameters and two caller-info parameters:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveLog.g.cs</span></div>
+<pre class="code-block"><code><span class="kw">public static void</span> Saved(<span class="kw">this</span> <span class="type">Log</span> log, <span class="kw">int</span> slot, <span class="type">TimeSpan</span> elapsed,
+    [<span class="attr">CallerFilePath</span>] <span class="kw">string</span> callerFile = <span class="str">""</span>, [<span class="attr">CallerLineNumber</span>] <span class="kw">int</span> callerLine = <span class="num">0</span>);</code></pre>
+            </div>
+            <ul class="prose" style="margin-top:16px">
+              <li>It checks whether the event is on, which is one compare, and if it is, copies the values into the store. It carries a doc comment pointing back at the declaration, since going to the definition of a call lands in generated code.</li>
+              <li>A nested <code>public static class Events</code> with one <code>LogEventSpec</code> field per declaration, named by the event: <code>SaveLog.Events.Saved</code>. A test compares a record's <code>Event</code> with it.</li>
+              <li>A registration method, run by <code>[InitializeOnLoadMethod]</code> in the editor and by <code>[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]</code> in a player, so the catalog lists every event before any of them fires.</li>
+            </ul>
+            <p class="prose">Caller-info parameters are optional parameters, and a partial method takes its parameter list from the declaration, so the generator cannot add them to it. That is why the generated method is the declaration's sibling, not its body. Generated parameters that would collide with a field are renamed, and C# keywords used as parameter names are escaped with <code>@</code>.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The catalog</h3>
+            <p class="prose"><code>LogCatalog</code> lists every event and scope the process can say, filled as assemblies load. It is static because specs are metadata, as types are, and nothing is written through it.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Member</th><th>What it is</th></tr></thead>
+                <tbody>
+                  <tr><td>LogCatalog.Events</td><td>Every spec registered, in the order of their indices</td></tr>
+                  <tr><td>LogCatalog.Count</td><td>How many are registered</td></tr>
+                  <tr><td>LogCatalog.Find(key)</td><td>The spec with a key, as an <code>Optional&lt;LogEventSpec&gt;</code></td></tr>
+                  <tr><td>LogCatalog.Conflicts</td><td>What two assemblies declared alike</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">Registering is idempotent, so registration can run on every entry to Play Mode, which it has to when domain reload is off, and still list each event once. A spec made again by the same class, after a domain reload, replaces the one with its key.</p>
+            <p class="prose">Two assemblies can declare what no compiler could catch:</p>
+            <ul class="prose">
+              <li><code>LogCatalogConflict.KeyTwice</code>: two events with one key. Both get an index and both are written, but <code>Find</code> keeps finding the first.</li>
+              <li><code>LogCatalogConflict.CategoryTwice</code>: one category declared by two classes.</li>
+            </ul>
+            <p class="prose">Every store also says each conflict as a record (<code>log/KeyTaken</code>, <code>log/CategoryTaken</code>), so it reaches the Console and the file.</p>
+            <p class="prose">A <code>LogEventSpec</code> says everything known about an event before it is written: <code>Category</code>, <code>Name</code>, <code>Key</code>, <code>Kind</code>, <code>Level</code> (none when each call chooses), <code>Template</code>, <code>Fields</code>, <code>PerSecond</code>, and <code>Source</code>, the assembly, class, file and line of the declaration.</p>
+          </div>
+        </section>
+
+        <!-- ── Events: Generator Diagnostics ── -->
+        <section class="docs-section" id="guide-diagnostics">
+          <div class="section-eyebrow">Events &amp; Scopes</div>
+          <h2 class="section-title">Generator Diagnostics</h2>
+          <p class="section-intro">
+            The generator refuses a declaration it cannot write for with a compile error, and writes nothing for that class until it is fixed. Every diagnostic is an error, in category <code>Logging</code>, reported at the declaration, parameter or attribute at fault.
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Id</th><th>Title</th></tr></thead>
+              <tbody>
+                <tr><td>TLOG0001</td><td>A hole in an event's template names no parameter</td></tr>
+                <tr><td>TLOG0002</td><td>An event's parameter is of a type a field cannot hold</td></tr>
+                <tr><td>TLOG0003</td><td>An event's declaration or class is not of the shape the generator writes for</td></tr>
+                <tr><td>TLOG0004</td><td>Two events have one key</td></tr>
+                <tr><td>TLOG0005</td><td>A category or a name is malformed</td></tr>
+                <tr><td>TLOG0006</td><td>An event's level or limit is malformed</td></tr>
+                <tr><td>TLOG0007</td><td>An event's template does not parse</td></tr>
+                <tr><td>TLOG0008</td><td>An event is declared in a class with no <code>[LogCategory]</code></td></tr>
+                <tr><td>TLOG0009</td><td>Two classes declare one category</td></tr>
+                <tr><td>TLOG0010</td><td>An event has more fields than a record holds</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">TLOG0001 - a hole names no parameter</h3>
+            <p class="prose">Holes match parameters ignoring case, so <code>{Slot}</code> matches <code>slot</code>.</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogEvent</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Saved slot {Slot}"</span>)]
+<span class="kw">static partial void</span> Saved(<span class="kw">int</span> index);   <span class="cmt">// TLOG0001: no parameter named Slot</span></code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">TLOG0002 - a type a field cannot hold</h3>
+            <p class="prose">A field is a bool, char, number, decimal, <code>Guid</code>, <code>DateTime</code>, <code>DateTimeOffset</code>, <code>TimeSpan</code>, enum, <code>string</code>, <code>Exception</code>, <code>ReadOnlySpan&lt;char&gt;</code>, an unmanaged struct that implements <code>IFormattable</code> (as <code>Vector3</code>), or an <code>Optional&lt;T&gt;</code> or nullable of one of these but <code>ReadOnlySpan&lt;char&gt;</code>. Log what the program needs of an object, as its name or id, instead of the object.</p>
+            <p class="prose">A struct bigger than 256 bytes (<code>LogField.MaxValueBytes</code>) is not caught here, since its size is known only to Unity: making its spec throws <code>ArgumentException</code> when the class's events are registered.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">TLOG0003 - not the shape the generator writes for</h3>
+            <p class="prose">The message says which rule it breaks:</p>
+            <ul class="prose">
+              <li>The class is nested, is not static, is generic, or is not partial.</li>
+              <li>The method is not a <code>static partial</code> method, has a body, has an access modifier, is generic, or returns something other than <code>void</code>.</li>
+              <li>The method is named <code>Events</code> or <code>RegisterLogEvents</code>, which the generator writes into the class.</li>
+              <li>A parameter is passed by <code>ref</code>, <code>out</code> or <code>in</code>, has a default, is <code>params</code>, or is a <code>Log</code>, which the generator adds.</li>
+            </ul>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveLog.cs</span></div>
+<pre class="code-block"><code>[<span class="attr">LogEvent</span>(<span class="type">LogLevel</span>.Information, <span class="str">"Saved"</span>)]
+<span class="kw">public static partial void</span> Saved();   <span class="cmt">// TLOG0003: an access modifier makes C# require a body</span></code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">TLOG0004 to TLOG0010</h3>
+            <ul class="prose">
+              <li><strong>TLOG0004:</strong> two events of one class have one key, the same method name or the same <code>Name</code> given in their attributes. Give one of them a <code>Name</code> of its own.</li>
+              <li><strong>TLOG0005:</strong> a category, an event's name or a field's name is malformed. A category is lowercase words of letters and digits, each starting with a letter, joined by dots. An event's name, and a field's, is an ASCII letter or <code>_</code> followed by letters, digits and <code>_</code>. Two parameters whose names differ only in case would be one field.</li>
+              <li><strong>TLOG0006:</strong> an event declared at <code>LogLevel.None</code>; a negative <code>PerSecond</code>; an attribute that gives a level and a <code>LogLevel</code> parameter as well; or one that gives no level and no <code>LogLevel</code> parameter, or two <code>LogLevel</code> parameters.</li>
+              <li><strong>TLOG0007:</strong> the template does not parse, as when a brace is not closed or a hole's alignment is not a number. A literal brace is written <code>{{</code> or <code>}}</code>.</li>
+              <li><strong>TLOG0008:</strong> an event is declared in a class with no <code>[LogCategory]</code>, so it has no key.</li>
+              <li><strong>TLOG0009:</strong> two classes of one assembly declare one category. Two assemblies doing it is caught at runtime instead, as a <code>LogCatalogConflict.CategoryTwice</code> and a <code>log/CategoryTaken</code> record.</li>
+              <li><strong>TLOG0010:</strong> an event has more than 32 fields, which is more than a record holds.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ── Store: The Store ── -->
+        <section class="docs-section" id="guide-store">
+          <div class="section-eyebrow">Store &amp; Rules</div>
+          <h2 class="section-title">The Store</h2>
+          <p class="section-intro">
+            A <code>LogStore</code> is where a program's records are held. The composition root makes one, hands its <code>Log</code> to the code it composes, and owns it: the package never makes a store on its own. A process can have several, side by side, as two tests running at once do.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Stores.cs</span></div>
+<pre class="code-block"><code><span class="kw">var</span> store = <span class="kw">new</span> <span class="type">LogStore</span>(<span class="type">LogRules</span>.Default);
+<span class="kw">var</span> quiet = <span class="kw">new</span> <span class="type">LogStore</span>(<span class="type">LogRules</span>.Parse(<span class="str">"warning"</span>).ValueUnsafe(),
+    <span class="kw">new</span> <span class="type">LogStoreOptions</span>(Records: <span class="num">1024</span>, Program: <span class="str">"Server"</span>));</code></pre>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The rings</h3>
+            <p class="prose">A store holds three rings of fixed size, allocated once:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Ring</th><th>Holds</th><th>Default</th><th>Least</th></tr></thead>
+                <tbody>
+                  <tr><td>Records</td><td>One 72-byte entry per record: its stamps, level, event, scope and call site</td><td>16,384</td><td>16 (<code>LogStore.MinRecords</code>)</td></tr>
+                  <tr><td>Bits</td><td>The values copied at the call, in 8-byte slots</td><td>65,536 slots</td><td>32,768 (<code>LogStore.MinBits</code>)</td></tr>
+                  <tr><td>Refs</td><td>The strings and exceptions kept by reference</td><td>16,384</td><td>64 (<code>LogStore.MinRefs</code>)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose"><code>LogStoreOptions</code> sets each size, which is rounded up to a power of two; a size below the least throws <code>ArgumentOutOfRangeException</code>. The defaults hold about 2 MB: some sixteen thousand records, a few frames' worth of a busy game or minutes of a quiet one. <code>Capacity</code> is how many records the store holds once rounded. <code>LogStoreOptions.Program</code> names the program, which a file sink writes first and names its file by; null reads <code>Application.productName</code>.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Writing</h3>
+            <p class="prose">A record is written under a lock, held for the copy of its fields and nothing else: no user code and no allocation run under it. The timestamp is taken under the lock too, so sequences are in the order of time.</p>
+            <p class="prose">A writer never waits for a reader. When a ring is full the oldest records are overwritten, and since every reader reads by sequence, a reader that fell behind knows how many it lost. A drain that loses records says so, as a <code>log/DrainFellBehind</code> record and as a <code>Lost</code> call on each sink. The record that opened a scope still open is kept, however old it is, so whatever is written under the scope can still say what it is under.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Stamps</h3>
+            <p class="prose">Every record carries:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Stamp</th><th>What it is</th></tr></thead>
+                <tbody>
+                  <tr><td>Sequence</td><td>From 1 in each store, with no holes; how every reader addresses a record</td></tr>
+                  <tr><td>Timestamp</td><td>A <code>Stopwatch</code> timestamp, which the store's <code>LogClock</code> turns into a time</td></tr>
+                  <tr><td>Frame</td><td>The frame the store was told last, by <code>EnterFrame</code>; 0 before the first</td></tr>
+                  <tr><td>Scope</td><td>The scope it was written under, or 0</td></tr>
+                  <tr><td>Thread</td><td>The managed id of the thread that wrote it</td></tr>
+                  <tr><td>CallSite</td><td>The file and line of the call, as the compiler filled them in</td></tr>
+                  <tr><td>Suppressed</td><td>How many records of its event a limit dropped since the last one kept</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose"><code>LogPump</code> calls <code>store.EnterFrame(Time.frameCount)</code> at the start of every frame (see <a href="#guide-pump">Pump &amp; Bridge</a>). A store that is not pumped can be told its frame by whatever drives it. <code>store.Clock</code> holds when the store started, as <code>LogClock(Started, StartedAt)</code>: <code>Clock.At(timestamp)</code> is the wall-clock time of a record, and <code>LogClock.Between(from, to)</code> is the time between two timestamps.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Reading</h3>
+            <p class="prose">A sink never reads the store itself: a drain reads it and hands the sinks what it read. A reader of its own, as a console view, reads into a <code>LogBatch</code>:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Reader.cs</span></div>
+<pre class="code-block"><code><span class="kw">var</span> batch = <span class="kw">new</span> <span class="type">LogBatch</span>(records: <span class="num">1024</span>);
+<span class="kw">long</span> next = store.First;
+
+<span class="type">LogRead</span> read = store.Read(next, batch);
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; batch.Count; i++)
+{
+    <span class="type">LogRecord</span> record = batch[i];
+    <span class="cmt">// ...</span>
+}
+next = read.Next;</code></pre>
+            </div>
+            <ul class="prose" style="margin-top:16px">
+              <li><code>Read(from, batch)</code> copies the records from a sequence on, as many as fit, and returns a <code>LogRead</code> that says the first copied, how many, the next sequence to read, and how many were <code>Lost</code> to overwriting after <code>from</code>.</li>
+              <li><code>Read(sequences, batch)</code> copies the records of the given sequences the store still holds, in the order given; a scope's opening still open is found however old.</li>
+              <li><code>First</code> is the oldest sequence the store still holds, and <code>Next</code> the one the next record gets.</li>
+              <li>A <code>LogRecord</code> is valid until the next read into its batch, and being a <code>ref struct</code> it cannot be kept past it.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ── Store: The Log Handle ── -->
+        <section class="docs-section" id="guide-log">
+          <div class="section-eyebrow">Store &amp; Rules</div>
+          <h2 class="section-title">The Log Handle</h2>
+          <p class="section-intro">
+            A <code>Log</code> is what a program passes to the code that logs: a handle to one store, and to the scope what is written through it is under. It is a value of two words, so the <code>Log</code> of every scope a program opens allocates nothing.
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Member</th><th>What it is</th></tr></thead>
+              <tbody>
+                <tr><td>store.Log</td><td>A handle under no scope</td></tr>
+                <tr><td>Log.Discard</td><td>A log that captures nothing: every event is off in it</td></tr>
+                <tr><td>log.IsHanded</td><td>Whether it was handed a store</td></tr>
+                <tr><td>log.Scope</td><td>The scope it writes under, or 0</td></tr>
+                <tr><td>log.IsEnabled(spec)</td><td>Whether the event is on, which is what the generated method checks first</td></tr>
+                <tr><td>==, Equals</td><td>Whether two handles are to one store and one scope</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout--warn">
+            <strong>A <code>default</code> <code>Log</code> throws on purpose</strong>
+            A <code>default</code> <code>Log</code> was never handed a store, and the first event written through it throws <code>InvalidOperationException</code>, saying so. Code given no log fails loudly instead of logging nowhere, and code that wants nothing from a log is handed <code>Log.Discard</code>.
+          </div>
+
+          <p class="prose">There is no static logger, no <code>Log.Default</code>, and no store that makes itself. Specs are static, in the catalog, because they describe the code that was compiled; records are not.</p>
+        </section>
+
+        <!-- ── Store: Rules ── -->
+        <section class="docs-section" id="guide-rules">
+          <div class="section-eyebrow">Store &amp; Rules</div>
+          <h2 class="section-title">Rules &amp; Rate Limits</h2>
+          <p class="section-intro">
+            <code>LogRules</code> say what a store captures: a least level every event is held to, and rules that change it, or limit how often an event is kept, for the events a pattern names. A store compiles them with the catalog into one byte per event, which is all a call reads to decide it is off.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">From text</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Rules.cs</span></div>
+<pre class="code-block"><code><span class="type">Result</span>&lt;<span class="type">LogRules</span>&gt; rules = <span class="type">LogRules</span>.Parse(
+    <span class="str">"debug; game.save=trace; ai.*=warning; game.input/Moved=off; physics/Contact=10/s"</span>);</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">Items are separated by <code>;</code>, and spaces around them do not matter.</p>
+            <ul class="prose">
+              <li>A bare level is the least. There can be one, and text with none keeps the default, <code>debug</code>.</li>
+              <li><code>pattern=what</code> is a rule, where what is a level, <code>off</code>, a limit as <code>10/s</code>, or a level and a limit separated by a comma, as <code>debug,10/s</code>.</li>
+            </ul>
+            <p class="prose">Levels are <code>trace</code>, <code>debug</code>, <code>information</code>, <code>warning</code>, <code>error</code>, <code>critical</code> and <code>off</code>, ignoring case; <code>info</code> and <code>warn</code> are read too.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Pattern</th><th>Names</th></tr></thead>
+                <tbody>
+                  <tr><td>*</td><td>Every event</td></tr>
+                  <tr><td>game</td><td>The category <code>game</code></td></tr>
+                  <tr><td>game.*</td><td><code>game</code> and every category under it, as <code>game.save</code>, but not <code>gameplay</code></td></tr>
+                  <tr><td>game.save/Saved</td><td>One event, by its key</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">Where two patterns match an event, the more specific wins: a key beats a category, a category beats every prefix, a longer prefix beats a shorter one, and every prefix beats <code>*</code>. Of two rules alike, the later wins. A level and a limit are resolved apart: a rule with only a limit keeps the level a less specific rule gave, and the other way round.</p>
+            <p class="prose"><code>Parse</code> fails with an <code>Error</code> whose <code>Code</code> is a <code>LogRulesError</code>:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Code</th><th>When</th></tr></thead>
+                <tbody>
+                  <tr><td>NotALevel</td><td>A bare item, or what follows <code>=</code>, is not a level</td></tr>
+                  <tr><td>NotAPattern</td><td>A pattern is none of the four kinds</td></tr>
+                  <tr><td>NotALimit</td><td>A limit is not a whole number a second, or a rule has two</td></tr>
+                  <tr><td>LeastTwice</td><td>A second bare level</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose"><code>rules.ToString()</code> writes the text <code>Parse</code> reads back as the same rules.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">In code</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Rules.cs</span></div>
+<pre class="code-block"><code><span class="kw">var</span> rules = <span class="kw">new</span> <span class="type">LogRules</span>(<span class="type">LogLevel</span>.Debug,
+    <span class="kw">new</span> <span class="type">LogRule</span>(<span class="str">"game.save"</span>, <span class="type">LogLevel</span>.Trace, <span class="type">F</span>.None),
+    <span class="kw">new</span> <span class="type">LogRule</span>(<span class="str">"physics/Contact"</span>, <span class="type">F</span>.None, <span class="num">10</span>));</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">A <code>LogRule</code> is a <code>Pattern</code>, an optional <code>Least</code> (<code>LogLevel.None</code> for off) and an optional <code>PerSecond</code>. <code>LogRules.Default</code> is <code>debug</code> and no rules: a store captures what a developer would want when something goes wrong, and the sinks, which write from <code>Information</code> by default, write the rest only as an error's context.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Rate limits</h3>
+            <p class="prose">A limit is a bucket per event that holds <code>PerSecond</code> records and refills at that rate, starting full. A record that finds the bucket empty is dropped and counted, and the next one kept carries the count as <code>Suppressed</code>. A rule's limit overrides the event's own <code>PerSecond</code>, and <code>0/s</code> takes the event's limit away.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Changing them at runtime</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">DebugMenu.cs</span></div>
+<pre class="code-block"><code>store.Apply(<span class="type">LogRules</span>.Parse(<span class="str">"trace; ai.*=debug"</span>).ValueUnsafe());</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px"><code>Apply</code> swaps the rules from any thread, and calls from then on read the new ones. It says, as a <code>log/RuleMatchesNothing</code> record, each rule whose pattern matches nothing the program declares, which is how a misspelt category is caught. <code>store.Rules</code> is the rules applied last. <code>LeastFor(spec)</code>, <code>PerSecondFor(spec)</code> and <code>MatchingNothing(specs)</code> answer what the rules say of an event without a store.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">What the log says about itself</h3>
+            <p class="prose">The package declares its own events, in category <code>log</code>, so its trouble is in the same place as everything else's:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Key</th><th>Level</th><th>Says</th></tr></thead>
+                <tbody>
+                  <tr><td>log/DrainFellBehind</td><td>Warning</td><td><code>{Count} records were overwritten before the drain read them</code></td></tr>
+                  <tr><td>log/SinkFailed</td><td>Error</td><td><code>The sink {Sink} failed, and is not written to again</code>, with the exception</td></tr>
+                  <tr><td>log/KeyTaken</td><td>Warning</td><td>Two assemblies declare one key</td></tr>
+                  <tr><td>log/CategoryTaken</td><td>Warning</td><td>Two assemblies declare one category</td></tr>
+                  <tr><td>log/RuleMatchesNothing</td><td>Information</td><td><code>The rule {Rule} matches no event the program declares</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">They are registered before any other event, and are held to the rules like any other: <code>log=off</code> silences them.</p>
+          </div>
+        </section>
+
+        <!-- ── Sinks: Drain & Backlog ── -->
+        <section class="docs-section" id="guide-drain">
+          <div class="section-eyebrow">Sinks</div>
+          <h2 class="section-title">Drain &amp; Backlog</h2>
+          <p class="section-intro">
+            A sink is where records leave the program: the Unity Console, a file, or memory for a test. Sinks never read the store; a drain reads it and hands every record to each of its sinks, which write the ones their options let through.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Drain.cs</span></div>
+<pre class="code-block"><code><span class="kw">var</span> drain = <span class="kw">new</span> <span class="type">LogDrain</span>(store,
+    (<span class="kw">new</span> <span class="type">UnityConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Information, Backlog: <span class="num">20</span>)),
+    (file, <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Debug, Backlog: <span class="num">100</span>, Redact: <span class="type">LogRedaction</span>.Personal)));</code></pre>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The drain</h3>
+            <p class="prose">A <code>LogDrain</code> reads a store when it is pumped and hands what it read to its sinks, in sequence order, on the thread that pumps it. It has no thread of its own, since WebGL has none. It starts from the oldest record the store still holds, so what was logged before the drain was made is not lost.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Member</th><th>What it does</th></tr></thead>
+                <tbody>
+                  <tr><td>Pump()</td><td>Reads what arrived since the last read, hands it to the sinks, and flushes them; throws <code>ObjectDisposedException</code> once disposed</td></tr>
+                  <tr><td>Flush()</td><td>Everything the store holds, to the sinks, now, on the caller's thread, and flushed: for a crash or an exit; does nothing once disposed</td></tr>
+                  <tr><td>Dispose()</td><td>Drains and flushes what is left, and disposes the sinks that are disposable</td></tr>
+                  <tr><td>Store</td><td>The store it reads</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose"><code>LogPump.Install(drain)</code> pumps it once a frame from the PlayerLoop. An editor tool that wants records in Edit Mode, when the PlayerLoop does not run every editor frame, pumps it itself: <code>EditorApplication.update += drain.Pump;</code>.</p>
+            <p class="prose">The drain owns its sinks. A sink given twice is refused with <code>ArgumentException</code>, since it would write every record twice. A sink that throws is said, as a <code>log/SinkFailed</code> record with the exception, and is not written to again. The program and the other sinks go on.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Sink options</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">LogSinkOptions.cs</span></div>
+<pre class="code-block"><code><span class="kw">public sealed record</span> <span class="type">LogSinkOptions</span>(
+    <span class="type">LogLevel</span> Least = <span class="type">LogLevel</span>.Information,
+    <span class="kw">int</span> Backlog = <span class="num">0</span>,
+    <span class="type">LogRedaction</span> Redact = <span class="type">LogRedaction</span>.None);</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px"><strong>Least</strong> is the least level the sink writes. The store captures from <code>Debug</code> by default and sinks write from <code>Information</code>, so <code>Debug</code> records are there for a backlog without filling the Console.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Backlog</h3>
+            <p class="prose">How many records below <code>Least</code> the sink writes before an error, as its context, at most. When a record at <code>Error</code> or <code>Critical</code> arrives, the sink is first handed the latest records it skipped that share the error's scope, oldest first, each marked as context.</p>
+            <ul class="prose">
+              <li>The error's scope is its outermost known scope, so an error deep in nested scopes brings what happened anywhere in the operation it belongs to.</li>
+              <li>An error under no scope brings the latest records under no scope.</li>
+              <li>The opening of the error's scope is context too, so the sink can say what the error was under.</li>
+              <li>A scope's closing is never context: by the time the error arrives, it says only that something ended.</li>
+              <li>A record is written as context once, however many errors follow it.</li>
+            </ul>
+            <p class="prose">0, the default, writes no backlog. A negative backlog is refused.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Redaction</h3>
+            <p class="prose">What the sink leaves out of the fields it writes:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Flag</th><th>Writes</th></tr></thead>
+                <tbody>
+                  <tr><td>LogRedaction.None</td><td>Every field as it was logged</td></tr>
+                  <tr><td>LogRedaction.Personal</td><td><code>[personal]</code> for every field marked <code>[Personal]</code>, exceptions included</td></tr>
+                  <tr><td>LogRedaction.HomeFolder</td><td><code>~</code> for the user's home folder, wherever a string, chars or exception field has it</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">The store keeps every value; redaction is per sink. A file that leaves the player's machine redacts what a developer's Console does not need to.</p>
+          </div>
+        </section>
+
+        <!-- ── Sinks: Unity Console ── -->
+        <section class="docs-section" id="guide-console">
+          <div class="section-eyebrow">Sinks</div>
+          <h2 class="section-title">Unity Console</h2>
+          <p class="section-intro">
+            <code>UnityConsoleSink</code> writes each record as one Console row, and in a player as one line of the player log.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Console row</span></div>
+<pre class="code-block"><code><span class="kw">new</span> <span class="type">UnityConsoleSink</span>(openOnDoubleClick: <span class="kw">true</span>, name: <span class="str">"unity console"</span>)
+
+<span class="cmt">// writes, for example:</span>
+game.save  Saved slot 3 in 00:00:01.2000000  &lt; Saving slot 3
+SaveManager.cs:42  frame 1240</code></pre>
+          </div>
+
+          <ul class="prose" style="margin-top:16px">
+            <li>The first line is the category and the message, then <code>  (+N)</code> when a limit dropped N records of the event before it, then <code>  &lt; </code> and the opening of the scope it is under.</li>
+            <li>A scope's closing reads <code>Saving slot 3: done in 12.5 ms</code>.</li>
+            <li>A record written as an error's context starts with <code>(context) </code>.</li>
+            <li>An exception follows its record whole, on the lines after it.</li>
+            <li>The second line is the call site, which in the editor is a link, <code>&lt;a href="Assets/Game/SaveManager.cs" line="42"&gt;</code>, that opens the file at the line; then the frame, when the store had one. In a player it reads <code>(at Assets/Game/SaveManager.cs:42)</code>.</li>
+            <li>Levels map to row types: <code>Warning</code> is a warning, <code>Error</code> and <code>Critical</code> are errors, and the rest are logs (<code>UnityConsoleSink.TypeOf</code>).</li>
+            <li>Records overwritten before the drain read them are a warning row, <code>1,234 records were overwritten before the Console read them</code>.</li>
+          </ul>
+
+          <p class="prose">A row is written with <code>LogOption.NoStacktrace</code>, since the stack Unity would capture is the drain's, not the call's. With <code>openOnDoubleClick</code>, in the editor, a row also opens its call site when double-clicked, through an internal Unity method; if a Unity version does not have it, every row is written with the public API and the link still opens the call site.</p>
+
+          <div class="callout callout--note">
+            <strong>The bridge and the Console never feed each other</strong>
+            The sink skips what <code>UnityLogBridge</code> captured from Unity's own log, which the Console already shows, and the bridge skips what this sink writes. A row is a string, which Unity's log needs, so this sink allocates for every record it writes; records below its level cost nothing here.
+          </div>
+        </section>
+
+        <!-- ── Sinks: JSON Lines File ── -->
+        <section class="docs-section" id="guide-file">
+          <div class="section-eyebrow">Sinks</div>
+          <h2 class="section-title">JSON Lines File</h2>
+          <p class="section-intro">
+            <code>LogFile.Session(store, keep: 10)</code> opens a file for this session in the <code>Logs</code> folder of <code>Application.persistentDataPath</code>, the folder a player build can always write. <code>LogFile.Session(store, folder, keep)</code> opens it in a folder of the program's choosing, which it makes if it has to.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">GameRoot.cs</span></div>
+<pre class="code-block"><code><span class="type">LogFile</span>.Session(store).Match(
+    error =&gt; <span class="type">Debug</span>.LogWarning(<span class="str">$"No log file: {error.Message}"</span>),
+    file =&gt; sinks.Add((file, <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Debug, Backlog: <span class="num">100</span>))));</code></pre>
+          </div>
+
+          <ul class="prose" style="margin-top:16px">
+            <li>The file is named for the program and the time the store started: <code>Sample Game-20261101-102409-000.jsonl</code>. Characters a file name cannot have become <code>_</code>.</li>
+            <li>The program's oldest files beyond <code>keep</code>, this one counted, are deleted; a file that cannot be deleted is left, and other programs' files are never touched.</li>
+            <li>It fails with an <code>Error</code> whose <code>Code</code> is a <code>LogFileError</code>: <code>NoFolder</code> when the folder cannot be made, <code>NoFile</code> when the file cannot.</li>
+            <li>A <code>keep</code> below 1 throws <code>ArgumentOutOfRangeException</code>.</li>
+          </ul>
+
+          <p class="prose"><code>new JsonLinesSink(stream, leaveOpen: false, name: "json")</code> writes the same format to any stream.</p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The format</h3>
+            <p class="prose">One JSON object per line, UTF-8 without a byte order mark:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Sample Game-20261101-102409-000.jsonl</span></div>
+<pre class="code-block"><code>{"format":1,"program":"Sample Game","started":"2026-11-01T10:24:09.0000000+01:00","redact":["Personal"]}
+{"event":"game.save/Saved","id":1,"kind":"Event","lvl":"Information","template":"Saved slot {Slot} in {Elapsed}","fields":[{"name":"Slot","kind":"Int32","type":"int"},{"name":"Elapsed","kind":"TimeSpan","type":"System.TimeSpan"}],"source":{"assembly":"Assembly-CSharp","type":"Game.SaveLog","file":"C:\\Projects\\MyGame\\Assets\\Game\\SaveLog.cs","line":12}}
+{"seq":4190,"scope":4182,"t":"2026-11-01T10:24:11.3510000+01:00","frame":1240,"thread":1,"lvl":"Information","key":"game.save/Saved","id":1,"msg":"Saved slot 3 in 00:00:01.2000000","file":"C:\\Projects\\MyGame\\Assets\\Game\\SaveManager.cs","line":42,"fields":{"Slot":3,"Elapsed":"00:00:01.2000000"}}</code></pre>
+            </div>
+            <ul class="prose" style="margin-top:16px">
+              <li><strong>The header</strong>, first: <code>format</code> (<code>JsonLinesSink.Format</code>, now 1), <code>program</code>, <code>started</code>, and <code>redact</code> when the sink redacts.</li>
+              <li><strong>A declaration</strong>, before the first record of each event: its key, an <code>id</code> numbered from 1 in each file, <code>kind</code>, <code>lvl</code> (absent when each call chooses), <code>template</code>, <code>perSecond</code> when it has one, its <code>fields</code>, and its <code>source</code>. A field has <code>name</code>, <code>kind</code> and <code>type</code>, and <code>personal</code>, <code>tag</code>, <code>optional</code>, <code>names</code> (an enum's members) and <code>flags</code> when they apply. So the file says what its records are without the program that wrote them.</li>
+              <li><strong>A record</strong>: <code>seq</code>, <code>scope</code> when under one, <code>t</code>, <code>frame</code> when stamped, <code>thread</code>, <code>lvl</code>, <code>key</code> and the <code>id</code> of its declaration, <code>msg</code>, <code>suppressed</code> when a limit dropped some, <code>context</code> when written as an error's context, <code>file</code> and <code>line</code> when it has a call site, and its <code>fields</code>. A record names its declaration by <code>id</code> as well as its event by <code>key</code>, since two assemblies can declare one key.</li>
+              <li>A scope's opening has <code>begin</code>, its own sequence, and its closing has <code>end</code>, the opening's, and <code>ms</code>, how long it was open.</li>
+              <li>Numbers and bools are JSON's own, and a number that is not finite is a string. An exception is an object of its <code>type</code>, <code>message</code> and <code>text</code>. Every other value is its formatted text, and a value of the program's own type is formatted as the first hole that names it formats it.</li>
+              <li><code>{"lost":N}</code> says N records were overwritten before the drain read them.</li>
+            </ul>
+            <p class="prose">Its buffers are reused for each line, so writing allocates nothing once they have grown, but for an exception's text.</p>
+          </div>
+        </section>
+
+        <!-- ── Sinks: Tests & Custom Sinks ── -->
+        <section class="docs-section" id="guide-memory">
+          <div class="section-eyebrow">Sinks</div>
+          <h2 class="section-title">Tests &amp; Custom Sinks</h2>
+          <p class="section-intro">
+            <code>MemoryLog</code> is a store that captures every level, unless given rules, drained into a <code>MemorySink</code> each time its records are read. It allocates for every record, which is what a test wants and a program does not.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Memory, for tests</h3>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Member</th><th>What it is</th></tr></thead>
+                <tbody>
+                  <tr><td>Log</td><td>The handle to pass to the code under test</td></tr>
+                  <tr><td>Records</td><td>Every record so far, scopes' openings and closings included</td></tr>
+                  <tr><td>Events</td><td>The events so far, without scopes' openings and closings</td></tr>
+                  <tr><td>Store</td><td>The store, for a test that reads it as a console would</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">A <code>MemoryRecord</code> has every stamp as a value (<code>Sequence</code>, <code>Frame</code>, <code>Scope</code>, <code>Begin</code>, <code>Thread</code>, <code>Level</code>, <code>Kind</code>, <code>Event</code>, <code>Suppressed</code>, <code>Backlog</code>, <code>Elapsed</code>, <code>CallSite</code>), its <code>Message</code>, and its <code>Fields</code>. <code>record.Field("Slot")</code> is a field's value by name, ignoring case: a number, bool, char, guid, date or span as itself, an enum as its <code>long</code>, text as a string, an exception as itself, and a value of the program's own type as its text.</p>
+            <p class="prose"><code>MemorySink</code> can be given to any drain, for a test that builds its own store; it also counts <code>Overwritten</code> records and <code>Flushes</code>.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Writing a sink</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">ILogSink.cs</span></div>
+<pre class="code-block"><code><span class="kw">public interface</span> <span class="type">ILogSink</span>
+{
+    <span class="kw">string</span> Name { <span class="kw">get</span>; }
+    <span class="kw">void</span> Open(<span class="type">LogContext</span> context);
+    <span class="kw">void</span> Write(<span class="type">LogRecord</span> record, <span class="kw">bool</span> backlog, <span class="type">LogContext</span> context);
+    <span class="kw">void</span> Lost(<span class="kw">long</span> count, <span class="type">LogContext</span> context);
+    <span class="kw">void</span> Flush();
+}</code></pre>
+            </div>
+            <ul class="prose" style="margin-top:16px">
+              <li><code>Open</code> is called once, before anything else.</li>
+              <li><code>Write</code> is called for every record the sink's options let through, and for each record of a backlog with <code>backlog</code> true.</li>
+              <li><code>Lost</code> says how many records were overwritten before the drain read them, at that point in the sequence.</li>
+              <li><code>Flush</code> makes what was written durable, as far as the sink can.</li>
+              <li>A sink that is also <code>IDisposable</code> is disposed with the drain.</li>
+            </ul>
+            <p class="prose">A <code>LogRecord</code> is valid only during <code>Write</code>. A sink that keeps records copies what it needs out of it. <code>LogContext</code> is what a sink writes with:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Member</th><th>What it is</th></tr></thead>
+                <tbody>
+                  <tr><td>Clock</td><td>The store's clock, which turns a record's <code>Timestamp</code> into a time</td></tr>
+                  <tr><td>Program</td><td>The program's name</td></tr>
+                  <tr><td>Options, Redact</td><td>The sink's options</td></tr>
+                  <tr><td>TryScope(scope, out begin)</td><td>The record that opened a scope, if the drain read it and the scope has not closed</td></tr>
+                  <tr><td>TryFormat(record, span, out written)</td><td>The record's message with the sink's redaction, and for a scope's closing, its opening's message</td></tr>
+                  <tr><td>Text(record)</td><td>The same, as a string</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">A sink that wants to allocate nothing formats into a buffer of its own with <code>TryFormat</code>, and grows the buffer when it returns false. <code>record.Field(i)</code> and <code>record.TryField(name, out value)</code> return a <code>LogValue</code>, which reads as itself (<code>Read&lt;T&gt;()</code>), as a number (<code>AsInt64()</code>, <code>AsDouble()</code>), as chars (<code>AsChars()</code>), or as the reference it was kept by (<code>AsRef()</code>), and formats into a span (<code>TryFormat</code>).</p>
+          </div>
+        </section>
+
+        <!-- ── Unity: Pump & Bridge ── -->
+        <section class="docs-section" id="guide-pump">
+          <div class="section-eyebrow">Unity</div>
+          <h2 class="section-title">Pump &amp; Bridge</h2>
+          <p class="section-intro">
+            The store, the rules and the drain know nothing of Unity's frame. Four pieces connect them to it: the pump, the bridge, the Console sink, and the registration the generator writes. Each piece the composition root installs returns what undoes it, so the root owns teardown too.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The pump</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">GameRoot.cs</span></div>
+<pre class="code-block"><code><span class="type">IDisposable</span> pump = <span class="type">LogPump</span>.Install(drain);
+<span class="cmt">// ...</span>
+pump.Dispose();</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px"><code>LogPump.Install</code> adds two systems to Unity's PlayerLoop:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>System</th><th>Where</th><th>What it does</th></tr></thead>
+                <tbody>
+                  <tr><td>LogFrameStamp</td><td>First in <code>EarlyUpdate</code></td><td><code>store.EnterFrame(Time.frameCount)</code>, so every record says the frame it was written in</td></tr>
+                  <tr><td>LogDrainPump</td><td>Last in <code>PostLateUpdate</code></td><td>Drains the store to the sinks and flushes them, once the frame's work is done</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">Both show by those names in the Profiler. Disposing the pump takes out its two systems and no others, so several pumps can be installed, and disposing twice does nothing. A pump whose drain was disposed first does nothing, rather than throwing every frame.</p>
+            <p class="prose">Installed in Play Mode in the editor, the pump removes itself when Play Mode ends, since Unity keeps a PlayerLoop that was changed into Edit Mode. That also covers entering Play Mode with domain reload off: each entry installs a pump of its own, and nothing of the last one is left. In Edit Mode the PlayerLoop does not run every editor frame, so an editor tool pumps its drain itself: <code>EditorApplication.update += drain.Pump;</code>.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The bridge</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">GameRoot.cs</span></div>
+<pre class="code-block"><code><span class="type">IDisposable</span> bridge = <span class="type">UnityLogBridge</span>.Attach(store.Log);
+<span class="cmt">// ...</span>
+bridge.Dispose();</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px"><code>UnityLogBridge.Attach</code> brings Unity's own log into a store, through <code>Application.logMessageReceivedThreaded</code>: every <code>Debug.Log</code>, warning, error, failed assertion and unhandled exception, from any thread. Each is a record of <code>unity/Logged</code>, with the fields <code>Message</code>, <code>StackTrace</code> and <code>Type</code>, at the level its type maps to:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>LogType</th><th>Level</th></tr></thead>
+                <tbody>
+                  <tr><td>Log</td><td><code>Information</code></td></tr>
+                  <tr><td>Warning</td><td><code>Warning</code></td></tr>
+                  <tr><td>Error, Assert, Exception</td><td><code>Error</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">So an exception Unity reports brings the records that led to it to a sink with a backlog, and code that does not log through a <code>Log</code>, as other packages', reaches the same file as code that does. Rules hold it like any other category: <code>unity=warning</code> keeps only Unity's warnings and errors.</p>
+            <ul class="prose">
+              <li>The message and stack trace are kept by reference, so a message costs the store nothing Unity has not already allocated.</li>
+              <li>A bridged record has no call site: where Unity's log was called from is in its stack trace.</li>
+              <li>What <code>UnityConsoleSink</code> writes is not captured, and the sink does not write what the bridge captured, so the two never feed each other.</li>
+              <li>Attaching <code>default</code> throws <code>ArgumentException</code>, since it was never handed a store.</li>
+              <li>Attached in Play Mode in the editor, the bridge detaches itself when Play Mode ends, so a composition root that does not tear down still leaves nothing behind.</li>
+            </ul>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Registration</h3>
+            <p class="prose">The generator writes, into every category class, a registration method marked with both <code>[InitializeOnLoadMethod]</code>, so the editor registers the class's events when it loads the assembly, and <code>[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]</code>, so a player, and every entry to Play Mode, registers them before the first scene loads. Registering is idempotent, so entering Play Mode with domain reload off lists each event once. The package's own <code>log</code> and <code>unity</code> events are registered before any other.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Threads</h3>
+            <p class="prose">A <code>Log</code> can be written from any thread: a record is written under the store's lock, which holds only for the copy of its fields. The drain and its sinks run on the thread that pumps it, which with <code>LogPump</code> is the main thread. <code>UnityConsoleSink.Open</code> asks Unity where the project and its packages are, which Unity answers only on its main thread, so a drain with a Console sink is made on the main thread.</p>
+          </div>
+        </section>
+
+        <!-- ── Unity: Console Links & Builds ── -->
+        <section class="docs-section" id="guide-links">
+          <div class="section-eyebrow">Unity</div>
+          <h2 class="section-title">Console Links &amp; Builds</h2>
+          <p class="section-intro">
+            A record reaches the Console only when the drain writes it, so the stack Unity would capture is the drain's. The call site travels in the record instead: the generated method takes <code>[CallerFilePath]</code> and <code>[CallerLineNumber]</code>, two values the compiler writes as constants, so a call still allocates nothing.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Console links</h3>
+            <p class="prose"><code>UnityConsoleSink</code> ends each row with the call site as a Unity hyperlink:</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Console row</span></div>
+<pre class="code-block"><code>&lt;a href="Assets/Game/SaveManager.cs" line="42"&gt;SaveManager.cs:42&lt;/a&gt;</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">Unity compiles the assemblies of packages with <code>/pathmap:&lt;project&gt;=.</code>, so the compiler writes a package's file in the project relative to it, as <code>.\Packages\com.tutan.messages\Runtime\MessageBus.cs</code> on Windows. It compiles the assemblies under <code>Assets/</code> with no path map, so their files are written absolute, as is any file outside the project. The sink maps each to the path Unity opens:</p>
+            <div class="table-wrap">
+              <table class="docs-table docs-table--wrap">
+                <thead><tr><th>Compiled as</th><th>Opens as</th></tr></thead>
+                <tbody>
+                  <tr><td>C:\<wbr>Projects\<wbr>MyGame\<wbr>Assets\<wbr>Game\<wbr>SaveManager.cs</td><td><code>Assets/<wbr>Game/<wbr>SaveManager.cs</code></td></tr>
+                  <tr><td>.\<wbr>Packages\<wbr>com.tutan.messages\<wbr>Runtime\<wbr>MessageBus.cs</td><td><code>Packages/<wbr>com.tutan.messages/<wbr>Runtime/<wbr>MessageBus.cs</code></td></tr>
+                  <tr><td>.\<wbr>Library\<wbr>PackageCache\<wbr>com.tutan.messages@1.0.0\<wbr>Runtime\<wbr>MessageBus.cs</td><td><code>Packages/<wbr>com.tutan.messages/<wbr>Runtime/<wbr>MessageBus.cs</code></td></tr>
+                  <tr><td>A package folder anywhere on disk</td><td><code>Packages/<wbr>&lt;name&gt;/<wbr>...</code>, by the folder Unity registered it from</td></tr>
+                  <tr><td>.\<wbr>Assets\<wbr>Game\<wbr>SaveManager.cs</td><td><code>Assets/<wbr>Game/<wbr>SaveManager.cs</code>, as a path map of your own writes it</td></tr>
+                  <tr><td>A path outside the project</td><td>Kept as it is, with forward slashes</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">Each path is mapped once and then read from a table.</p>
+            <p class="prose">In the editor, a row written with <code>openOnDoubleClick</code> (the default) also opens the call site when it is double-clicked, as a <code>Debug.Log</code> written at that line does. Unity has no public way to say where a row opens, so this binds the internal <code>Debug.LogInfo</code>, <code>LogWarning</code> and <code>LogError</code> overloads that take a file and a line. It is kept apart from the sink, and Editor-only, so that a Unity upgrade that renames or removes them costs only the double-click: the sink falls back to rows with the link, for good, the first time binding or a call fails. <code>new UnityConsoleSink(openOnDoubleClick: false)</code> writes every row with the public API.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Caller paths in builds</h3>
+            <p class="prose">The compiler writes each calling file's path into the assembly as a constant, once per file, and the generator writes each event's declaring file the same way. Unity's <code>/pathmap:&lt;project&gt;=.</code> covers only the assemblies of packages, so a package's file in the project reaches a build relative to it.</p>
+            <p class="prose"><code>Assembly-CSharp</code> and every assembly defined under <code>Assets/</code> are compiled with no path map, so a build carries their files' absolute paths on the machine that built it, as <code>C:\Projects\MyGame\Assets\Game\SaveManager.cs</code>. So does a package whose folder is outside the project. Code that logs from an embedded package, a folder under <code>Packages/</code>, is compiled with Unity's path map like any other package's. A <code>-pathmap</code> in an assembly's <code>csc.rsp</code> maps the rest, though the option names the project's folder on one machine.</p>
+            <div class="callout callout--warn">
+              <strong>Absolute paths reach players</strong>
+              A player knows no project folder, so it writes an absolute call site as the compiler wrote it, with forward slashes, as <code>(at C:/Projects/MyGame/Assets/Game/SaveManager.cs:42)</code>.
+            </div>
+          </div>
+        </section>
+
+      </div><!-- .docs-content -->
+    </main>
+  </div><!-- .docs-shell -->
+
+  <!-- Sidebar toggle (mobile) -->
+  <button class="sidebar-toggle-btn" aria-label="Toggle navigation sidebar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <script src="src/main.js"></script>
+  <script src="src/docs.js"></script>
+</body>
+</html>

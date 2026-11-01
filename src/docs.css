@@ -72,12 +72,17 @@
 .sidebar-pkg-id--util {
   color: var(--util-color);
   background: var(--util-soft);
-  border: 1px solid rgba(249,115,22,0.15);
+  border: 1px solid rgba(6,182,212,0.15);
 }
 .sidebar-pkg-id--msg {
   color: var(--msg-color);
   background: var(--msg-soft);
-  border: 1px solid rgba(6,182,212,0.15);
+  border: 1px solid rgba(249,115,22,0.15);
+}
+.sidebar-pkg-id--log {
+  color: var(--log-color);
+  background: var(--log-soft);
+  border: 1px solid rgba(168,85,247,0.15);
 }
 
 .sidebar-pkg-name {
@@ -160,6 +165,7 @@
 .sidebar-link.active[data-pkg="func"] { color: var(--func-color); }
 .sidebar-link.active[data-pkg="util"] { color: var(--util-color); }
 .sidebar-link.active[data-pkg="msg"]  { color: var(--msg-color); }
+.sidebar-link.active[data-pkg="log"]  { color: var(--log-color); }
 
 /* --- Main Content --- */
 .docs-main {
@@ -214,12 +220,17 @@
 .docs-hero-badge--util {
   color: var(--util-color);
   background: var(--util-soft);
-  border: 1px solid rgba(249,115,22,0.2);
+  border: 1px solid rgba(6,182,212,0.2);
 }
 .docs-hero-badge--msg {
   color: var(--msg-color);
   background: var(--msg-soft);
-  border: 1px solid rgba(6,182,212,0.2);
+  border: 1px solid rgba(249,115,22,0.2);
+}
+.docs-hero-badge--log {
+  color: var(--log-color);
+  background: var(--log-soft);
+  border: 1px solid rgba(168,85,247,0.2);
 }
 
 .docs-hero-title {
@@ -313,7 +324,6 @@
 /* --- Section Anchors --- */
 .docs-section {
   padding-top: 64px;
-  scroll-margin-top: 80px;
 }
 
 .docs-section + .docs-section {
@@ -546,6 +556,9 @@ table.docs-table {
   white-space: nowrap;
 }
 
+/* For first columns holding paths or lists: wrap at spaces (or <wbr> in paths) rather than crush the other columns */
+.docs-table--wrap td:first-child { white-space: normal; overflow-wrap: break-word; }
+
 .docs-table code {
   font-family: var(--font-code);
   font-size: 0.82em;
@@ -611,6 +624,9 @@ table.docs-table {
 
 .api-kind {
   flex-shrink: 0;
+  /* As wide as the longest label ("method"), so every signature starts on one line */
+  min-width: calc(6ch + 14px);
+  text-align: center;
   font-size: 0.62rem;
   font-family: var(--font-code);
   font-weight: 600;
