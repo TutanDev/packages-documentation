@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Architecture — Unity Framework</title>
-  <meta name="description" content="UP-Architecture: compile-time layer enforcement for Löwy's Method. Five layers, one direction.">
+  <title>Architecture - Unity Framework</title>
+  <meta name="description" content="Tutan Architecture: a compile-time enforcer of Löwy's Method for Unity 6. Tag types with their layer, and the validator enforces the closed five-layer topology and the Design Don'ts.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="src/styles.css">
   <link rel="stylesheet" href="src/docs.css">
+  <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 </head>
 <body>
 
@@ -43,16 +46,17 @@
             <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="sidebar-items">
-            <a href="#guide-layers" class="sidebar-link" data-pkg="arch">The 5-Layer System</a>
+            <a href="#guide-layers" class="sidebar-link" data-pkg="arch">The Five Layers</a>
             <a href="#guide-tagging" class="sidebar-link" data-pkg="arch">Tagging Your Code</a>
-            <a href="#guide-usecases" class="sidebar-link" data-pkg="arch">Use Cases &amp; Events</a>
+            <a href="#guide-topology" class="sidebar-link" data-pkg="arch">Topology</a>
             <a href="#guide-validation" class="sidebar-link" data-pkg="arch">Validation Rules</a>
-            <a href="#guide-custom-rules" class="sidebar-link" data-pkg="arch">Custom Rules</a>
             <a href="#guide-settings" class="sidebar-link" data-pkg="arch">Settings &amp; Enforcement</a>
+            <a href="#guide-runtime" class="sidebar-link" data-pkg="arch">Wiring at Runtime</a>
           </div>
         </div>
 
         <a href="architecture-api.html" class="sidebar-direct" data-pkg="arch">API Reference →</a>
+        <a href="hosting.html" class="sidebar-direct" data-pkg="arch">Hosting →</a>
       </nav>
     </aside>
 
@@ -62,10 +66,10 @@
       <!-- ── Getting Started Hero ── -->
       <section class="docs-hero" id="getting-started">
         <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--arch-glow) 0%, transparent 70%)" aria-hidden="true"></div>
-        <span class="docs-hero-badge docs-hero-badge--arch">com.tutan.architecture · v2.0.0</span>
-        <h1 class="docs-hero-title">Enforce Architecture<br>at Compile Time</h1>
+        <span class="docs-hero-badge docs-hero-badge--arch">com.tutan.architecture · v4.0.0</span>
+        <h1 class="docs-hero-title">Enforce Löwy's Method<br>at Compile Time</h1>
         <p class="docs-hero-desc">
-          UP-Architecture implements Löwy's Method in Unity. Tag your types, and the validator enforces a strict 5-layer topology — no upward calls, no skipped layers, no sideways dependencies.
+          Tag types and assemblies with their layer and run validation, all without leaving the editor. The package enforces Löwy's closed, volatility-based architecture: five layers (Client → Manager → Engine → ResourceAccess → Resource), a fixed dependency topology, and the structural Design Don'ts. Tagging is all the validator asks of your code: no base class, no interface, no lifecycle methods.
         </p>
         <div class="docs-hero-stats">
           <div>
@@ -73,49 +77,47 @@
             <span class="docs-stat-label">Layers</span>
           </div>
           <div>
-            <span class="docs-stat-value" style="color:var(--arch-color)">7</span>
-            <span class="docs-stat-label">Rule Sets</span>
+            <span class="docs-stat-value" style="color:var(--arch-color)">5</span>
+            <span class="docs-stat-label">Rule Families</span>
           </div>
           <div>
-            <span class="docs-stat-value" style="color:var(--arch-color)">24+</span>
-            <span class="docs-stat-label">Validations</span>
+            <span class="docs-stat-value" style="color:var(--arch-color)">13</span>
+            <span class="docs-stat-label">Findings</span>
           </div>
         </div>
 
-        <div class="steps">
+        <div class="callout callout--note" style="margin-top:8px">
+          <strong>Opinionated by design</strong>
+          Internally the rules are data-driven and unit-tested, but the architecture they enforce is fixed: there is no layer, topology or rule configuration to edit, only how loudly violations are reported. The package has no dependencies and targets Unity 6000.1 and above.
+        </div>
+
+        <div class="steps" style="margin-top:28px">
           <div class="step">
             <div class="step-num" style="border-color:var(--arch-color);color:var(--arch-color)">1</div>
             <div class="step-body">
-              <div class="step-title">Install via Framework</div>
-              <div class="step-desc">Install <code>com.tutan.framework</code> — it pulls in Architecture, Functional, and Utilities automatically. <code>FrameworkBootstrap</code> handles initialization order for you.</div>
+              <div class="step-title">Install the package</div>
+              <div class="step-desc">Open <strong>Window → Package Manager</strong>, click <strong>+</strong> → <em>Add package from disk…</em>, and select <code>Packages/com.tutan.architecture/package.json</code>. There is nothing to configure.</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num" style="border-color:var(--arch-color);color:var(--arch-color)">2</div>
             <div class="step-body">
               <div class="step-title">Tag your first type</div>
-              <div class="step-desc">Add a <strong>layer attribute</strong> (<code>[Manager]</code>, <code>[Engine]</code>, etc.) and implement the matching <strong>layer interface</strong> (<code>IManager</code>, <code>IEngine</code>, etc.). The interface provides <code>InstallAsync()</code> and <code>Remove()</code> lifecycle methods.</div>
+              <div class="step-desc">Add a <strong>layer attribute</strong> such as <code>[Manager]</code>, or the explicit <code>[Layer(LayerId.Manager)]</code>. To tag every type in an assembly at once, use <code>[assembly: AssemblyLayer(LayerId.Engine)]</code>.</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num" style="border-color:var(--arch-color);color:var(--arch-color)">3</div>
             <div class="step-body">
-              <div class="step-title">Register in the container</div>
-              <div class="step-desc">In a <code>[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]</code> method, register your types on <code>FrameworkBootstrap.Container</code> using <code>AddManager&lt;T&gt;()</code>, <code>AddEngine&lt;T&gt;()</code>, etc. The container resolves constructor dependencies and calls <code>InstallAsync()</code> in layer order.</div>
+              <div class="step-title">Run validation</div>
+              <div class="step-desc">Open <strong>Tools → Architecture → Validate Now</strong>. Violations appear in the Console with rule ids such as <code>ARCH001</code>. Validation also runs after every domain reload.</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num" style="border-color:var(--arch-color);color:var(--arch-color)">4</div>
             <div class="step-body">
-              <div class="step-title">Run validation</div>
-              <div class="step-desc">Open <strong>Window → Architecture → Validate Now</strong>. Violations appear in the console with rule IDs like <code>ARCH001</code>.</div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num" style="border-color:var(--arch-color);color:var(--arch-color)">5</div>
-            <div class="step-body">
-              <div class="step-title">Configure enforcement</div>
-              <div class="step-desc">Open <strong>Edit → Project Settings → Architecture</strong>. The settings asset is created automatically on first visit. Set enforcement mode (WarningsOnly → Strict), add utility assembly names, and run validation inline from the same panel.</div>
+              <div class="step-title">Choose an enforcement mode</div>
+              <div class="step-desc">Open <strong>Edit → Project Settings → Architecture</strong> to set the mode (Off, WarningsOnly, ErrorsForCore or Strict) and browse each finding with its rule's <em>Why</em> and <em>Fix</em>.</div>
             </div>
           </div>
         </div>
@@ -123,72 +125,65 @@
 
       <div class="docs-content">
 
-        <!-- ── Guide: 5-Layer System ── -->
+        <!-- ── Guide: The Five Layers ── -->
         <section class="docs-section" id="guide-layers">
           <div class="section-eyebrow">Guides</div>
-          <h2 class="section-title">The 5-Layer System</h2>
+          <h2 class="section-title">The Five Layers</h2>
           <p class="section-intro">
-            Löwy's Method organizes every type by volatility — how likely it is to change. The most volatile code (UI, controllers) sits at the top; the most stable (schemas, configs) at the bottom. Dependencies flow strictly downward, one layer at a time.
+            The layers are fixed, and their order is their volatility rank: Client is the most volatile, Resource the most stable. Dependencies flow from more volatile layers toward more stable ones, according to the <a href="#guide-topology">topology</a>.
           </p>
 
           <div class="table-wrap">
             <table class="docs-table">
-              <thead><tr><th>Layer</th><th>Question It Answers</th><th>Volatility</th><th>Naming</th></tr></thead>
+              <thead><tr><th>Rank</th><th>Layer</th><th>Role</th><th>Suffix</th><th>Gerund policy</th></tr></thead>
               <tbody>
-                <tr><td>[Client]</td><td>Who uses this system?</td><td>Highest — UI, entry points</td><td>No required suffix</td></tr>
-                <tr><td>[Manager]</td><td>What business rules apply?</td><td>High — business logic</td><td>Must end with <code>Manager</code></td></tr>
-                <tr><td>[Engine]</td><td>How is the work performed?</td><td>Medium — algorithms</td><td>Must end with <code>Engine</code></td></tr>
-                <tr><td>[ResourceAccess]</td><td>Where is the data?</td><td>Low — data access</td><td>Must end with <code>Access</code></td></tr>
-                <tr><td>[Resource]</td><td>What is the raw data?</td><td>Lowest — schemas, configs</td><td>No required suffix</td></tr>
+                <tr><td>0</td><td><code>LayerId.Client</code></td><td><em>Who</em></td><td>none</td><td>none</td></tr>
+                <tr><td>1</td><td><code>LayerId.Manager</code></td><td><em>What</em></td><td><code>Manager</code></td><td>forbid</td></tr>
+                <tr><td>2</td><td><code>LayerId.Engine</code></td><td><em>How (Business)</em></td><td><code>Engine</code></td><td>require</td></tr>
+                <tr><td>3</td><td><code>LayerId.ResourceAccess</code></td><td><em>How (Resource)</em></td><td><code>Access</code></td><td>forbid</td></tr>
+                <tr><td>4</td><td><code>LayerId.Resource</code></td><td><em>Where</em></td><td>none</td><td>none</td></tr>
               </tbody>
             </table>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Client</h3>
-            <p class="prose">The entry point to the system. Clients receive user input, subscribe to events, and call Managers to execute use cases. A Client should call <strong>one Manager per use case</strong> — never call an Engine or ResourceAccess directly.</p>
+            <p class="prose">The entry point to the system. Clients receive user input and call Managers to execute use cases. Under Löwy's Method a Client should call <strong>one Manager per use case</strong>, a topology cardinality cap reported as <code>DONT001</code>.</p>
             <div class="code-card code-card--arch">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">LobbyClient.cs</span></div>
-<pre class="code-block"><code><span class="attr">[Client]</span>
-<span class="kw">public class</span> <span class="type">LobbyClient</span> : <span class="type">IClient</span>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Architecture;
+
+<span class="attr">[Layer(LayerId.Client, Name = <span class="str">"Lobby Client"</span>, Description = <span class="str">"Handles lobby UI interactions"</span>)]</span>
+<span class="kw">public class</span> <span class="type">LobbyClient</span>
 {
     <span class="kw">private readonly</span> <span class="type">SessionManager</span> _sessionManager;
 
-    <span class="kw">public</span> LobbyClient(<span class="type">SessionManager</span> sessionManager)
-        => _sessionManager = sessionManager;
+    <span class="kw">public</span> <span class="type">LobbyClient</span>(<span class="type">SessionManager</span> sessionManager)
+    {
+        _sessionManager = sessionManager;
+    }
 
-    <span class="kw">public</span> ValueTask&lt;<span class="type">InstallResult</span>&gt; InstallAsync()
-        => <span class="kw">new</span>(<span class="type">InstallResult</span>.Success());
-
-    <span class="kw">public void</span> Remove() { }
-
-    <span class="kw">public void</span> OnJoinPressed(<span class="kw">string</span> roomCode)
-        => _sessionManager.JoinSession(roomCode);
+    <span class="kw">public void</span> OnJoinPressed(<span class="kw">string</span> roomCode) =&gt; _sessionManager.JoinSession(roomCode);
 }</code></pre>
             </div>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Manager</h3>
-            <p class="prose">Orchestrates business logic by coordinating Engines and ResourceAccess. Managers are the <strong>only</strong> layer that may publish events to the Messages. They implement use cases — one method per use case entry point. Constructor dependencies are injected by <code>FrameworkContainer</code>.</p>
+            <p class="prose">The orchestrator of business logic. Managers coordinate Engines and ResourceAccess components to fulfill a use case.</p>
             <div class="code-card code-card--arch">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SessionManager.cs</span></div>
-<pre class="code-block"><code><span class="attr">[Manager]</span>
-<span class="kw">public class</span> <span class="type">SessionManager</span> : <span class="type">IManager</span>
+<pre class="code-block"><code><span class="attr">[Layer(LayerId.Manager, Name = <span class="str">"Session Manager"</span>, Description = <span class="str">"Orchestrates session lifecycle"</span>)]</span>
+<span class="kw">public class</span> <span class="type">SessionManager</span>
 {
     <span class="kw">private readonly</span> <span class="type">ValidatingEngine</span> _validator;
     <span class="kw">private readonly</span> <span class="type">SessionAccess</span> _sessionAccess;
 
-    <span class="kw">public</span> SessionManager(<span class="type">ValidatingEngine</span> validator, <span class="type">SessionAccess</span> access)
+    <span class="kw">public</span> <span class="type">SessionManager</span>(<span class="type">ValidatingEngine</span> validator, <span class="type">SessionAccess</span> sessionAccess)
     {
         _validator = validator;
-        _sessionAccess = access;
+        _sessionAccess = sessionAccess;
     }
-
-    <span class="kw">public</span> ValueTask&lt;<span class="type">InstallResult</span>&gt; InstallAsync()
-        => <span class="kw">new</span>(<span class="type">InstallResult</span>.Success());
-
-    <span class="kw">public void</span> Remove() { }
 
     <span class="kw">public void</span> JoinSession(<span class="kw">string</span> roomCode)
     {
@@ -201,181 +196,193 @@
 
           <div class="sub-section">
             <h3 class="sub-title">Engine</h3>
-            <p class="prose">Performs a single algorithm or activity. Engines answer <em>how</em> — computation without knowing why or when it runs. An Engine must not call another Engine.</p>
+            <p class="prose">Performs a single activity or algorithm. Engines answer <em>how</em>: they encapsulate computation without knowing why or when it runs. An Engine must <strong>not</strong> call another Engine (<code>DONT011</code>), and its name should carry a gerund prefix (<code>NAME002</code>).</p>
+            <div class="code-card code-card--arch">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">ValidatingEngine.cs</span></div>
+<pre class="code-block"><code><span class="attr">[Layer(LayerId.Engine, Name = <span class="str">"Validating Engine"</span>, Description = <span class="str">"Room code validation logic"</span>)]</span>
+<span class="kw">public class</span> <span class="type">ValidatingEngine</span>
+{
+    <span class="kw">public bool</span> IsValidRoomCode(<span class="kw">string</span> code) =&gt; !<span class="kw">string</span>.IsNullOrEmpty(code) &amp;&amp; code.Length == <span class="num">6</span>;
+}</code></pre>
+            </div>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">ResourceAccess</h3>
-            <p class="prose">Abstracts external resources: databases, file systems, network endpoints, Unity asset bundles. A ResourceAccess must not call another ResourceAccess.</p>
+            <p class="prose">Abstracts access to external resources: databases, file systems, network endpoints, Unity asset bundles. A ResourceAccess must <strong>not</strong> call another ResourceAccess (<code>DONT012</code>). It is a terminal data layer, where a use case ultimately reads or writes its data.</p>
+            <div class="code-card code-card--arch">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SessionAccess.cs</span></div>
+<pre class="code-block"><code><span class="attr">[Layer(LayerId.ResourceAccess, Name = <span class="str">"Session Access"</span>, Description = <span class="str">"Network session connectivity"</span>)]</span>
+<span class="kw">public class</span> <span class="type">SessionAccess</span>
+{
+    <span class="kw">private readonly</span> <span class="type">SessionConfig</span> _config;
+
+    <span class="kw">public</span> <span class="type">SessionAccess</span>(<span class="type">SessionConfig</span> config) =&gt; _config = config;
+
+    <span class="kw">public void</span> Connect(<span class="kw">string</span> roomCode) { <span class="cmt">/* use _config to establish connection */</span> }
+}</code></pre>
+            </div>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Resource</h3>
-            <p class="prose">Raw data: ScriptableObjects, JSON schemas, configuration assets, external service contracts. Resources have no dependencies on other architecture layers — they are the stable foundation.</p>
+            <p class="prose">Raw data: ScriptableObjects, JSON schemas, configuration assets, external service contracts. Resources sit at the bottom of the volatility hierarchy, the other terminal data layer.</p>
+            <div class="code-card code-card--arch">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SessionConfig.cs</span></div>
+<pre class="code-block"><code><span class="attr">[Layer(LayerId.Resource, Name = <span class="str">"Session Config"</span>)]</span>
+<span class="kw">public class</span> <span class="type">SessionConfig</span>
+{
+    <span class="kw">public string</span> ServerUrl;
+    <span class="kw">public int</span> MaxPlayers;
+    <span class="kw">public float</span> TimeoutSeconds;
+}</code></pre>
+            </div>
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title">Utility (cross-cutting)</h3>
-            <p class="prose">Not a layer in the enum. Types marked <code>[Utility]</code> can be depended upon by any layer without violating the closed architecture. The litmus test: <em>"Could a smart cappuccino machine use this?"</em> Logging, serialization helpers, the Messages — all pass.</p>
-            <div class="callout callout--note">
-              <strong>Resolution order</strong>
-              Type-level attribute overrides assembly-level attribute. If a type has <code>[Manager]</code> but its assembly is tagged <code>[assembly: AssemblyLayer(Engine)]</code>, the type is a Manager.
+            <h3 class="sub-title">Utilities are simply untagged</h3>
+            <p class="prose">There is no <code>[Utility]</code> attribute. Only types that carry a layer attribute, or inherit one from <code>[assembly: AssemblyLayer]</code>, are tracked, and the scanner only creates dependency edges <em>between tracked types</em>. A cross-cutting helper such as logging, serialization, math or the message bus participates in no edges as long as it is not tagged with a layer. To exempt a type, do not give it a layer.</p>
+            <p class="prose" style="margin-top:12px">Whole assemblies are also treated as <strong>transparent</strong> by name prefix and are never tracked, including <code>System.*</code>, <code>UnityEngine.*</code>, <code>UnityEditor.*</code>, <code>Unity.*</code> and <code>Tutan.Functional</code>.</p>
+            <div class="callout callout--tip">
+              <strong>The cappuccino machine test</strong>
+              A type qualifies as domain-agnostic infrastructure if a smart cappuccino machine could use it too. If yes, leave it untagged. The companion package <a href="hosting.html#guide-utilities"><code>com.tutan.hosting</code></a> registers such a type with <code>AddUtility&lt;T&gt;()</code>, and checks the one Utility rule the validator cannot: a Utility may depend only on other Utilities.
             </div>
           </div>
         </section>
 
-        <!-- ── Guide: Tagging ── -->
+        <!-- ── Guide: Tagging Your Code ── -->
         <section class="docs-section" id="guide-tagging">
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Tagging Your Code</h2>
           <p class="section-intro">
-            Every tracked type needs a <strong>layer attribute</strong> (identifies the layer) and a <strong>layer interface</strong> (provides <code>InstallAsync()</code>/<code>Remove()</code> lifecycle methods). You can also tag entire assemblies with <code>[assembly: AssemblyLayer]</code>, or mark infrastructure as <code>[Utility]</code>.
+            A type joins the architecture through a <strong>layer attribute</strong> that names its layer. It needs no base class and no interface. The <code>LayerId</code> enum ships with the package, so the layers are compile-time safe.
           </p>
 
           <div class="sub-section">
-            <h3 class="sub-title">Attribute + interface</h3>
-            <p class="prose">Each layer has a shorthand attribute and a matching interface. The attribute is sealed, non-inherited, and allows only one per type. The interface provides lifecycle hooks that <code>FrameworkContainer</code> calls during bootstrap.</p>
+            <h3 class="sub-title">Type-level attributes</h3>
+            <p class="prose">Each layer has a shorthand attribute: <code>[Client]</code>, <code>[Manager]</code>, <code>[Engine]</code>, <code>[ResourceAccess]</code> and <code>[Resource]</code>. They are thin <code>LayerAttribute</code> subclasses, so <code>[Manager]</code> is exactly <code>[Layer(LayerId.Manager)]</code>. Use the explicit form when you want to attach editor metadata.</p>
             <div class="code-card code-card--arch">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SessionManager.cs</span></div>
-<pre class="code-block"><code><span class="kw">using</span> System.Threading.Tasks;
-<span class="kw">using</span> Tutan.Architecture;
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">InventoryManager.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Architecture;
 
-<span class="attr">[Manager]</span>
-<span class="kw">public class</span> <span class="type">SessionManager</span> : <span class="type">IManager</span>
-{
-    <span class="kw">public async</span> ValueTask&lt;<span class="type">InstallResult</span>&gt; InstallAsync()
-    {
-        <span class="cmt">// Initialize this component</span>
-        <span class="kw">return</span> <span class="type">InstallResult</span>.Success();
-    }
+<span class="attr">[Manager]</span>                     <span class="cmt">// shorthand</span>
+<span class="kw">public class</span> <span class="type">InventoryManager</span> { <span class="cmt">/* ... */</span> }
 
-    <span class="kw">public void</span> Remove()
-    {
-        <span class="cmt">// Teardown this component</span>
-    }
-}</code></pre>
+<span class="attr">[Layer(LayerId.Manager, Name = <span class="str">"Inventory Manager"</span>, Description = <span class="str">"Inventory business logic"</span>)]</span>
+<span class="kw">public class</span> <span class="type">InventoryManager</span> { <span class="cmt">/* ... */</span> }   <span class="cmt">// exactly equivalent, with editor metadata</span></code></pre>
             </div>
-            <div class="table-wrap" style="margin-top:16px">
-              <table class="docs-table">
-                <thead><tr><th>Attribute</th><th>Interface</th><th>Lifecycle</th></tr></thead>
-                <tbody>
-                  <tr><td><code>[Client]</code></td><td><code>IClient</code></td><td><code>InstallAsync()</code> / <code>Remove()</code></td></tr>
-                  <tr><td><code>[Manager]</code></td><td><code>IManager</code></td><td><code>InstallAsync()</code> / <code>Remove()</code></td></tr>
-                  <tr><td><code>[Engine]</code></td><td><code>IEngine</code></td><td><code>InstallAsync()</code> / <code>Remove()</code></td></tr>
-                  <tr><td><code>[ResourceAccess]</code></td><td><code>IResourceAccess</code></td><td><code>InstallAsync()</code> / <code>Remove()</code></td></tr>
-                  <tr><td><code>[Resource]</code></td><td><code>IResource</code></td><td><code>InstallAsync()</code> / <code>Remove()</code></td></tr>
-                </tbody>
-              </table>
-            </div>
+            <p class="prose" style="margin-top:12px">A layer attribute targets classes and interfaces only: structs, enums and delegates are not tracked. It is <strong>not inherited</strong>, so a subclass does not get its parent's layer, and a type belongs to exactly one layer.</p>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Assembly-level tagging</h3>
-            <p class="prose">When every type in an assembly belongs to the same layer, tag the assembly once in <code>AssemblyInfo.cs</code>. Type-level attributes still override this for exceptions.</p>
+            <p class="prose">When every type in an assembly belongs to the same layer, tag the assembly once in an <code>AssemblyInfo.cs</code> at its root. If a few types differ, override them with a type-level attribute.</p>
             <div class="code-card code-card--arch">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AssemblyInfo.cs</span></div>
 <pre class="code-block"><code><span class="kw">using</span> Tutan.Architecture;
 
-<span class="cmt">// All types in this assembly are treated as Engine-layer</span>
-[<span class="kw">assembly</span>: <span class="type">AssemblyLayer</span>(<span class="type">ArchitectureLayer</span>.Engine)]
+<span class="cmt">// All types in this assembly are treated as Engine-layer...</span>
+[<span class="kw">assembly</span>: <span class="type">AssemblyLayer</span>(<span class="type">LayerId</span>.Engine)]
 
-<span class="cmt">// This one type overrides the assembly tag</span>
-<span class="attr">[Utility]</span>
-<span class="kw">internal static class</span> <span class="type">InternalMathHelpers</span> { }</code></pre>
+<span class="cmt">// ...except this one, whose type-level tag wins</span>
+<span class="attr">[Layer(LayerId.Manager)]</span>
+<span class="kw">public class</span> <span class="type">CoordinatingManager</span> { <span class="cmt">/* ... */</span> }</code></pre>
             </div>
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title">Marking infrastructure as Utility</h3>
-            <p class="prose"><code>[Utility]</code> is not a layer attribute — it's a declaration that this type is domain-agnostic and can be used by any layer. Whole assemblies can be designated as Utility via <code>FrameworkSettings.UtilityAssemblies</code>.</p>
-            <div class="callout callout--tip">
-              <strong>When to use Utility</strong>
-              Logging facades, math helpers, serialization wrappers, the Messages, timers, audio. If the code has no business domain knowledge, it's Utility.
-            </div>
-          </div>
-
-          <div class="sub-section">
-            <h3 class="sub-title">Marker interfaces</h3>
-            <p class="prose">Optional interfaces (<code>IClient</code>, <code>IManager</code>, etc.) let you create generic constraints restricted to a specific layer. Implementing them does not assign a layer — you still need an attribute.</p>
-            <div class="code-card code-card--arch">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">ServiceLocator.cs</span></div>
-<pre class="code-block"><code><span class="kw">public class</span> <span class="type">ManagerLocator</span>
-{
-    <span class="kw">public</span> T Resolve&lt;T&gt;() <span class="kw">where</span> T : <span class="kw">class</span>, <span class="type">IManager</span>
-    {
-        <span class="cmt">// Only Manager-layer types can be resolved</span>
-        <span class="kw">return default</span>;
-    }
-}</code></pre>
-            </div>
-          </div>
-
-          <div class="sub-section">
-            <h3 class="sub-title">Right-click context menu</h3>
-            <p class="prose">Right-click any <code>.cs</code> file in the Project window and choose <strong>Architecture → Assign Layer → …</strong> to insert (or replace) the layer attribute directly in the source file. This avoids typing the attribute manually and handles the case where a different layer attribute is already present.</p>
+            <h3 class="sub-title">Resolution order</h3>
             <div class="table-wrap">
               <table class="docs-table">
-                <thead><tr><th>Menu item</th><th>Inserts</th></tr></thead>
+                <thead><tr><th>Step</th><th>The scanner finds</th><th>Result</th></tr></thead>
                 <tbody>
-                  <tr><td>Assign Layer → Client</td><td><code>[Client]</code></td></tr>
-                  <tr><td>Assign Layer → Manager</td><td><code>[Manager]</code></td></tr>
-                  <tr><td>Assign Layer → Engine</td><td><code>[Engine]</code></td></tr>
-                  <tr><td>Assign Layer → ResourceAccess</td><td><code>[ResourceAccess]</code></td></tr>
-                  <tr><td>Assign Layer → Resource</td><td><code>[Resource]</code></td></tr>
-                  <tr><td>Assign Layer → Utility</td><td><code>[Utility]</code></td></tr>
+                  <tr><td>1</td><td><code>[Layer(id)]</code> or a shorthand on the type</td><td>That layer (<code>LayerResolutionSource.TypeAttribute</code>)</td></tr>
+                  <tr><td>2</td><td><code>[assembly: AssemblyLayer(id)]</code> on its assembly</td><td>That layer (<code>LayerResolutionSource.AssemblyAttribute</code>)</td></tr>
+                  <tr><td>3</td><td>Neither</td><td>The type is untracked: not scanned, not validated</td></tr>
                 </tbody>
               </table>
             </div>
-            <p class="prose" style="margin-top:12px">The menu only activates when a single <code>.cs</code> file is selected. If no public class, struct, or interface is found in the file, a warning is logged and no changes are made.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Suppressing a rule</h3>
+            <p class="prose">For an intentional, documented exception, put <code>[SuppressArchRule]</code> on the type. It may be applied several times to suppress several rules, and a family prefix such as <code>"DONT"</code> covers every finding in that family. Use suppression sparingly: each one is a reviewable exception to the architecture.</p>
+            <div class="code-card code-card--arch">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">CheckoutManager.cs</span></div>
+<pre class="code-block"><code><span class="attr">[Layer(LayerId.Manager)]</span>
+<span class="attr">[SuppressArchRule(<span class="str">"DONT001"</span>, Reason = <span class="str">"This screen orchestrates a multi-step wizard; two managers are intentional."</span>)]</span>
+<span class="kw">public class</span> <span class="type">CheckoutManager</span> { <span class="cmt">/* ... */</span> }</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Assign Layer from the Project window</h3>
+            <p class="prose">Right-click a script and choose <strong>Assets → Architecture → Assign Layer…</strong>. The picker lists the five Löwy layers and puts the chosen shorthand attribute on the script's first type declaration, replacing a layer attribute that is already there.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">When to use which</h3>
+            <div class="table-wrap">
+              <table class="docs-table docs-table--wrap">
+                <thead><tr><th>Scenario</th><th>Approach</th></tr></thead>
+                <tbody>
+                  <tr><td>Single type in a mixed assembly</td><td><code>[Layer(LayerId.X)]</code>, or its shorthand such as <code>[Manager]</code></td></tr>
+                  <tr><td>Add editor metadata</td><td><code>[Layer(LayerId.Manager, Name = "…", Description = "…")]</code></td></tr>
+                  <tr><td>Entire assembly is one layer</td><td><code>[assembly: AssemblyLayer(LayerId.X)]</code> in <code>AssemblyInfo.cs</code></td></tr>
+                  <tr><td>Cross-cutting helper</td><td>Leave it untagged</td></tr>
+                  <tr><td>Intentional, documented exception</td><td><code>[SuppressArchRule("RULEID", Reason = "…")]</code></td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
-        <!-- ── Guide: Use Cases & Events ── -->
-        <section class="docs-section" id="guide-usecases">
+        <!-- ── Guide: Topology ── -->
+        <section class="docs-section" id="guide-topology">
           <div class="section-eyebrow">Guides</div>
-          <h2 class="section-title">Use Cases &amp; Events</h2>
+          <h2 class="section-title">Topology</h2>
           <p class="section-intro">
-            Annotate Manager methods with <code>[UseCase]</code> to declare use case entry points. Use <code>[Publishes]</code> and <code>[SubscribesTo]</code> to document message flow without runtime coupling.
+            In Löwy's Method the architecture is <strong>closed</strong>: every call passes through the immediately adjacent layer below. Skipping layers is a violation, upward calls are never permitted, and same-layer calls are forbidden. Each layer stays a complete abstraction boundary that can change without affecting the layers above or below.
           </p>
 
           <div class="sub-section">
-            <h3 class="sub-title">[UseCase] on Manager methods</h3>
-            <p class="prose">Apply <code>[UseCase("name")]</code> to public methods on Manager types. The validator traces the call chain from each annotated method through the dependency graph (BFS), validating topology and coverage.</p>
-            <div class="code-card code-card--arch">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">OrderManager.cs</span></div>
-<pre class="code-block"><code><span class="attr">[Manager]</span>
-<span class="kw">public class</span> <span class="type">OrderManager</span>
-{
-    <span class="attr">[UseCase(<span class="str">"PlaceOrder"</span>)]</span>
-    <span class="kw">public void</span> HandlePlaceOrder(<span class="type">OrderRequest</span> req) { <span class="cmt">/* ... */</span> }
-
-    <span class="attr">[UseCase(<span class="str">"CancelOrder"</span>)]</span>
-    <span class="kw">public void</span> HandleCancelOrder(<span class="kw">string</span> orderId) { <span class="cmt">/* ... */</span> }
-}</code></pre>
+            <h3 class="sub-title">The allowed directions</h3>
+            <p class="prose">Read the matrix as <em>"Can the row depend on the column?"</em> Any pair without an allowed cell is disallowed, including the diagonal.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th></th><th>Client</th><th>Manager</th><th>Engine</th><th>ResourceAccess</th><th>Resource</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Client</strong></td><td>✗</td><td>✓ (max 1)</td><td>✗</td><td>✗</td><td>✗</td></tr>
+                  <tr><td><strong>Manager</strong></td><td>✗</td><td>✗</td><td>✓</td><td>✓</td><td>✗</td></tr>
+                  <tr><td><strong>Engine</strong></td><td>✗</td><td>✗</td><td>✗</td><td>✓</td><td>✗</td></tr>
+                  <tr><td><strong>ResourceAccess</strong></td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>✓</td></tr>
+                  <tr><td><strong>Resource</strong></td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td></tr>
+                </tbody>
+              </table>
             </div>
+            <p class="prose">Manager → ResourceAccess is the one skip: a Manager may reach ResourceAccess directly when a use case needs data without computation. The Client → Manager cap of one encodes Löwy's "one Manager per use case"; a Client that depends on two or more Managers is reported as <code>DONT001</code>.</p>
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title">[Publishes] and [SubscribesTo]</h3>
-            <p class="prose">Declare which message types a class publishes or subscribes to. These are validated by the MSGBUS rules. Only Managers should publish events; Managers and Clients may subscribe.</p>
-            <div class="code-card code-card--arch">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SessionTypes.cs</span></div>
-<pre class="code-block"><code><span class="cmt">// Manager publishes events when state changes</span>
-<span class="attr">[Manager]</span>
-<span class="attr">[Publishes(<span class="kw">typeof</span>(<span class="type">SessionStarted</span>))]</span>
-<span class="attr">[Publishes(<span class="kw">typeof</span>(<span class="type">SessionEnded</span>))]</span>
-<span class="kw">public class</span> <span class="type">SessionManager</span> { }
-
-<span class="cmt">// Client subscribes to react to events</span>
-<span class="attr">[Client]</span>
-<span class="attr">[SubscribesTo(<span class="kw">typeof</span>(<span class="type">SessionStarted</span>))]</span>
-<span class="kw">public class</span> <span class="type">LobbyClient</span> { }</code></pre>
-            </div>
+            <h3 class="sub-title">Why same-layer is forbidden</h3>
+            <p class="prose">Same-layer dependencies tie two components that share a volatility profile into a single unit of change, the hallmark of <strong>functional decomposition</strong>. If two Engines need coordination, a Manager orchestrates them (<code>DONT011</code>). If two data sources must be combined, a Manager decides which (<code>DONT012</code>). Clients are independent entry points, and each Manager owns one area of business logic.</p>
           </div>
 
-          <div class="callout callout--note">
-            <strong>How use case tracing works</strong>
-            After tagging, open <strong>Window → Architecture → Validation</strong> and switch to the <em>Use Cases</em> tab. Each <code>[UseCase]</code> entry point is shown with its BFS call chain depth, layers visited, and any USECASE001–003 violations.
+          <div class="sub-section">
+            <h3 class="sub-title">Querying the topology</h3>
+            <p class="prose">The topology is data: a list of <code>TopologyCell</code> entries in <code>LowyTopology.Cells</code>, queried through the shared <code>LowyTopology.Instance</code>. The rules read it, and so does the runtime container in <code>com.tutan.hosting</code>, so the two cannot disagree.</p>
+            <div class="code-card code-card--arch">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">TopologyQueries.cs</span></div>
+<pre class="code-block"><code><span class="type">LayerTopology</span> topology = <span class="type">LowyTopology</span>.Instance;
+
+topology.IsAllowed(<span class="type">LayerId</span>.Manager, <span class="type">LayerId</span>.Engine);   <span class="cmt">// true</span>
+topology.IsAllowed(<span class="type">LayerId</span>.Client,  <span class="type">LayerId</span>.Engine);   <span class="cmt">// false: Client may not skip to Engine</span>
+topology.IsAllowed(<span class="type">LayerId</span>.Engine,  <span class="type">LayerId</span>.Engine);   <span class="cmt">// false: same-layer</span>
+topology.IsAllowed(<span class="type">LayerId</span>.Engine,  <span class="type">LayerId</span>.Manager);  <span class="cmt">// false: upward</span>
+
+topology.MaxCount(<span class="type">LayerId</span>.Client, <span class="type">LayerId</span>.Manager);    <span class="cmt">// 1 under Löwy's Method</span>
+topology.GetAllowedTargets(<span class="type">LayerId</span>.Manager);           <span class="cmt">// { Engine, ResourceAccess }</span></code></pre>
+            </div>
           </div>
         </section>
 
@@ -384,159 +391,142 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Validation Rules</h2>
           <p class="section-intro">
-            Seven rule sets run after every compilation (or on demand). Each rule has a unique ID that appears in console output and the Validation window.
+            The validator runs a fixed set of rules against the scanned dependency graph. Every finding carries a rule id, such as <code>DONT002</code>, and the settings page shows each rule's plain-English <em>Why</em> and <em>Fix</em>.
           </p>
 
           <div class="table-wrap">
             <table class="docs-table">
-              <thead><tr><th>Rule ID</th><th>Category</th><th>What It Checks</th></tr></thead>
+              <thead><tr><th>Rule id</th><th>Severity</th><th>What it checks</th></tr></thead>
               <tbody>
-                <tr><td>ARCH001</td><td>Closed Architecture</td><td>Dependencies only flow downward through adjacent layers. No skipping layers, no upward calls.</td></tr>
-                <tr><td>DONT001</td><td>Design Don'ts</td><td>Client calls only one Manager per use case entry point.</td></tr>
-                <tr><td>DONT002</td><td>Design Don'ts</td><td>Client must not depend on an Engine directly — must go through a Manager.</td></tr>
-                <tr><td>DONT006</td><td>Design Don'ts</td><td>Engine, ResourceAccess, and Resource must not access the Messages — only Managers may publish or subscribe.</td></tr>
-                <tr><td>DONT011</td><td>Design Don'ts</td><td>Engine does not call another Engine.</td></tr>
-                <tr><td>DONT012</td><td>Design Don'ts</td><td>ResourceAccess does not call another ResourceAccess.</td></tr>
-                <tr><td>NAME001</td><td>Naming</td><td>Manager types end with <code>Manager</code>; Engine types end with <code>Engine</code>.</td></tr>
-                <tr><td>NAME002</td><td>Naming</td><td>ResourceAccess types end with <code>Access</code>.</td></tr>
-                <tr><td>ASMREF001</td><td>Assembly</td><td><code>.asmdef</code> hard references respect the layer topology.</td></tr>
-                <tr><td>MSGBUS001–007</td><td>Message Bus</td><td>Pub/sub declarations match layer roles. Only Managers publish events. Only Clients and Managers subscribe.</td></tr>
-                <tr><td>USECASE001</td><td>Use Cases</td><td>Use case call chain contains a topology violation.</td></tr>
-                <tr><td>USECASE002</td><td>Use Cases</td><td>Use case chain does not reach ResourceAccess or Resource — may be incomplete.</td></tr>
-                <tr><td>USECASE003</td><td>Use Cases</td><td>Use case chain depth asymmetry — possible uneven decomposition.</td></tr>
-                <tr><td>STRUCT001–005</td><td>Structure Metrics</td><td>Composition metrics: golden ratio, subsystem balance guidance.</td></tr>
+                <tr><td>ARCH001</td><td>Error</td><td>Every dependency follows the allowed directions of the closed architecture: no same-layer, skipping or upward edges.</td></tr>
+                <tr><td>DONT001</td><td>Warning</td><td>A Client depends on more than one Manager (Don't #1).</td></tr>
+                <tr><td>DONT002</td><td>Error</td><td>A Client depends on an Engine directly (Don't #2).</td></tr>
+                <tr><td>DONT004</td><td>Error</td><td>An Engine accesses a Resource directly instead of through ResourceAccess (Don't #4).</td></tr>
+                <tr><td>DONT011</td><td>Error</td><td>An Engine depends on another Engine (Don't #11).</td></tr>
+                <tr><td>DONT012</td><td>Error</td><td>A ResourceAccess depends on another ResourceAccess (Don't #12).</td></tr>
+                <tr><td>NAME001</td><td>Warning</td><td>The type name ends with its layer's suffix: <code>Manager</code>, <code>Engine</code> or <code>Access</code>.</td></tr>
+                <tr><td>NAME002</td><td>Warning</td><td>Engines carry a gerund prefix; Managers and ResourceAccess must not.</td></tr>
+                <tr><td>ASMREF001</td><td>Error</td><td><code>.asmdef</code> references between layer-tagged assemblies respect the topology.</td></tr>
+                <tr><td>STRUCT001</td><td>Warning</td><td>8 or more Managers: consider subsystems.</td></tr>
+                <tr><td>STRUCT002</td><td>Warning</td><td>The Engine count exceeds the golden ratio for the Manager count.</td></tr>
+                <tr><td>STRUCT003</td><td>Info</td><td>Several Managers but no Engines.</td></tr>
+                <tr><td>STRUCT004</td><td>Info</td><td>More than 24 tracked types.</td></tr>
               </tbody>
             </table>
           </div>
 
+          <div class="code-card code-card--arch">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Example findings</span></div>
+<pre class="code-block"><code>[Error]   ARCH001: disallowed dependency: GameClient [Client] → ScoringEngine [Engine] via ConstructorParameter
+[Warning] DONT001: Client 'GameplayClient' depends on 2 Managers (SessionManager, LobbyManager). Don't #1: A Client should call only one Manager per use case.
+[Error]   DONT011: Engine 'ScoringEngine' depends on Engine 'RankingEngine'. Don't #11: Engines must not call other Engines.
+[Warning] NAME001: Manager type 'AuthService' should end with 'Manager'.
+[Warning] NAME002: Engine type 'ScoreEngine' prefix should be a gerund (activity word).
+[Error]   ASMREF001: Assembly 'Client.Gameplay' [Client] references 'Engine.Core' [Engine] which violates layer topology</code></pre>
+          </div>
+
           <div class="callout callout--warn">
-            <strong>Deliberate violation to test enforcement</strong>
-            Tag a <code>[Client]</code> with a direct field reference to an <code>[Engine]</code> type, then run <em>Validate Now</em>. You should see <code>ARCH001: disallowed dependency: MyClient [Client] → MyEngine [Engine] via Field</code>. Fix it by introducing a Manager between them.
+            <strong>Try a deliberate violation</strong>
+            Give a <code>[Client]</code> a constructor parameter of an <code>[Engine]</code> type and run <em>Validate Now</em>. You should see <code>ARCH001: disallowed dependency: GameplayClient [Client] → ScoringEngine [Engine] via ConstructorParameter</code>. Fix it by introducing a Manager between them.
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Validating from code</h3>
+            <p class="prose">Scan the project into an <code>ArchitectureGraph</code> and run the fixed rule set from <code>ValidatorFactory</code>, for example from your own editor tooling.</p>
+            <div class="code-card code-card--arch">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">ValidateFromCode.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Architecture.Editor;
+
+<span class="kw">var</span> graph = <span class="kw">new</span> <span class="type">ArchitectureGraph</span>();
+graph.Scan(); <span class="cmt">// scans the project against Löwy's Method</span>
+
+<span class="kw">var</span> validator = <span class="type">ValidatorFactory</span>.Build();
+<span class="kw">var</span> results = validator.Validate(graph);
+
+<span class="kw">foreach</span> (<span class="kw">var</span> r <span class="kw">in</span> results)
+    UnityEngine.<span class="type">Debug</span>.Log(<span class="str">$"[{r.Severity}] {r.RuleId}: {r.Message}"</span>);</code></pre>
+            </div>
           </div>
         </section>
 
-        <!-- ── Guide: Settings ── -->
+        <!-- ── Guide: Settings & Enforcement ── -->
         <section class="docs-section" id="guide-settings">
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Settings &amp; Enforcement</h2>
           <p class="section-intro">
-            A <code>FrameworkSettings</code> ScriptableObject controls how violations are surfaced. When using the Framework meta-package, the settings asset is created automatically by <code>FrameworkInitializer</code> on domain reload — no manual setup required.
+            What you configure is only <em>how loudly</em> violations are reported. The enforcement mode lives on the <code>FrameworkSettings</code> asset at <code>Assets/Resources/Framework/FrameworkSettings.asset</code>, edited under <strong>Edit → Project Settings → Architecture</strong>. Without the asset, validation runs in WarningsOnly.
           </p>
-
-          <div class="sub-section">
-            <h3 class="sub-title">Project Settings panel</h3>
-            <p class="prose">Open <strong>Edit → Project Settings → Framework → Architecture</strong>. The settings asset (<code>Assets/Resources/Framework/FrameworkSettings.asset</code>) is created automatically by the Framework package. From this panel you can set enforcement mode, configure utility assemblies, manage client toggles, and run validation inline — all in one place. The panel shows violations with severity filtering, text search, and a detail pane with the rule's <em>Why</em> and a <em>Fix suggestion</em>.</p>
-          </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Enforcement modes</h3>
             <div class="table-wrap">
               <table class="docs-table">
-                <thead><tr><th>Mode</th><th>Behavior</th><th>When to use</th></tr></thead>
+                <thead><tr><th>Mode</th><th>Behavior</th></tr></thead>
                 <tbody>
-                  <tr><td>Off</td><td>No automatic validation after compilation</td><td>Temporary — disabling during mass refactor</td></tr>
-                  <tr><td>WarningsOnly</td><td>All violations → Warning in console</td><td>Onboarding an existing codebase</td></tr>
-                  <tr><td>ErrorsForCore</td><td>ARCH001 + DONT rules → Error; naming → Warning</td><td>Recommended for active development</td></tr>
-                  <tr><td>Strict</td><td>All violations → Error, blocks compilation</td><td>CI/CD gates, pre-release hardening</td></tr>
+                  <tr><td>Off</td><td>No automatic validation. The menu item and the API still work.</td></tr>
+                  <tr><td>WarningsOnly</td><td>Every finding is logged as a warning. The default, for adoption.</td></tr>
+                  <tr><td>ErrorsForCore</td><td>Each finding keeps its own severity: ARCH and ASMREF errors, naming warnings.</td></tr>
+                  <tr><td>Strict</td><td>Every finding is logged as an error.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="callout callout--tip">
+              <strong>Adopt gradually</strong>
+              Start in WarningsOnly to audit the project and fix the critical findings (<code>ARCH001</code>, <code>DONT002</code>). Move to ErrorsForCore to block on closed-architecture violations while allowing naming warnings, then to Strict to enforce everything.
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">After every domain reload</h3>
+            <p class="prose">The <code>CompilationHook</code> loads the settings, exits if the mode is Off, scans the project, skips if no tracked types were found, then validates and logs each finding with its severity mapped by the mode. The format is <code>[Architecture:RuleId] message (SourceType.FullName)</code>.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Finding</th><th>WarningsOnly</th><th>ErrorsForCore</th><th>Strict</th></tr></thead>
+                <tbody>
+                  <tr><td>Info</td><td>Log</td><td>Log</td><td>Error</td></tr>
+                  <tr><td>Warning</td><td>Warning</td><td>Warning</td><td>Error</td></tr>
+                  <tr><td>Error</td><td>Warning</td><td>Error</td><td>Error</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title">Utility assemblies</h3>
-            <p class="prose">Add assembly names to <code>FrameworkSettings.UtilityAssemblies</code> to treat entire assemblies as cross-cutting. Useful for third-party libraries (DOTween, UniTask) that every layer legitimately calls.</p>
-          </div>
-
-          <div class="sub-section">
             <h3 class="sub-title">CI / headless validation</h3>
-            <p class="prose"><code>CIValidator</code> provides a static entry point for Unity batch mode. It scans, validates, writes a JSON report to <code>architecture-report.json</code>, and exits with code <code>0</code> (clean) or <code>1</code> (errors found).</p>
+            <p class="prose"><code>CIValidator.Run</code> scans and validates in batch mode, writes <code>architecture-report.json</code> (counts and a <code>violations</code> array) to the project root, logs each finding, and exits with code <code>1</code> if any Error-severity finding exists, otherwise <code>0</code>.</p>
             <div class="code-card code-card--arch">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">CI pipeline</span></div>
 <pre class="code-block"><code>Unity.exe -batchmode -projectPath . \
-  -executeMethod Tutan.Architecture.Editor.CIValidator.Run \
-  -quit</code></pre>
+  -executeMethod Tutan.Architecture.Editor.CIValidator.Run -quit</code></pre>
             </div>
-            <div class="table-wrap" style="margin-top:12px">
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Menu items</h3>
+            <div class="table-wrap">
               <table class="docs-table">
-                <thead><tr><th>Exit code</th><th>Meaning</th></tr></thead>
+                <thead><tr><th>Menu path</th><th>Action</th></tr></thead>
                 <tbody>
-                  <tr><td>0</td><td>No Error-severity violations found</td></tr>
-                  <tr><td>1</td><td>One or more Error-severity violations found</td></tr>
+                  <tr><td>Tools → Architecture → Validate Now</td><td>Scans and validates immediately; logs a summary to the Console.</td></tr>
+                  <tr><td>Tools → Architecture → Validation</td><td>Opens <strong>Project Settings → Architecture</strong> and its live validation view.</td></tr>
+                  <tr><td>Edit → Project Settings → Architecture</td><td>The enforcement mode and a live validation view.</td></tr>
+                  <tr><td>Assets → Architecture → Assign Layer…</td><td>Tags the selected script with a layer's shorthand attribute.</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- ── Guide: Custom Rules ── -->
-        <section class="docs-section" id="guide-custom-rules">
+        <!-- ── Guide: Wiring at Runtime ── -->
+        <section class="docs-section" id="guide-runtime">
           <div class="section-eyebrow">Guides</div>
-          <h2 class="section-title">Custom Rules</h2>
+          <h2 class="section-title">Wiring at Runtime</h2>
           <p class="section-intro">
-            Implement <code>IArchitectureRule</code> to add project-specific validation. Custom rules receive the full graph and return <code>ValidationResult</code> structs — no changes to the package required.
+            This package checks the code in the Editor. To construct the tagged types at runtime, hand each one its dependencies and start them in order, use the companion package <code>com.tutan.hosting</code>.
           </p>
-
-          <div class="sub-section">
-            <h3 class="sub-title">IArchitectureRule interface</h3>
-            <div class="code-card code-card--arch">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">IArchitectureRule.cs</span></div>
-<pre class="code-block"><code><span class="kw">public interface</span> <span class="type">IArchitectureRule</span>
-{
-    <span class="kw">string</span> RuleId { <span class="kw">get</span>; }
-    IEnumerable&lt;<span class="type">ValidationResult</span>&gt; Validate(<span class="type">ArchitectureGraph</span> graph);
-}</code></pre>
-            </div>
-          </div>
-
-          <div class="sub-section">
-            <h3 class="sub-title">Example: ban singleton Managers</h3>
-            <div class="code-card code-card--arch">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">NoSingletonRule.cs</span></div>
-<pre class="code-block"><code><span class="kw">using</span> Tutan.Architecture.Editor;
-
-<span class="kw">public class</span> <span class="type">NoSingletonRule</span> : <span class="type">IArchitectureRule</span>
-{
-    <span class="kw">public string</span> RuleId => <span class="str">"CUSTOM001"</span>;
-
-    <span class="kw">public</span> IEnumerable&lt;<span class="type">ValidationResult</span>&gt; Validate(<span class="type">ArchitectureGraph</span> graph)
-    {
-        <span class="kw">foreach</span> (<span class="kw">var</span> kvp <span class="kw">in</span> graph.TypeMap)
-        {
-            <span class="kw">var</span> type = kvp.Key;
-            <span class="kw">var</span> info = kvp.Value;
-            <span class="kw">if</span> (info.Layer != <span class="type">ArchitectureLayer</span>.Manager) <span class="kw">continue</span>;
-
-            <span class="kw">var</span> prop = type.GetProperty(<span class="str">"Instance"</span>,
-                BindingFlags.Public | BindingFlags.Static);
-
-            <span class="kw">if</span> (prop != <span class="kw">null</span>)
-                <span class="kw">yield return new</span> <span class="type">ValidationResult</span>(
-                    RuleId, <span class="type">ValidationSeverity</span>.Warning,
-                    $<span class="str">"Manager '{type.Name}' exposes a static Instance — prefer injection"</span>,
-                    type);
-        }
-    }
-}</code></pre>
-            </div>
-          </div>
-
-          <div class="sub-section">
-            <h3 class="sub-title">Passing custom rules to LayerValidator</h3>
-            <div class="code-card code-card--arch">
-              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">RunCustomValidation.cs</span></div>
-<pre class="code-block"><code><span class="kw">var</span> rules = <span class="kw">new</span> <span class="type">IArchitectureRule</span>[]
-{
-    <span class="kw">new</span> <span class="type">ClosedArchitectureRule</span>(),
-    <span class="kw">new</span> <span class="type">DesignDontRules</span>(),
-    <span class="kw">new</span> <span class="type">NamingConventionRule</span>(),
-    <span class="kw">new</span> <span class="type">NoSingletonRule</span>(),  <span class="cmt">// custom</span>
-};
-
-<span class="kw">var</span> validator = <span class="kw">new</span> <span class="type">LayerValidator</span>(rules);
-<span class="kw">var</span> results = validator.ScanAndValidate();</code></pre>
-            </div>
-            <p class="prose" style="margin-top:12px">The constructor overload accepts any <code>IEnumerable&lt;IArchitectureRule&gt;</code> — mix built-in and custom rules in any order. Use this from an Editor script, CI runner, or custom menu item.</p>
+          <p class="prose">Its container reads the same <code>LowyTopology</code> the validator reads, so an edge the validator would flag fails the install with a named error instead of running. It requires the layer tag on every service it registers, so every service it runs is one the validator checks.</p>
+          <div style="margin-top:24px">
+            <a href="hosting.html" class="btn btn--cta btn--cta--util">Explore Hosting</a>
           </div>
         </section>
 

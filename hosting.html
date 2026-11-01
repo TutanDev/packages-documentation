@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hosting - Unity Framework</title>
+  <meta name="description" content="Tutan Hosting: a composition root for a Löwy's Method architecture in Unity 6. It builds your services, and refuses to wire an edge the topology forbids.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles.css">
+  <link rel="stylesheet" href="src/docs.css">
+  <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/favicon/favicon-32x32.png" alt="" class="nav-logo-icon" aria-hidden="true">
+        Unity Framework
+      </a>
+    </div>
+  </nav>
+  <div class="docs-shell">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to home
+        </a>
+        <span class="sidebar-pkg-id sidebar-pkg-id--util">com.tutan.hosting</span>
+        <div class="sidebar-pkg-name">Hosting</div>
+      </div>
+      <nav class="sidebar-nav" aria-label="Page sections">
+        <a href="#getting-started" class="sidebar-direct" data-pkg="util">Getting Started</a>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Guides
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#guide-quick-start" class="sidebar-link" data-pkg="util">Quick Start</a>
+            <a href="#guide-registration" class="sidebar-link" data-pkg="util">Registration &amp; Tags</a>
+            <a href="#guide-utilities" class="sidebar-link" data-pkg="util">Utilities</a>
+            <a href="#guide-wiring" class="sidebar-link" data-pkg="util">Wiring &amp; Enforcement</a>
+            <a href="#guide-lifecycle" class="sidebar-link" data-pkg="util">Lifecycle</a>
+            <a href="#guide-order" class="sidebar-link" data-pkg="util">Order, Rollback &amp; Teardown</a>
+            <a href="#guide-outcome" class="sidebar-link" data-pkg="util">Awaiting &amp; Resolving</a>
+            <a href="#guide-play-mode" class="sidebar-link" data-pkg="util">Play Mode</a>
+          </div>
+        </div>
+
+        <a href="hosting-api.html" class="sidebar-direct" data-pkg="util">API Reference →</a>
+        <a href="architecture.html" class="sidebar-direct" data-pkg="util">Architecture →</a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="docs-main">
+
+      <!-- ── Getting Started Hero ── -->
+      <section class="docs-hero" id="getting-started">
+        <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--util-glow) 0%, transparent 70%)" aria-hidden="true"></div>
+        <span class="docs-hero-badge docs-hero-badge--util">com.tutan.hosting · v0.1.0</span>
+        <h1 class="docs-hero-title">A Composition Root<br>for Löwy's Method</h1>
+        <p class="docs-hero-desc">
+          You register your Managers, Engines, ResourceAccess, Resources and Utilities, and the host constructs them, hands each one its dependencies, installs them in dependency order and tears them down in reverse. Every constructor dependency is checked against the topology the <a href="architecture.html">Architecture</a> validator reads, so an edge the validator would flag fails the install with a named error instead of running.
+        </p>
+        <div class="docs-hero-stats">
+          <div>
+            <span class="docs-stat-value" style="color:var(--util-color)">5</span>
+            <span class="docs-stat-label">Registration Methods</span>
+          </div>
+          <div>
+            <span class="docs-stat-value" style="color:var(--util-color)">1</span>
+            <span class="docs-stat-label">Lifecycle Interface</span>
+          </div>
+          <div>
+            <span class="docs-stat-value" style="color:var(--util-color)">1</span>
+            <span class="docs-stat-label">Topology</span>
+          </div>
+        </div>
+
+        <div class="callout callout--note" style="margin-top:8px">
+          <strong>Requirements</strong>
+          Unity 6000.1 or later, <a href="architecture.html"><code>com.tutan.architecture</code></a> for the layer tags and the topology, and <a href="functional.html"><code>com.tutan.functional</code></a> 1.0.0 for <code>Result&lt;T&gt;</code>. There is nothing to configure: services are singletons, wired through their one public constructor.
+        </div>
+
+        <div class="steps" style="margin-top:28px">
+          <div class="step">
+            <div class="step-num" style="border-color:var(--util-color);color:var(--util-color)">1</div>
+            <div class="step-body">
+              <div class="step-title">Install the package</div>
+              <div class="step-desc">Add <code>com.tutan.hosting</code> and its two dependencies to <code>Packages/manifest.json</code>. <code>Tutan.Hosting</code> is auto-referenced; an assembly with its own <code>.asmdef</code> adds <code>Tutan.Hosting</code>, <code>Tutan.Architecture</code> and <code>Tutan.Functional</code> to its references.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--util-color);color:var(--util-color)">2</div>
+            <div class="step-body">
+              <div class="step-title">Write a service</div>
+              <div class="step-desc">Tag it with its layer, such as <code>[Engine]</code>, and implement <code>IHostedService</code>. It receives its dependencies through its one public constructor.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--util-color);color:var(--util-color)">3</div>
+            <div class="step-body">
+              <div class="step-title">Register it</div>
+              <div class="step-desc">From a <code>[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]</code> method, call <code>AppHost.Container.AddEngine&lt;T&gt;()</code>, <code>AddManager&lt;T&gt;()</code> and so on. Registration order does not matter.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="border-color:var(--util-color);color:var(--util-color)">4</div>
+            <div class="step-body">
+              <div class="step-title">Await the install</div>
+              <div class="step-desc">The host builds at <code>BeforeSceneLoad</code>. Scene code awaits <code>AppHost.WaitForInstallAsync()</code>, then resolves its Manager and hands it to its Client.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="docs-content">
+
+        <!-- ── Guide: Quick Start ── -->
+        <section class="docs-section" id="guide-quick-start">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Quick Start</h2>
+          <p class="section-intro">
+            Something has to construct the Managers, Engines, ResourceAccess and Resources, hand each one its dependencies, start them in an order that works, and stop them in the reverse. This package is that place.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Install</h3>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Packages/manifest.json</span></div>
+<pre class="code-block"><code>{
+  <span class="str">"dependencies"</span>: {
+    <span class="str">"com.tutan.architecture"</span>: <span class="str">"https://github.com/TutanDev/UP-Architecture.git"</span>,
+    <span class="str">"com.tutan.functional"</span>: <span class="str">"https://github.com/TutanDev/com.tutan.functional.git"</span>,
+    <span class="str">"com.tutan.hosting"</span>: <span class="str">"https://github.com/TutanDev/com.tutan.hosting.git"</span>
+  }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Write a service</h3>
+            <p class="prose">A hosted service carries the tag of its layer and implements <code>IHostedService</code>. The tag comes from <code>com.tutan.architecture</code>: a shorthand such as <code>[Manager]</code>, the explicit <code>[Layer(LayerId.Manager)]</code>, or <code>[assembly: AssemblyLayer(LayerId.Manager)]</code> for a whole assembly. <code>IHostedService</code> gives the host a way to start and stop the service.</p>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">NumberServices.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> System.Threading.Tasks;
+<span class="kw">using</span> Tutan.Architecture;
+<span class="kw">using</span> Tutan.Hosting;
+
+<span class="attr">[Engine]</span>
+<span class="kw">public sealed class</span> <span class="type">ValidatingEngine</span> : <span class="type">IHostedService</span>
+{
+    <span class="kw">public bool</span> IsValid(<span class="kw">int</span> value) =&gt; value &gt;= <span class="num">0</span>;
+
+    <span class="kw">public</span> <span class="type">ValueTask</span>&lt;<span class="type">InstallResult</span>&gt; InstallAsync() =&gt; <span class="kw">new</span>(<span class="type">InstallResult</span>.Success());
+    <span class="kw">public void</span> Remove() { }
+}
+
+<span class="attr">[Manager]</span>
+<span class="kw">public sealed class</span> <span class="type">NumberManager</span> : <span class="type">IHostedService</span>
+{
+    <span class="kw">private readonly</span> <span class="type">ValidatingEngine</span> _validating;
+
+    <span class="kw">public</span> <span class="type">NumberManager</span>(<span class="type">ValidatingEngine</span> validating) =&gt; _validating = validating;
+
+    <span class="kw">public bool</span> TrySet(<span class="kw">int</span> value) =&gt; _validating.IsValid(value);
+
+    <span class="kw">public</span> <span class="type">ValueTask</span>&lt;<span class="type">InstallResult</span>&gt; InstallAsync() =&gt; <span class="kw">new</span>(<span class="type">InstallResult</span>.Success());
+    <span class="kw">public void</span> Remove() { }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Register it</h3>
+            <p class="prose">Register services from a static method that runs at <code>SubsystemRegistration</code>, before the host builds. Registration order does not matter, because the host orders services by their dependencies.</p>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AppInstaller.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Hosting;
+<span class="kw">using</span> UnityEngine;
+
+<span class="kw">internal static class</span> <span class="type">AppInstaller</span>
+{
+    <span class="attr">[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]</span>
+    <span class="kw">private static void</span> Register() =&gt;
+        <span class="type">AppHost</span>.Container
+            .AddEngine&lt;<span class="type">ValidatingEngine</span>&gt;()
+            .AddManager&lt;<span class="type">NumberManager</span>&gt;();
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Await the install</h3>
+            <p class="prose"><code>AppHost</code> builds and installs the registered services at <code>BeforeSceneLoad</code>, before the first scene's <code>Awake</code>. Scene code awaits the outcome and, on success, resolves its Manager and hands it to its Client.</p>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AppBootstrap.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Functional;
+<span class="kw">using</span> Tutan.Hosting;
+<span class="kw">using</span> UnityEngine;
+
+<span class="kw">public sealed class</span> <span class="type">AppBootstrap</span> : <span class="type">MonoBehaviour</span>
+{
+    <span class="attr">[SerializeField]</span> <span class="type">NumberClient</span> _client;
+
+    <span class="kw">private async void</span> Awake()
+    {
+        <span class="kw">var</span> installed = <span class="kw">await</span> <span class="type">AppHost</span>.WaitForInstallAsync();
+        installed.Match(
+            onError: error =&gt; <span class="type">Debug</span>.LogError(<span class="str">$"[AppBootstrap] Install failed: {error}"</span>),
+            onSuccess: () =&gt; _client.Initialize(<span class="type">AppHost</span>.Container.Resolve&lt;<span class="type">NumberManager</span>&gt;()));
+    }
+}</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">The Client is an ordinary MonoBehaviour that Unity creates, so the host does not construct it. It carries <code>[Client]</code>, so the validator checks that it calls one Manager, and it does not implement <code>IHostedService</code>, because nothing hosts it.</p>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">NumberClient.cs</span></div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Architecture;
+<span class="kw">using</span> UnityEngine;
+
+<span class="attr">[Client]</span>
+<span class="kw">public sealed class</span> <span class="type">NumberClient</span> : <span class="type">MonoBehaviour</span>
+{
+    <span class="kw">private</span> <span class="type">NumberManager</span> _manager;
+
+    <span class="kw">public void</span> Initialize(<span class="type">NumberManager</span> manager) =&gt; _manager = manager;
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">When it goes wrong</h3>
+            <p class="prose">Give the Manager a second Engine and make one Engine call the other. Register it, and the install fails before anything is constructed. <code>WaitForInstallAsync()</code> returns the error, and the bootstrap above logs it.</p>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">PricingEngine.cs</span></div>
+<pre class="code-block"><code><span class="attr">[Engine]</span>
+<span class="kw">public sealed class</span> <span class="type">PricingEngine</span> : <span class="type">IHostedService</span>
+{
+    <span class="kw">public</span> <span class="type">PricingEngine</span>(<span class="type">ValidatingEngine</span> validating) { }
+
+    <span class="kw">public</span> <span class="type">ValueTask</span>&lt;<span class="type">InstallResult</span>&gt; InstallAsync() =&gt; <span class="kw">new</span>(<span class="type">InstallResult</span>.Success());
+    <span class="kw">public void</span> Remove() { }
+}</code></pre>
+            </div>
+            <div class="code-card code-card--util" style="margin-top:12px">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Console</span></div>
+<pre class="code-block"><code>[AppBootstrap] Install failed: 'PricingEngine' (Engine) depends on 'ValidatingEngine' (Engine) - violates Don't #11: Engines must not call other Engines.</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">The validator in <code>com.tutan.architecture</code> reports the same edge in the Editor as <code>DONT011</code>.</p>
+          </div>
+        </section>
+
+        <!-- ── Guide: Registration & Tags ── -->
+        <section class="docs-section" id="guide-registration">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Registration &amp; Tags</h2>
+          <p class="section-intro">
+            The container is opinionated in the way the Architecture validator is. Every service is a singleton, every dependency comes in through the one public constructor, and the Löwy topology decides which dependencies are allowed. There are no lifetimes, scopes or wiring strategies to choose.
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Method</th><th>Registers</th><th>The concrete type carries</th></tr></thead>
+              <tbody>
+                <tr><td><code>AddManager&lt;T&gt;()</code></td><td>a Manager</td><td><code>[Manager]</code></td></tr>
+                <tr><td><code>AddEngine&lt;T&gt;()</code></td><td>an Engine</td><td><code>[Engine]</code></td></tr>
+                <tr><td><code>AddResourceAccess&lt;T&gt;()</code></td><td>a ResourceAccess</td><td><code>[ResourceAccess]</code></td></tr>
+                <tr><td><code>AddResource&lt;T&gt;()</code></td><td>a Resource</td><td><code>[Resource]</code></td></tr>
+                <tr><td><code>AddUtility&lt;T&gt;()</code></td><td>a Utility</td><td>no layer tag</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="prose">Every registered type implements <code>IHostedService</code>. Registration is fluent, so each call returns the container. Registering the same defining type twice throws, and so does registering once the build has started. There is no <code>AddClient</code>: Clients are MonoBehaviours that Unity creates, so the host never constructs them.</p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Interface mapping</h3>
+            <p class="prose">Each method has an overload that registers an implementation under a defining type, usually an interface. A Manager can then take an <code>IValidating</code> in its constructor, and the container injects the <code>ValidatingEngine</code>. The service is registered under its defining type only, so a constructor that asks for <code>ValidatingEngine</code> itself finds nothing. The tag check reads the implementation, so <code>ValidatingEngine</code> is the type that carries <code>[Engine]</code>.</p>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AppInstaller.cs</span></div>
+<pre class="code-block"><code><span class="type">AppHost</span>.Container
+    .AddEngine&lt;<span class="type">IValidating</span>, <span class="type">ValidatingEngine</span>&gt;();   <span class="cmt">// resolved and injected as IValidating</span></code></pre>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Layer tags are required</h3>
+            <p class="prose">The tag is how the Architecture validator knows a type's layer, so the host requires it on every layered service and checks it against the registration. The tag can be on the type (<code>[Engine]</code> or <code>[Layer(LayerId.Engine)]</code>) or on its assembly (<code>[assembly: AssemblyLayer(LayerId.Engine)]</code>), and a type's own tag wins over its assembly's, as it does in the validator. A Utility carries no tag, which is the shape the validator already treats as a Utility.</p>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Install errors</span></div>
+<pre class="code-block"><code>Missing layer tag: 'NumberManager' is registered as Manager but carries no [Manager] tag, so the editor validator cannot see it. Tag the type, or its assembly with [assembly: AssemblyLayer].
+
+Layer mismatch: 'NumberManager' is registered as Engine but is tagged [Manager].</code></pre>
+            </div>
+            <div class="callout callout--tip">
+              <strong>Every hosted service is a validated service</strong>
+              A tag that disagrees with the registration fails the install, including a tagged type registered as a Utility. Because of this check, every service the host runs is also a service the validator checks.
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Guide: Utilities ── -->
+        <section class="docs-section" id="guide-utilities">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Utilities</h2>
+          <p class="section-intro">
+            A Utility is not a layer. It is infrastructure from the vertical bar beside the layers, such as logging, security, diagnostics or a message bus. Löwy's test for one is the cappuccino machine: if a smart cappuccino machine could use it too, it is a Utility.
+          </p>
+
+          <div class="code-card code-card--util">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AppInstaller.cs</span></div>
+<pre class="code-block"><code><span class="type">AppHost</span>.Container
+    .AddUtility&lt;<span class="type">IClock</span>, <span class="type">SystemClock</span>&gt;()
+    .AddManager&lt;<span class="type">NumberManager</span>&gt;();   <span class="cmt">// NumberManager can take an IClock</span></code></pre>
+          </div>
+
+          <p class="prose" style="margin-top:16px">Any service may take a Utility as a constructor dependency, and a Utility may take other Utilities. A Utility may not take a Manager, Engine, ResourceAccess or Resource, because depending on one would tie it to this system's domain. The validator cannot see that edge, because it never tracks untagged types. The container can, because the registration says which services are Utilities.</p>
+        </section>
+
+        <!-- ── Guide: Wiring & Enforcement ── -->
+        <section class="docs-section" id="guide-wiring">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Wiring &amp; Enforcement</h2>
+          <p class="section-intro">
+            When the host builds, the container reads each service's public constructor. For each parameter it finds the service registered under the parameter's type, then checks the edge from the service to that dependency. An unregistered dependency, or an edge the architecture forbids, fails the install with an error that names the rule.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Between layers</h3>
+            <p class="prose">The container allows exactly the edges the validator allows, because both read <code>LowyTopology</code>.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Wiring</th><th>Result</th></tr></thead>
+                <tbody>
+                  <tr><td>Manager → Engine, Manager → ResourceAccess</td><td>allowed</td></tr>
+                  <tr><td>Engine → ResourceAccess</td><td>allowed</td></tr>
+                  <tr><td>ResourceAccess → Resource</td><td>allowed</td></tr>
+                  <tr><td>Engine → Engine</td><td>rejected by Don't #11</td></tr>
+                  <tr><td>ResourceAccess → ResourceAccess</td><td>rejected by Don't #12</td></tr>
+                  <tr><td>Engine → Resource</td><td>rejected by Don't #4, because it skips ResourceAccess</td></tr>
+                  <tr><td>Any other same-layer, skipping or upward edge</td><td>rejected</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Utilities</h3>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Wiring</th><th>Result</th></tr></thead>
+                <tbody>
+                  <tr><td>Any service → Utility</td><td>allowed</td></tr>
+                  <tr><td>Utility → Utility</td><td>allowed</td></tr>
+                  <tr><td>Utility → Manager, Engine, ResourceAccess or Resource</td><td>rejected</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">Every edge between layers points down, so only Utilities can form a cycle, and the container rejects one.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The errors</h3>
+            <p class="prose">The container stops at the first problem it finds, before it constructs anything.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Problem</th><th>Error</th></tr></thead>
+                <tbody>
+                  <tr><td>Missing tag</td><td><code>Missing layer tag: 'NumberManager' is registered as Manager but carries no [Manager] tag, …</code></td></tr>
+                  <tr><td>Wrong tag</td><td><code>Layer mismatch: 'NumberManager' is registered as Engine but is tagged [Manager].</code></td></tr>
+                  <tr><td>Unregistered dependency</td><td><code>Unregistered dependency: 'NumberManager' needs 'IClock', which is not registered with the container.</code></td></tr>
+                  <tr><td>Engine → Engine</td><td><code>'PricingEngine' (Engine) depends on 'ValidatingEngine' (Engine) - violates Don't #11: Engines must not call other Engines.</code></td></tr>
+                  <tr><td>ResourceAccess → ResourceAccess</td><td><code>'SaveAccess' (ResourceAccess) depends on 'NumberAccess' (ResourceAccess) - violates Don't #12: ResourceAccess must not call other ResourceAccess.</code></td></tr>
+                  <tr><td>Engine → Resource</td><td><code>'PricingEngine' (Engine) depends directly on 'NumberStore' (Resource) - violates Don't #4: Engines must reach Resources only through ResourceAccess.</code></td></tr>
+                  <tr><td>Other same-layer edge</td><td><code>'NumberManager' and 'SaveManager' are both Manager - same-layer dependencies are not allowed in a closed architecture.</code></td></tr>
+                  <tr><td>Other forbidden edge</td><td><code>'NumberManager' (Manager) may not depend on 'NumberStore' (Resource) - the closed architecture forbids this edge.</code></td></tr>
+                  <tr><td>Utility → layer</td><td><code>'AuditLog' (Utility) depends on 'NumberAccess' (ResourceAccess) - a Utility must stay domain-agnostic (the cappuccino machine test), so it may depend only on other Utilities.</code></td></tr>
+                  <tr><td>Cycle</td><td><code>Dependency cycle detected involving 'AuditLog'. A closed architecture must be acyclic.</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="callout callout--warn">
+            <strong>Exactly one public constructor</strong>
+            A service with zero or several public constructors is a mistake in the code rather than in the architecture, so the build throws an <code>InvalidOperationException</code> instead of returning a failed <code>Result</code>. <code>AppHost</code> logs the exception to the Console, and awaiting <code>WaitForInstallAsync()</code> rethrows it.
+          </div>
+        </section>
+
+        <!-- ── Guide: Lifecycle ── -->
+        <section class="docs-section" id="guide-lifecycle">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Lifecycle</h2>
+          <p class="section-intro">
+            Every service the host builds implements one interface, whatever its layer, Utilities included. The constructor wires and <code>InstallAsync</code> starts.
+          </p>
+
+          <div class="code-card code-card--util">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">IHostedService.cs</span></div>
+<pre class="code-block"><code><span class="kw">namespace</span> Tutan.Hosting
+{
+    <span class="kw">public interface</span> <span class="type">IHostedService</span>
+    {
+        <span class="type">ValueTask</span>&lt;<span class="type">InstallResult</span>&gt; InstallAsync();
+        <span class="kw">void</span> Remove();
+    }
+}</code></pre>
+          </div>
+
+          <div class="table-wrap" style="margin-top:16px">
+            <table class="docs-table">
+              <thead><tr><th>Method</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code>InstallAsync()</code></td><td>Starts the service, after every service it depends on has started, and returns <code>InstallResult.Success()</code> or <code>InstallResult.Failure(reason)</code>.</td></tr>
+                <tr><td><code>Remove()</code></td><td>Stops the service: release resources, unsubscribe, clear state.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="prose">When a constructor runs, its dependencies have been constructed but not installed, so it should keep them and not call them. <code>InstallAsync</code> runs once every dependency has installed, so it can. It returns a <code>ValueTask</code>, so a service with nothing to await returns <code>new(InstallResult.Success())</code> and allocates nothing. A service with real work to await makes <code>InstallAsync</code> an <code>async</code> method.</p>
+
+          <div class="callout callout--note">
+            <strong>Two InstallResult types</strong>
+            <code>Tutan.Messages</code> has an <code>InstallResult</code> of its own. A file that imports both namespaces writes <code>Tutan.Hosting.InstallResult</code>.
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The host's timeline</h3>
+            <p class="prose"><code>AppHost</code> ties the container to Unity's startup and shutdown.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>When</th><th>What happens</th></tr></thead>
+                <tbody>
+                  <tr><td><code>SubsystemRegistration</code></td><td>Installers register services on <code>AppHost.Container</code>.</td></tr>
+                  <tr><td><code>BeforeSceneLoad</code></td><td><code>AppHost</code> builds: it checks every tag and edge, constructs every service, then installs them in order.</td></tr>
+                  <tr><td>The first scene's <code>Awake</code></td><td>Scene code awaits <code>AppHost.WaitForInstallAsync()</code> and resolves its Managers.</td></tr>
+                  <tr><td><code>Application.quitting</code></td><td><code>AppHost</code> removes every installed service, in reverse install order.</td></tr>
+                  <tr><td>Exiting Play Mode, in the Editor</td><td><code>AppHost</code> removes every service and starts the next session from an empty container.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">The build starts at <code>BeforeSceneLoad</code> but does not have to finish there. A service whose <code>InstallAsync</code> awaits real work finishes later, which is why scene code awaits the outcome instead of assuming it. Registering after the build has started throws, so every installer runs at <code>SubsystemRegistration</code>.</p>
+          </div>
+        </section>
+
+        <!-- ── Guide: Order, Rollback & Teardown ── -->
+        <section class="docs-section" id="guide-order">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Order, Rollback &amp; Teardown</h2>
+          <p class="section-intro">
+            The container constructs every service, then installs them, in dependency order: each service comes after everything it depends on. Utilities come before every layered service, whatever order they were registered in.
+          </p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Rollback</h3>
+            <p class="prose">If a service's <code>InstallAsync</code> returns a failure, the container calls <code>Remove()</code> on every service that has already installed, in reverse order. The install then fails with the service's name and its reason.</p>
+            <div class="code-card code-card--util">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Install error</span></div>
+<pre class="code-block"><code>Install failed for 'NumberAccess': the save file is locked.</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">The failed service is not removed, because it reported that it never started. Neither are the services after it, because they were never installed. After a failed install, <code>Resolve</code> keeps throwing, and the host does not try again.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Teardown</h3>
+            <p class="prose">When the application quits, the host calls <code>Remove()</code> on every installed service, in reverse install order. Utilities install first, so they are removed last. A logger or a message bus is up before any layered service installs, and stays up until every one of them has been removed.</p>
+          </div>
+        </section>
+
+        <!-- ── Guide: Awaiting & Resolving ── -->
+        <section class="docs-section" id="guide-outcome">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Awaiting &amp; Resolving</h2>
+          <p class="section-intro">
+            <code>AppHost.WaitForInstallAsync()</code> returns a <code>Task&lt;Result&lt;Unit&gt;&gt;</code>. It returns the same <code>Task</code> to every caller, so every scene, and every bootstrap in a scene, can await it.
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Outcome</th><th>Result</th></tr></thead>
+              <tbody>
+                <tr><td>Every service installed</td><td>A success, and <code>Resolve</code> works.</td></tr>
+                <tr><td>A tag, an edge, a dependency or an install failed</td><td>A failure that carries the first error.</td></tr>
+                <tr><td>Called before <code>BeforeSceneLoad</code></td><td>A failure that says <code>AppHost has not initialized yet.</code></td></tr>
+                <tr><td>A programmer error, such as two public constructors</td><td>The task faults, and <code>await</code> rethrows the exception.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="prose">Awaited from a MonoBehaviour, it resumes on Unity's main thread. A project that uses UniTask can await the <code>Task</code> as it is, or call <code>.AsUniTask()</code> on it. <code>AppHost</code> logs a faulted install to the Console even when nothing awaits it.</p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Resolving services</h3>
+            <p class="prose"><code>Resolve&lt;T&gt;()</code> returns the singleton registered under <code>T</code>, once the install has succeeded. Called before then, it throws and says to await <code>AppHost.WaitForInstallAsync()</code> first. It also throws for a type that is not registered.</p>
+            <p class="prose" style="margin-top:12px"><code>Resolve</code> is for the one place where Unity-owned code meets the host: handing a Manager to a Client. Services never call it, because they receive their dependencies through their constructors. A Client that needs a Utility gets it the same way.</p>
+          </div>
+        </section>
+
+        <!-- ── Guide: Play Mode ── -->
+        <section class="docs-section" id="guide-play-mode">
+          <div class="section-eyebrow">Guides</div>
+          <h2 class="section-title">Play Mode &amp; Domain Reload</h2>
+          <p class="section-intro">
+            When <em>Enter Play Mode Options</em> skip the domain reload, static state survives from one Play session to the next.
+          </p>
+          <p class="prose"><code>AppHost</code> removes every service and replaces its container when Play Mode exits, so each session starts empty and registrations do not pile up. The reset runs as the previous session ends, so it never races the next session's <code>SubsystemRegistration</code> installers.</p>
+        </section>
+
+      </div><!-- .docs-content -->
+    </main>
+  </div><!-- .docs-shell -->
+
+  <!-- Sidebar toggle (mobile) -->
+  <button class="sidebar-toggle-btn" aria-label="Toggle navigation sidebar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <script src="src/main.js"></script>
+  <script src="src/docs.js"></script>
+</body>
+</html>

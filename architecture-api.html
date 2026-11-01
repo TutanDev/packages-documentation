@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Architecture — API Reference — Unity Framework</title>
-  <meta name="description" content="UP-Architecture API Reference: complete type and member documentation for layer attributes, validation types, and editor tools.">
+  <title>Architecture API Reference - Unity Framework</title>
+  <meta name="description" content="Tutan Architecture API Reference: layer attributes, the Löwy topology, the dependency graph, validation rules and editor integration.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="src/styles.css">
   <link rel="stylesheet" href="src/docs.css">
+  <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 </head>
 <body>
 
@@ -39,16 +42,27 @@
 
         <div class="sidebar-group open">
           <button class="sidebar-group-btn" aria-expanded="true">
-            API Reference
+            Runtime API
             <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="sidebar-items">
-            <a href="#api-layer-attrs" class="sidebar-link" data-pkg="arch">Layer Attributes</a>
-            <a href="#api-behavioral-attrs" class="sidebar-link" data-pkg="arch">Behavioral Attributes</a>
-            <a href="#api-topology" class="sidebar-link" data-pkg="arch">LayerTopology</a>
+            <a href="#api-attributes" class="sidebar-link" data-pkg="arch">Attributes</a>
+            <a href="#api-layer-id" class="sidebar-link" data-pkg="arch">LayerId</a>
+            <a href="#api-topology" class="sidebar-link" data-pkg="arch">Topology</a>
+          </div>
+        </div>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Editor API
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#api-layers" class="sidebar-link" data-pkg="arch">Layer Definitions</a>
             <a href="#api-graph" class="sidebar-link" data-pkg="arch">ArchitectureGraph</a>
-            <a href="#api-validation" class="sidebar-link" data-pkg="arch">Validation Types</a>
-            <a href="#api-editor" class="sidebar-link" data-pkg="arch">Editor Tools</a>
+            <a href="#api-rules" class="sidebar-link" data-pkg="arch">Rules</a>
+            <a href="#api-validation" class="sidebar-link" data-pkg="arch">Running Validation</a>
+            <a href="#api-settings" class="sidebar-link" data-pkg="arch">Settings &amp; CI</a>
           </div>
         </div>
       </nav>
@@ -59,11 +73,11 @@
 
       <div class="docs-content">
 
-        <!-- ── API: Layer Attributes ── -->
-        <section class="docs-section" id="api-layer-attrs">
-          <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">Layer Attributes</h2>
-          <p class="section-intro">All in namespace <code>Tutan.Architecture</code>. Shorthand attributes inherit from <code>LayerAttribute</code>. All are sealed, non-inherited, single-use.</p>
+        <!-- ── API: Attributes ── -->
+        <section class="docs-section" id="api-attributes">
+          <div class="section-eyebrow">Runtime API</div>
+          <h2 class="section-title">Attributes</h2>
+          <p class="section-intro">Runtime types live in namespace <code>Tutan.Architecture</code>. A type is tracked when it, or its assembly, carries a layer attribute.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -74,15 +88,29 @@
               <div class="api-member">
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">LayerAttribute(ArchitectureLayer layer)</div>
-                  <div class="api-member-desc">Assigns the type to the given layer. Verbose form of shorthand attributes.</div>
+                  <div class="api-member-name">LayerAttribute(LayerId layer)</div>
+                  <div class="api-member-desc">Assigns the type to the given layer. Targets classes and interfaces; not inherited; one per type.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">ArchitectureLayer Layer { get; }</div>
+                  <div class="api-member-name">LayerId Layer { get; }</div>
                   <div class="api-member-desc">The layer this type belongs to.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Name { get; set; }</div>
+                  <div class="api-member-desc">Optional display name for editor tooling.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Description { get; set; }</div>
+                  <div class="api-member-desc">Optional description for editor tooling.</div>
                 </div>
               </div>
             </div>
@@ -95,32 +123,17 @@
             </div>
             <div class="table-wrap">
               <table class="docs-table">
-                <thead><tr><th>Attribute</th><th>Layer</th><th>Targets</th></tr></thead>
+                <thead><tr><th>Attribute</th><th>Class</th><th>Equivalent to</th></tr></thead>
                 <tbody>
-                  <tr><td>[Client]</td><td><code>ArchitectureLayer.Client</code></td><td>Class, Interface</td></tr>
-                  <tr><td>[Manager]</td><td><code>ArchitectureLayer.Manager</code></td><td>Class, Interface</td></tr>
-                  <tr><td>[Engine]</td><td><code>ArchitectureLayer.Engine</code></td><td>Class, Interface</td></tr>
-                  <tr><td>[ResourceAccess]</td><td><code>ArchitectureLayer.ResourceAccess</code></td><td>Class, Interface</td></tr>
-                  <tr><td>[Resource]</td><td><code>ArchitectureLayer.Resource</code></td><td>Class, Interface</td></tr>
+                  <tr><td><code>[Client]</code></td><td><code>ClientAttribute</code></td><td><code>[Layer(LayerId.Client)]</code></td></tr>
+                  <tr><td><code>[Manager]</code></td><td><code>ManagerAttribute</code></td><td><code>[Layer(LayerId.Manager)]</code></td></tr>
+                  <tr><td><code>[Engine]</code></td><td><code>EngineAttribute</code></td><td><code>[Layer(LayerId.Engine)]</code></td></tr>
+                  <tr><td><code>[ResourceAccess]</code></td><td><code>ResourceAccessAttribute</code></td><td><code>[Layer(LayerId.ResourceAccess)]</code></td></tr>
+                  <tr><td><code>[Resource]</code></td><td><code>ResourceAttribute</code></td><td><code>[Layer(LayerId.Resource)]</code></td></tr>
                 </tbody>
               </table>
             </div>
-          </div>
-
-          <div class="api-group">
-            <div class="api-group-header">
-              <span class="api-group-name">UtilityAttribute</span>
-              <span class="api-type-badge badge--attr">Attribute</span>
-            </div>
-            <div class="api-members">
-              <div class="api-member">
-                <span class="api-kind kind--ctor">ctor</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">UtilityAttribute()</div>
-                  <div class="api-member-desc">Marks a type as cross-cutting. Edges targeting this type are ignored by topology validation. Not a layer — a type cannot be both Utility and a layer member.</div>
-                </div>
-              </div>
-            </div>
+            <p class="prose">Each is a sealed <code>LayerAttribute</code> subclass with a parameterless constructor and no extra behavior.</p>
           </div>
 
           <div class="api-group">
@@ -132,8 +145,15 @@
               <div class="api-member">
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">AssemblyLayerAttribute(ArchitectureLayer layer)</div>
-                  <div class="api-member-desc">Tags the assembly. All types inherit this layer unless they have a type-level attribute. Target: <code>Assembly</code>.</div>
+                  <div class="api-member-name">AssemblyLayerAttribute(LayerId layer)</div>
+                  <div class="api-member-desc">Tags the assembly. Every type in it gets this layer unless it carries a type-level layer attribute. Target: <code>Assembly</code>, once.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LayerId Layer { get; }</div>
+                  <div class="api-member-desc">The layer for all types in this assembly.</div>
                 </div>
               </div>
             </div>
@@ -141,48 +161,100 @@
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">ArchitectureLayer</span>
+              <span class="api-group-name">SuppressArchRuleAttribute</span>
+              <span class="api-type-badge badge--attr">Attribute</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">SuppressArchRuleAttribute(string ruleId)</div>
+                  <div class="api-member-desc">Suppresses a rule on a class, interface or struct, for an intentional, documented exception. Allowed several times per type; a family prefix such as <code>"DONT"</code> covers the whole family.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string RuleId { get; }</div>
+                  <div class="api-member-desc">The rule id to suppress, such as <code>"DONT001"</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Reason { get; set; }</div>
+                  <div class="api-member-desc">Why the violation is intentional.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: LayerId ── -->
+        <section class="docs-section" id="api-layer-id">
+          <div class="section-eyebrow">Runtime API</div>
+          <h2 class="section-title">LayerId</h2>
+          <p class="section-intro">The closed set of layers and the single source of truth for layer identity, ordered top to bottom by volatility rank.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LayerId</span>
               <span class="api-type-badge badge--enum">Enum</span>
             </div>
             <div class="table-wrap">
               <table class="docs-table">
-                <thead><tr><th>Value</th><th>Ordinal</th></tr></thead>
+                <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
                 <tbody>
-                  <tr><td>Client</td><td>0</td></tr>
-                  <tr><td>Manager</td><td>1</td></tr>
-                  <tr><td>Engine</td><td>2</td></tr>
-                  <tr><td>ResourceAccess</td><td>3</td></tr>
-                  <tr><td>Resource</td><td>4</td></tr>
+                  <tr><td><code>None</code></td><td>Never a valid tag: untagged or unresolved</td></tr>
+                  <tr><td><code>Client</code></td><td>Rank 0, the most volatile</td></tr>
+                  <tr><td><code>Manager</code></td><td>Rank 1</td></tr>
+                  <tr><td><code>Engine</code></td><td>Rank 2</td></tr>
+                  <tr><td><code>ResourceAccess</code></td><td>Rank 3</td></tr>
+                  <tr><td><code>Resource</code></td><td>Rank 4, the most stable</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- ── API: Behavioral Attributes ── -->
-        <section class="docs-section" id="api-behavioral-attrs">
-          <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">Behavioral Attributes</h2>
-          <p class="section-intro">Declare message flow and use case entry points. All validated by the MSGBUS and USECASE rule sets.</p>
+        <!-- ── API: Topology ── -->
+        <section class="docs-section" id="api-topology">
+          <div class="section-eyebrow">Runtime API</div>
+          <h2 class="section-title">Topology</h2>
+          <p class="section-intro">The legal call directions, as data. The editor rules query <code>LowyTopology.Instance</code>, and so does the runtime container in <a href="hosting.html"><code>com.tutan.hosting</code></a>, so the two cannot disagree.</p>
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">PublishesAttribute</span>
-              <span class="api-type-badge badge--attr">Attribute</span>
+              <span class="api-group-name">TopologyCell</span>
+              <span class="api-type-badge badge--class">sealed class</span>
             </div>
             <div class="api-members">
               <div class="api-member">
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">PublishesAttribute(Type messageType)</div>
-                  <div class="api-member-desc">Declares that this class publishes the given message type. <code>AllowMultiple = true</code>. Only Manager types should use this — other layers trigger a MSGBUS violation.</div>
+                  <div class="api-member-name">TopologyCell(LayerId fromId, LayerId toId, bool allowed, int maxCount = 0)</div>
+                  <div class="api-member-desc">Declares one cell. Only allowed directions need a cell; any pair without one is disallowed.</div>
                 </div>
               </div>
               <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
+                <span class="api-kind kind--field">field</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">Type MessageType { get; }</div>
-                  <div class="api-member-desc">The message type being published.</div>
+                  <div class="api-member-name">LayerId FromId, ToId</div>
+                  <div class="api-member-desc">The source and target layers.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool Allowed</div>
+                  <div class="api-member-desc">Whether the dependency is permitted.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int MaxCount</div>
+                  <div class="api-member-desc">Cap on distinct target-layer types per source type (<code>0</code> = unlimited).</div>
                 </div>
               </div>
             </div>
@@ -190,15 +262,36 @@
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">SubscribesToAttribute</span>
-              <span class="api-type-badge badge--attr">Attribute</span>
+              <span class="api-group-name">LayerTopology</span>
+              <span class="api-type-badge badge--class">sealed class</span>
             </div>
             <div class="api-members">
               <div class="api-member">
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">SubscribesToAttribute(Type messageType)</div>
-                  <div class="api-member-desc">Declares that this class subscribes to the given message type. <code>AllowMultiple = true</code>. Engines, ResourceAccess, and Resources must not subscribe.</div>
+                  <div class="api-member-name">LayerTopology(IEnumerable&lt;TopologyCell&gt; cells)</div>
+                  <div class="api-member-desc">Builds a query object from a list of cells, such as <code>LowyTopology.Cells</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool IsAllowed(LayerId source, LayerId target)</div>
+                  <div class="api-member-desc">Whether a dependency from <code>source</code> to <code>target</code> is permitted.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int MaxCount(LayerId source, LayerId target)</div>
+                  <div class="api-member-desc">The cardinality cap for a cell, or <code>0</code> (unlimited) when none is set.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyCollection&lt;LayerId&gt; GetAllowedTargets(LayerId source)</div>
+                  <div class="api-member-desc">The layers <code>source</code> may depend on.</div>
                 </div>
               </div>
             </div>
@@ -206,52 +299,103 @@
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">UseCaseAttribute</span>
-              <span class="api-type-badge badge--attr">Attribute</span>
+              <span class="api-group-name">LowyTopology</span>
+              <span class="api-type-badge badge--static">static class</span>
             </div>
             <div class="api-members">
               <div class="api-member">
-                <span class="api-kind kind--ctor">ctor</span>
+                <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">UseCaseAttribute(string name)</div>
-                  <div class="api-member-desc">Marks a Manager method as a use case entry point with the given name. Target: <code>Method</code>. The validator traces the call chain from this method and validates USECASE001–003.</div>
+                  <div class="api-member-name">IReadOnlyList&lt;TopologyCell&gt; Cells { get; }</div>
+                  <div class="api-member-desc">The allowed edges of the closed architecture: Client → Manager (max 1), Manager → Engine, Manager → ResourceAccess, Engine → ResourceAccess, ResourceAccess → Resource.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">string Name { get; }</div>
-                  <div class="api-member-desc">The use case name. Multiple Managers can share the same name — both appear as entry points in the Validation window.</div>
+                  <div class="api-member-name">LayerTopology Instance { get; }</div>
+                  <div class="api-member-desc">A shared query object over <code>Cells</code>.</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ── API: LayerTopology ── -->
-        <section class="docs-section" id="api-topology">
-          <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">LayerTopology</h2>
-          <p class="section-intro">Static query API for the allowed dependency directions. Use in custom rules or tooling.</p>
+        <!-- ── API: Layer Definitions ── -->
+        <section class="docs-section" id="api-layers">
+          <div class="section-eyebrow">Editor API</div>
+          <h2 class="section-title">Layer Definitions</h2>
+          <p class="section-intro">Editor types live in namespace <code>Tutan.Architecture.Editor</code>. A layer's editor presentation is a pure descriptor; the naming conventions and the topology live with the rules that use them.</p>
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">LayerTopology</span>
+              <span class="api-group-name">LayerDefinition</span>
+              <span class="api-type-badge badge--class">sealed class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LayerId Id</div>
+                  <div class="api-member-desc">Stable layer identity.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string DisplayName</div>
+                  <div class="api-member-desc">Human-readable name.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LayerRole Role</div>
+                  <div class="api-member-desc">Diagram question word: <code>Who</code>, <code>What</code>, <code>HowBusiness</code>, <code>HowResource</code> or <code>Where</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Description</div>
+                  <div class="api-member-desc">The layer's purpose and the volatility it encapsulates.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;string&gt; Remarks</div>
+                  <div class="api-member-desc">Key do's and don'ts for the layer.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Color Color</div>
+                  <div class="api-member-desc">Layer accent color, used for the dependency graph band.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LowyArchitecture</span>
               <span class="api-type-badge badge--static">static class</span>
             </div>
             <div class="api-members">
               <div class="api-member">
-                <span class="api-kind kind--method">method</span>
+                <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">bool IsAllowed(ArchitectureLayer source, ArchitectureLayer target)</div>
-                  <div class="api-member-desc">Returns <code>true</code> if a dependency from <code>source</code> to <code>target</code> is permitted by the closed architecture.</div>
+                  <div class="api-member-name">IReadOnlyList&lt;LayerDefinition&gt; LayerDefinitions { get; }</div>
+                  <div class="api-member-desc">The five layers' presentation, built once and shared by the dependency graph and the Assign Layer picker.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">IReadOnlyCollection&lt;ArchitectureLayer&gt; GetAllowedTargets(ArchitectureLayer source)</div>
-                  <div class="api-member-desc">Returns the set of layers the given source layer may depend on.</div>
+                  <div class="api-member-name">LayerDefinition GetLayer(LayerId id)</div>
+                  <div class="api-member-desc">The layer with this id, or <code>null</code>.</div>
                 </div>
               </div>
             </div>
@@ -260,93 +404,307 @@
 
         <!-- ── API: ArchitectureGraph ── -->
         <section class="docs-section" id="api-graph">
-          <div class="section-eyebrow">API Reference</div>
+          <div class="section-eyebrow">Editor API</div>
           <h2 class="section-title">ArchitectureGraph</h2>
-          <p class="section-intro">Editor-only. Scans loaded assemblies and builds the dependency graph. Read by all validation rules.</p>
+          <p class="section-intro">Scans the project and builds the dependency graph between tracked types. Every rule reads it.</p>
 
           <div class="api-group">
             <div class="api-group-header">
               <span class="api-group-name">ArchitectureGraph</span>
-              <span class="api-type-badge badge--class">class</span>
+              <span class="api-type-badge badge--class">sealed class</span>
             </div>
             <div class="api-members">
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">void Scan()</div>
-                  <div class="api-member-desc">Scans all loaded assemblies for layer attributes and builds the dependency graph. Call before validating.</div>
+                  <div class="api-member-desc">Scans the project against Löwy's Method.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LayerTopology Topology { get; }</div>
+                  <div class="api-member-desc">The Löwy call topology (<code>LowyTopology.Instance</code>).</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">IReadOnlyDictionary&lt;Type, TypeLayerInfo&gt; TypeMap { get; }</div>
-                  <div class="api-member-desc">All tracked types and their resolved layer info.</div>
+                  <div class="api-member-desc">Tracked types and their layer info.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">IReadOnlyList&lt;DependencyEdge&gt; Edges { get; }</div>
-                  <div class="api-member-desc">All dependency edges between tracked types. Each edge records source, target, and how the dependency was detected (<code>DependencyKind</code>).</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">IReadOnlyDictionary&lt;Type, MessageTypeInfo&gt; MessageTypes { get; }</div>
-                  <div class="api-member-desc">Message types found via <code>[Publishes]</code> / <code>[SubscribesTo]</code> declarations.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">IReadOnlyDictionary&lt;string, IReadOnlyList&lt;UseCaseEntryPoint&gt;&gt; UseCases { get; }</div>
-                  <div class="api-member-desc">Use case entry points grouped by name.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ── API: Validation Types ── -->
-        <section class="docs-section" id="api-validation">
-          <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">Validation Types</h2>
-          <p class="section-intro">Editor-only types for running and interpreting validation results.</p>
-
-          <div class="api-group">
-            <div class="api-group-header">
-              <span class="api-group-name">LayerValidator</span>
-              <span class="api-type-badge badge--class">class</span>
-            </div>
-            <div class="api-members">
-              <div class="api-member">
-                <span class="api-kind kind--ctor">ctor</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">LayerValidator()</div>
-                  <div class="api-member-desc">Creates a validator with all 7 default rule sets.</div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--ctor">ctor</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">LayerValidator(IEnumerable&lt;IArchitectureRule&gt; rules)</div>
-                  <div class="api-member-desc">Creates a validator with a custom rule set. Mix built-in and custom rules in any order. Used for CI scripts and custom tooling.</div>
+                  <div class="api-member-desc">Dependency edges between tracked types.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">List&lt;ValidationResult&gt; ScanAndValidate()</div>
-                  <div class="api-member-desc">Convenience method — scans assemblies and validates in one call.</div>
+                  <div class="api-member-name">string LayerDisplayName(LayerId layerId)</div>
+                  <div class="api-member-desc">Display name for a layer, falling back to the enum name.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">TypeLayerInfo</span>
+              <span class="api-type-badge badge--struct">readonly struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Type Type { get; }</div>
+                  <div class="api-member-desc">The tracked type.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LayerId Layer { get; }</div>
+                  <div class="api-member-desc">The resolved layer.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LayerResolutionSource Source { get; }</div>
+                  <div class="api-member-desc">How the layer was determined: <code>TypeAttribute</code> or <code>AssemblyAttribute</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Name { get; }, string Description { get; }</div>
+                  <div class="api-member-desc">Display metadata from the attribute; either may be <code>null</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">DependencyEdge</span>
+              <span class="api-type-badge badge--struct">readonly struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Type From { get; }, Type To { get; }</div>
+                  <div class="api-member-desc">The depending type and its dependency.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">DependencyKind Kind { get; }</div>
+                  <div class="api-member-desc">How the dependency was found.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">DependencyKind</span>
+              <span class="api-type-badge badge--enum">Enum</span>
+            </div>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
+                <tbody>
+                  <tr><td><code>Field</code></td><td>Field type reference</td></tr>
+                  <tr><td><code>ConstructorParameter</code></td><td>Constructor parameter type</td></tr>
+                  <tr><td><code>MethodParameter</code></td><td>Method parameter type</td></tr>
+                  <tr><td><code>MethodReturn</code></td><td>Method return type</td></tr>
+                  <tr><td><code>InterfaceImplementation</code></td><td>Implemented interface</td></tr>
+                  <tr><td><code>BaseClass</code></td><td>Base class</td></tr>
+                  <tr><td><code>GenericArgument</code></td><td>Generic type argument (unwrapped)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: Rules ── -->
+        <section class="docs-section" id="api-rules">
+          <div class="section-eyebrow">Editor API</div>
+          <h2 class="section-title">Rules</h2>
+          <p class="section-intro">A rule's identity and detail-panel copy live in a <code>RuleDefinition</code>; its detection lives in the <code>IArchitectureRule</code> that emits it, the same split <code>LayerDefinition</code> uses. The set is fixed.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">IArchitectureRule</span>
+              <span class="api-type-badge badge--iface">interface</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IEnumerable&lt;ValidationResult&gt; Validate(ArchitectureGraph graph)</div>
+                  <div class="api-member-desc">Reads the scanned graph and returns its findings.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">RuleDefinition</span>
+              <span class="api-type-badge badge--class">sealed class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">RuleFamily Family, int Number</div>
+                  <div class="api-member-desc">The rule's identity. <code>RuleFamily</code> is <code>Arch</code>, <code>Dont</code>, <code>Name</code>, <code>AsmRef</code> or <code>Struct</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Id { get; }</div>
+                  <div class="api-member-desc">The identity rendered as the id carried on <code>ValidationResult.RuleId</code>, such as <code>"DONT002"</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Title, ValidationSeverity Severity</div>
+                  <div class="api-member-desc">The rule's title and fixed severity.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Why, string Fix</div>
+                  <div class="api-member-desc">The plain-English detail-panel copy.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static string FillPlaceholders(string template, string source, string target)</div>
+                  <div class="api-member-desc">Fills a <em>Why</em> or <em>Fix</em> template with the finding's type names.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LowyRules</span>
+              <span class="api-type-badge badge--static">static class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;RuleDefinition&gt; RuleDefinitions { get; }</div>
+                  <div class="api-member-desc">The fixed rule preset, and the single registry of what rules exist. A rule cannot raise an unlisted id.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">RuleDefinition Get(string ruleId)</div>
+                  <div class="api-member-desc">The definition with this id, or <code>null</code>. The settings page reads <em>Why</em> and <em>Fix</em> through it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">field</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static readonly RuleDefinition Arch001, Dont001, …, Struct004</div>
+                  <div class="api-member-desc">A named accessor per rule.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">Built-in rule families</span>
+              <span class="api-type-badge badge--class">sealed classes</span>
+            </div>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Class</th><th>Family</th><th>Finding ids</th></tr></thead>
+                <tbody>
+                  <tr><td><code>ClosedArchitectureRule</code></td><td><code>ARCH</code></td><td>ARCH001</td></tr>
+                  <tr><td><code>DesignDontRules</code></td><td><code>DONT</code></td><td>DONT001, DONT002, DONT004, DONT011, DONT012</td></tr>
+                  <tr><td><code>NamingConventionRule</code></td><td><code>NAME</code></td><td>NAME001, NAME002</td></tr>
+                  <tr><td><code>AssemblyReferenceRule</code></td><td><code>ASMREF</code></td><td>ASMREF001</td></tr>
+                  <tr><td><code>StructureMetricsRule</code></td><td><code>STRUCT</code></td><td>STRUCT001-004</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">See <a href="architecture.html#guide-validation">Validation Rules</a> for what each finding checks.</p>
+          </div>
+        </section>
+
+        <!-- ── API: Running Validation ── -->
+        <section class="docs-section" id="api-validation">
+          <div class="section-eyebrow">Editor API</div>
+          <h2 class="section-title">Running Validation</h2>
+          <p class="section-intro">Build the fixed rule set with <code>ValidatorFactory</code>, run it against a scanned <code>ArchitectureGraph</code>, and read the findings.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">ValidatorFactory</span>
+              <span class="api-type-badge badge--static">static class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LayerValidator Build()</div>
+                  <div class="api-member-desc">A validator with the fixed Löwy rule set.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">List&lt;IArchitectureRule&gt; BuildRules()</div>
+                  <div class="api-member-desc">The built-in rule instances, in canonical order.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LayerValidator</span>
+              <span class="api-type-badge badge--class">sealed class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LayerValidator(IEnumerable&lt;IArchitectureRule&gt; rules)</div>
+                  <div class="api-member-desc">Creates a validator with the given rule set, usually from <code>ValidatorFactory</code>.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">List&lt;ValidationResult&gt; Validate(ArchitectureGraph graph)</div>
-                  <div class="api-member-desc">Runs all rules against a pre-scanned graph.</div>
+                  <div class="api-member-desc">Runs every rule against a scanned graph, dropping findings suppressed with <code>[SuppressArchRule]</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int SuppressedCount { get; }</div>
+                  <div class="api-member-desc">How many findings <code>[SuppressArchRule]</code> dropped in the last <code>Validate</code> call.</div>
                 </div>
               </div>
             </div>
@@ -355,32 +713,46 @@
           <div class="api-group">
             <div class="api-group-header">
               <span class="api-group-name">ValidationResult</span>
-              <span class="api-type-badge badge--struct">struct</span>
+              <span class="api-type-badge badge--struct">readonly struct</span>
             </div>
             <div class="api-members">
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">string RuleId { get; }</div>
-                  <div class="api-member-desc">Which rule produced this result (e.g., <code>ARCH001</code>, <code>NAME002</code>).</div>
+                  <div class="api-member-desc">The finding's id, such as <code>"DONT002"</code>.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">ValidationSeverity Severity { get; }</div>
-                  <div class="api-member-desc"><code>Info</code>, <code>Warning</code>, or <code>Error</code>. Actual severity is modified by the active <code>EnforcementMode</code>.</div>
+                  <div class="api-member-desc"><code>Info</code>, <code>Warning</code> or <code>Error</code>.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">string Message { get; }</div>
-                  <div class="api-member-desc">Human-readable violation description.</div>
+                  <div class="api-member-desc">Human-readable description of the violation.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Type SourceType { get; }, Type TargetType { get; }</div>
+                  <div class="api-member-desc">The offending type, and the dependency target for edge findings; either is <code>null</code> when it does not apply.</div>
                 </div>
               </div>
             </div>
           </div>
+        </section>
+
+        <!-- ── API: Settings & CI ── -->
+        <section class="docs-section" id="api-settings">
+          <div class="section-eyebrow">Editor API</div>
+          <h2 class="section-title">Settings &amp; CI</h2>
+          <p class="section-intro">The enforcement mode decides how loudly findings are reported after every domain reload. Nothing else is configurable.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -391,47 +763,76 @@
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">EnforcementMode EnforcementMode { get; set; }</div>
-                  <div class="api-member-desc"><code>Off</code> | <code>WarningsOnly</code> | <code>ErrorsForCore</code> | <code>Strict</code></div>
-                </div>
-              </div>
-              <div class="api-member">
-                <span class="api-kind kind--prop">prop</span>
-                <div class="api-member-content">
-                  <div class="api-member-name">string[] UtilityAssemblies { get; set; }</div>
-                  <div class="api-member-desc">Assembly names treated as cross-cutting utility. All types in these assemblies are exempt from topology validation.</div>
+                  <div class="api-member-name">EnforcementMode EnforcementMode { get; }</div>
+                  <div class="api-member-desc">The current enforcement level.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">static FrameworkSettings GetOrDefault()</div>
-                  <div class="api-member-desc">Loads from <code>Resources/Framework/FrameworkSettings</code> or returns a default instance.</div>
+                  <div class="api-member-desc">Loads the asset from Resources, or returns a non-persisted default instance in <code>WarningsOnly</code>. Never <code>null</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static FrameworkSettings GetOrCreateAsset()</div>
+                  <div class="api-member-desc">Returns the saved asset, creating it at <code>Assets/Resources/Framework/FrameworkSettings.asset</code> when missing.</div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
 
-        <!-- ── API: Editor Tools ── -->
-        <section class="docs-section" id="api-editor">
-          <div class="section-eyebrow">API Reference</div>
-          <h2 class="section-title">Editor Tools</h2>
-          <p class="section-intro">Two editor windows for exploring and validating your architecture. Both accessible from the <strong>Window → Architecture</strong> menu.</p>
-
-          <div class="table-wrap">
-            <table class="docs-table">
-              <thead><tr><th>Window</th><th>Menu Path</th><th>Description</th></tr></thead>
-              <tbody>
-                <tr><td>ArchitectureSettingsProvider</td><td>Edit → Project Settings → Architecture</td><td>Unified panel — configure enforcement mode and utility assemblies, then run validation inline. Violations list with severity filter, search, and a detail pane showing the rule's <em>Why</em> and a <em>Fix suggestion</em>. Settings asset is auto-created on first visit.</td></tr>
-                <tr><td>ValidationWindow</td><td>Window → Architecture → Validation</td><td>Tabbed window — <em>Violations</em> list with rule IDs and source types; <em>Use Cases</em> tab with BFS chains and USECASE results.</td></tr>
-              </tbody>
-            </table>
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">EnforcementMode</span>
+              <span class="api-type-badge badge--enum">Enum</span>
+            </div>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Value</th><th>Behavior</th></tr></thead>
+                <tbody>
+                  <tr><td><code>Off</code></td><td>No automatic validation</td></tr>
+                  <tr><td><code>WarningsOnly</code></td><td>Every finding is logged as a warning</td></tr>
+                  <tr><td><code>ErrorsForCore</code></td><td>Each finding keeps its own severity</td></tr>
+                  <tr><td><code>Strict</code></td><td>Every finding is logged as an error</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div class="callout callout--note">
-            <strong>CompilationHook</strong>
-            Validation runs automatically after every successful compilation when <code>EnforcementMode</code> is not <code>Off</code>. Results appear directly in the Unity Console with clickable links to the violating type.
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">CIValidator</span>
+              <span class="api-type-badge badge--static">static class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static void Run()</div>
+                  <div class="api-member-desc">Headless batch-mode entry point. Scans, validates, writes <code>architecture-report.json</code>, and exits with code <code>1</code> on any Error-severity finding, <code>0</code> otherwise.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">Editor Menus</span>
+            </div>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Menu path</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td>Edit → Project Settings → Architecture</td><td>The enforcement mode and a live validation view, with each rule's <em>Why</em> and <em>Fix</em></td></tr>
+                  <tr><td>Tools → Architecture → Validation</td><td>Opens that settings page</td></tr>
+                  <tr><td>Tools → Architecture → Validate Now</td><td>Runs a one-shot validation and logs to the Console</td></tr>
+                  <tr><td>Assets → Architecture → Assign Layer…</td><td>Tags the selected script with a layer's shorthand attribute</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 

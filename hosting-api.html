@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hosting API Reference - Unity Framework</title>
+  <meta name="description" content="Tutan Hosting API Reference: AppHost, ArchitectureContainer, IHostedService and InstallResult.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles.css">
+  <link rel="stylesheet" href="src/docs.css">
+  <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/favicon/favicon-32x32.png" alt="" class="nav-logo-icon" aria-hidden="true">
+        Unity Framework
+      </a>
+    </div>
+  </nav>
+  <div class="docs-shell">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to home
+        </a>
+        <span class="sidebar-pkg-id sidebar-pkg-id--util">com.tutan.hosting</span>
+        <div class="sidebar-pkg-name">Hosting</div>
+      </div>
+      <nav class="sidebar-nav" aria-label="Page sections">
+        <a href="hosting.html" class="sidebar-direct" data-pkg="util">← Guides</a>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            API Reference
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#api-apphost" class="sidebar-link" data-pkg="util">AppHost</a>
+            <a href="#api-container" class="sidebar-link" data-pkg="util">ArchitectureContainer</a>
+            <a href="#api-hosted-service" class="sidebar-link" data-pkg="util">IHostedService</a>
+            <a href="#api-install-result" class="sidebar-link" data-pkg="util">InstallResult</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="docs-main">
+
+      <div class="docs-content">
+
+        <!-- ── API: AppHost ── -->
+        <section class="docs-section" id="api-apphost">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">AppHost</h2>
+          <p class="section-intro">All types live in namespace <code>Tutan.Hosting</code>. <code>AppHost</code> builds and installs <code>Container</code> at <code>BeforeSceneLoad</code>. It removes every service when the application quits, and starts from an empty container when Play Mode exits in the Editor.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">AppHost</span>
+              <span class="api-type-badge badge--static">static class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">ArchitectureContainer Container { get; }</div>
+                  <div class="api-member-desc">The container the host builds, populated from <code>SubsystemRegistration</code> installers.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Task&lt;Result&lt;Unit&gt;&gt; WaitForInstallAsync()</div>
+                  <div class="api-member-desc">The install outcome, the same task for every caller. A success once every service has installed; a failure that carries the first error otherwise, or <code>AppHost has not initialized yet.</code> before <code>BeforeSceneLoad</code>. A programmer error faults the task.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: ArchitectureContainer ── -->
+        <section class="docs-section" id="api-container">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">ArchitectureContainer</h2>
+          <p class="section-intro">Registers services by layer and as Utilities, checks every constructor dependency against <code>LowyTopology</code>, and installs and removes them in dependency order. Every registration method returns the container, so calls chain.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">ArchitectureContainer</span>
+              <span class="api-type-badge badge--class">sealed class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">AddManager&lt;T&gt;() / AddManager&lt;TDefining, TImpl&gt;()</div>
+                  <div class="api-member-desc">Registers a Manager, by its concrete type or under a defining type. The concrete type carries <code>[Manager]</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">AddEngine&lt;T&gt;() / AddEngine&lt;TDefining, TImpl&gt;()</div>
+                  <div class="api-member-desc">Registers an Engine. The concrete type carries <code>[Engine]</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">AddResourceAccess&lt;T&gt;() / AddResourceAccess&lt;TDefining, TImpl&gt;()</div>
+                  <div class="api-member-desc">Registers a ResourceAccess. The concrete type carries <code>[ResourceAccess]</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">AddResource&lt;T&gt;() / AddResource&lt;TDefining, TImpl&gt;()</div>
+                  <div class="api-member-desc">Registers a Resource. The concrete type carries <code>[Resource]</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">AddUtility&lt;T&gt;() / AddUtility&lt;TDefining, TImpl&gt;()</div>
+                  <div class="api-member-desc">Registers a Utility. The concrete type carries no layer tag. Any service may depend on it, and it may depend only on other Utilities.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">T Resolve&lt;T&gt;()</div>
+                  <div class="api-member-desc">The singleton registered under <code>T</code>, once the install has succeeded. For handing a Manager to a Client; services receive their dependencies through their constructors.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="prose">The <code>Add…</code> constraints are <code>T : class, IHostedService</code> and <code>TImpl : class, TDefining, IHostedService</code>, and <code>Resolve&lt;T&gt;</code> asks only <code>T : class</code>, because a defining type need not implement <code>IHostedService</code>. A layered registration requires the matching layer tag on the concrete type or its assembly, and a Utility requires none; a mismatch fails the install.</p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Throws <code>InvalidOperationException</code></th><th>When</th></tr></thead>
+              <tbody>
+                <tr><td>Any <code>Add…</code> method</td><td>The defining type is already registered, or the build has started</td></tr>
+                <tr><td><code>Resolve&lt;T&gt;()</code></td><td>The install has not succeeded, or nothing is registered under <code>T</code></td></tr>
+                <tr><td>The build</td><td>A service does not have exactly one public constructor</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout--note">
+            <strong>Every other problem is a Result</strong>
+            A missing or wrong tag, an unregistered dependency, a forbidden edge, a cycle or a failed install comes back from <code>AppHost.WaitForInstallAsync()</code> as a failed <code>Result</code> with a named error. See <a href="hosting.html#guide-wiring">Wiring &amp; Enforcement</a> for every message.
+          </div>
+        </section>
+
+        <!-- ── API: IHostedService ── -->
+        <section class="docs-section" id="api-hosted-service">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">IHostedService</h2>
+          <p class="section-intro">The lifecycle every hosted service implements, layered services and Utilities alike.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">IHostedService</span>
+              <span class="api-type-badge badge--iface">interface</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">ValueTask&lt;InstallResult&gt; InstallAsync()</div>
+                  <div class="api-member-desc">Starts the service once its dependencies have started.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Remove()</div>
+                  <div class="api-member-desc">Stops the service, in reverse install order on rollback and teardown.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: InstallResult ── -->
+        <section class="docs-section" id="api-install-result">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">InstallResult</h2>
+          <p class="section-intro">What a service's <code>InstallAsync</code> reports. A failure rolls back every service installed before it.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">InstallResult</span>
+              <span class="api-type-badge badge--struct">readonly struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool IsSuccess { get; }</div>
+                  <div class="api-member-desc">Whether the service installed.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string ErrorMessage { get; }</div>
+                  <div class="api-member-desc">The failure reason, or <code>null</code> on success.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static InstallResult Success()</div>
+                  <div class="api-member-desc">A success.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static InstallResult Failure(string reason)</div>
+                  <div class="api-member-desc">A failure with a reason.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- .docs-content -->
+    </main>
+  </div><!-- .docs-shell -->
+
+  <!-- Sidebar toggle (mobile) -->
+  <button class="sidebar-toggle-btn" aria-label="Toggle navigation sidebar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <script src="src/main.js"></script>
+  <script src="src/docs.js"></script>
+</body>
+</html>

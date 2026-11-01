@@ -394,7 +394,19 @@
 }
 
 /* Long inline identifiers break instead of overflowing phone-width screens */
-.docs-content :not(pre) > code { overflow-wrap: break-word; }
+.docs-content :not(pre) > code,
+.docs-hero :not(pre) > code { overflow-wrap: break-word; }
+
+/* In-content links: the base reset styles links as body text, so mark them with an underline */
+.docs-main a:not([class]) {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s;
+}
+.docs-main a:not([class]):hover { text-decoration-color: currentColor; }
 
 .prose strong {
   color: var(--text-primary);
@@ -445,7 +457,8 @@ ul.prose li::marker { color: var(--text-muted); }
   z-index: 1;
 }
 
-.step-body { flex: 1; padding-top: 4px; }
+/* min-width: 0 lets the body shrink below a long identifier, so it wraps instead of clipping */
+.step-body { flex: 1; min-width: 0; padding-top: 4px; }
 
 .step-title {
   font-size: 0.9375rem;
