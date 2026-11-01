@@ -85,20 +85,20 @@
 
   function highlightNav() {
     var scrollY = window.scrollY + 100;
+    var current = null;
 
     sections.forEach(function (section) {
       var top = section.offsetTop;
       var height = section.offsetHeight;
-      var id = section.getAttribute('id');
 
       if (scrollY >= top && scrollY < top + height) {
-        navLinkElements.forEach(function (link) {
-          link.style.color = '';
-          if (link.getAttribute('href') === '#' + id) {
-            link.style.color = 'var(--text-primary)';
-          }
-        });
+        current = section.getAttribute('id');
       }
+    });
+
+    // Above the first section (the hero) no link is current, so none stays lit
+    navLinkElements.forEach(function (link) {
+      link.style.color = link.getAttribute('href') === '#' + current ? 'var(--text-primary)' : '';
     });
   }
 

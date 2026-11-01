@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Unity Framework - Professional Unity Packages</title>
-  <meta name="description" content="Unity packages for professional projects: functional primitives (Optional/Result), a zero-allocation message bus, and a structured log that allocates nothing.">
+  <meta name="description" content="Unity packages for professional projects: functional primitives (Optional/Result), a zero-allocation message bus, a structured log that allocates nothing, and a composition root for Löwy's Method.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -28,6 +28,7 @@
         <a href="#functional" class="nav-link">Functional</a>
         <a href="#messages" class="nav-link">Messages</a>
         <a href="#logging" class="nav-link">Logging</a>
+        <a href="#hosting" class="nav-link">Hosting</a>
       </div>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -45,9 +46,10 @@
         <span class="hero-title-accent">The Right Way</span>
       </h1>
       <p class="hero-subtitle">
-        Three focused packages for professional Unity development:
+        Four focused packages for professional Unity development:
         null-safe functional primitives, a zero-allocation message bus,
-        and a structured log that allocates nothing.
+        a structured log that allocates nothing,
+        and a composition root for Löwy's Method.
       </p>
       <div class="hero-actions">
         <a href="#functional" class="btn btn--primary">Explore Packages</a>
@@ -64,6 +66,10 @@
         <a href="#logging" class="hero-package hero-package--log">
           <span class="hero-package-dot" aria-hidden="true"></span>
           Logging
+        </a>
+        <a href="#hosting" class="hero-package hero-package--util">
+          <span class="hero-package-dot" aria-hidden="true"></span>
+          Hosting
         </a>
       </div>
     </div>
@@ -325,6 +331,98 @@ saving.Log.Saved(slot, file);
       </div>
       <div style="text-align:center;margin-top:48px">
         <a href="logging.html" class="btn btn--cta btn--cta--log">Explore</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hosting Package -->
+  <section class="package" id="hosting">
+    <div class="container">
+      <div class="package-header">
+        <span class="package-label package-label--util">com.tutan.hosting</span>
+        <h2 class="package-title">Hosting</h2>
+        <p class="package-desc">
+          A composition root for a Löwy's Method architecture in Unity 6. The host constructs your services, hands each one its dependencies
+          and installs them in dependency order, and an edge the Löwy topology forbids fails the install with a named error instead of running.
+        </p>
+      </div>
+      <div class="package-grid">
+        <div class="feature-list">
+          <div class="feature">
+            <div class="feature-icon feature-icon--util" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Registration by Layer</h3>
+              <p class="feature-desc"><code>AddManager</code>, <code>AddEngine</code>, <code>AddResourceAccess</code>, <code>AddResource</code> and <code>AddUtility</code>, each with an overload that registers an implementation under an interface.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--util" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">The Topology at Wiring Time</h3>
+              <p class="feature-desc">Every constructor dependency is checked against <code>LowyTopology</code>, the table the Architecture validator reads, so the two cannot disagree. A layered service must carry its layer's tag.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--util" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Utilities</h3>
+              <p class="feature-desc">Any service may depend on a Utility, and a Utility may depend only on other Utilities, which is Löwy's cappuccino machine test made mechanical.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon feature-icon--util" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+            </div>
+            <div>
+              <h3 class="feature-name">Ordered Lifecycle &amp; Rollback</h3>
+              <p class="feature-desc">Every service installs after the services it depends on, Utilities before everything else, and teardown runs in reverse. The first service that fails to install undoes the ones before it.</p>
+            </div>
+          </div>
+        </div>
+        <div class="code-card code-card--util">
+          <div class="code-card-header">
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-dot" aria-hidden="true"></span>
+            <span class="code-card-file">AppInstaller.cs</span>
+          </div>
+<pre class="code-block"><code><span class="kw">using</span> Tutan.Architecture;
+<span class="kw">using</span> Tutan.Hosting;
+
+<span class="cmt">// Tag the layer - dependencies arrive through the constructor</span>
+[<span class="attr">Manager</span>]
+<span class="kw">public sealed class</span> <span class="type">NumberManager</span> : <span class="type">IHostedService</span>
+{
+    <span class="kw">private readonly</span> <span class="type">ValidatingEngine</span> _validating;
+    <span class="kw">public</span> NumberManager(<span class="type">ValidatingEngine</span> validating)
+        =&gt; _validating = validating;
+
+    <span class="kw">public</span> <span class="type">ValueTask</span>&lt;<span class="type">InstallResult</span>&gt; InstallAsync()
+        =&gt; <span class="kw">new</span>(<span class="type">InstallResult</span>.Success());
+    <span class="kw">public void</span> Remove() { }
+}
+
+<span class="cmt">// Register before the first scene loads, in any order</span>
+<span class="type">AppHost</span>.Container
+    .AddEngine&lt;<span class="type">ValidatingEngine</span>&gt;()
+    .AddManager&lt;<span class="type">NumberManager</span>&gt;();
+
+<span class="cmt">// Await the install - a forbidden edge comes back as an error</span>
+<span class="kw">var</span> installed = <span class="kw">await</span> <span class="type">AppHost</span>.WaitForInstallAsync();
+installed.Match(
+    onError: error =&gt; <span class="type">Debug</span>.LogError(error),
+    onSuccess: () =&gt; _client.Initialize(
+        <span class="type">AppHost</span>.Container.Resolve&lt;<span class="type">NumberManager</span>&gt;()));</code></pre>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:48px">
+        <a href="hosting.html" class="btn btn--cta btn--cta--util">Explore</a>
       </div>
     </div>
   </section>
