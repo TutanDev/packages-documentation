@@ -572,6 +572,9 @@ table.docs-table {
 /* For first columns holding paths or lists: wrap at spaces (or <wbr> in paths) rather than crush the other columns */
 .docs-table--wrap td:first-child { white-space: normal; overflow-wrap: break-word; }
 
+/* For first columns holding what an editor's UI says (menu items, column names) rather than code: the body font */
+.docs-table--labels td:first-child { font-family: inherit; font-size: inherit; }
+
 .docs-table code {
   font-family: var(--font-code);
   font-size: 0.82em;

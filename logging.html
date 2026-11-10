@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Logging - Unity Framework</title>
-  <meta name="description" content="Tutan Logging: a structured log for Unity 6. Events declared once as partial methods, written by a source generator, captured into fixed rings without allocating, and drained once a frame to the Unity Console and a JSON lines file.">
+  <meta name="description" content="Tutan Logging: a structured log for Unity 6. Events declared once as partial methods, written by a source generator, captured into fixed rings without allocating, and drained once a frame to the Unity Console and a JSON lines file. A view reads them as rows a filter query keeps, and the log console, an editor window beside Unity's Console, reads a session's records whole.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -45,6 +45,7 @@
           <div class="sidebar-items">
             <a href="#guide-quickstart" class="sidebar-link" data-pkg="log">Quick Start</a>
             <a href="#guide-compose" class="sidebar-link" data-pkg="log">Composition Root</a>
+            <a href="#guide-log-console" class="sidebar-link" data-pkg="log">The Log Console</a>
           </div>
         </div>
 
@@ -83,7 +84,22 @@
             <a href="#guide-drain" class="sidebar-link" data-pkg="log">Drain &amp; Backlog</a>
             <a href="#guide-console" class="sidebar-link" data-pkg="log">Unity Console</a>
             <a href="#guide-file" class="sidebar-link" data-pkg="log">JSON Lines File</a>
+            <a href="#guide-sessions" class="sidebar-link" data-pkg="log">Log Console Sessions</a>
             <a href="#guide-memory" class="sidebar-link" data-pkg="log">Tests &amp; Custom Sinks</a>
+          </div>
+        </div>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Reading
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#guide-records" class="sidebar-link" data-pkg="log">Records a Reader Reads</a>
+            <a href="#guide-view" class="sidebar-link" data-pkg="log">The View</a>
+            <a href="#guide-filters" class="sidebar-link" data-pkg="log">Filters</a>
+            <a href="#guide-reading-scopes" class="sidebar-link" data-pkg="log">Scopes</a>
+            <a href="#guide-session-file" class="sidebar-link" data-pkg="log">Reading a Session's File</a>
           </div>
         </div>
 
@@ -98,6 +114,7 @@
           </div>
         </div>
 
+        <a href="logging-console.html" class="sidebar-direct" data-pkg="log">Log Console →</a>
         <a href="logging-api.html" class="sidebar-direct" data-pkg="log">API Reference →</a>
       </nav>
     </aside>
@@ -111,7 +128,7 @@
         <span class="docs-hero-badge docs-hero-badge--log">com.tutan.logging · v0.1.0</span>
         <h1 class="docs-hero-title">Structured Logging<br>Without Allocating</h1>
         <p class="docs-hero-desc">
-          Tutan Logging keeps records as typed data, not text. An event is declared once as a <code>static partial</code> method, and a source generator writes the method a program calls. Records are drained once a frame to the Unity Console, with a link to the line that wrote them, and to a JSON lines file. An error brings the records that led to it.
+          Tutan Logging keeps records as typed data, not text. An event is declared once as a <code>static partial</code> method, and a source generator writes the method a program calls. Records are drained once a frame to the Unity Console, with a link to the line that wrote them, and to a JSON lines file. An error brings the records that led to it. A view reads a live store, or a session's file read back, as rows a filter query keeps, and the log console, an editor window beside Unity's Console, reads a session's records whole.
         </p>
         <div class="docs-hero-stats">
           <div>
@@ -123,7 +140,7 @@
             <span class="docs-stat-label">Compare When Off</span>
           </div>
           <div>
-            <span class="docs-stat-value" style="color:var(--log-color)">3</span>
+            <span class="docs-stat-value" style="color:var(--log-color)">4</span>
             <span class="docs-stat-label">Sinks</span>
           </div>
         </div>
@@ -291,6 +308,7 @@
                                      │
                                      ▼  LogPump pumps the drain (end of PostLateUpdate)
                                  LogDrain ──▶ UnityConsoleSink   (rows with links)
+                                     │──────▶ LogConsoleSink     (the log console's sessions ──▶ Window &gt; General &gt; Log Console)
                                      │──────▶ JsonLinesSink      (a file per session)
                                      └──────▶ MemorySink         (tests)
 
@@ -348,9 +366,29 @@ Debug.Log ── UnityLogBridge ──▶ LogStore</code></pre>
           </div>
 
           <div class="callout callout--note">
-            <strong>Planned for Version 2</strong>
-            A <code>LogFilter</code> and a <code>LogView</code>, drawn by an Editor window and a runtime overlay, and a <code>LogArchive</code> to read a session's file back, are planned and not in this version.
+            <strong>Version 2</strong>
+            Version 2 reads records as well as writing them. A <code>LogView</code> shows what a <code>LogFilter</code> keeps, over a live store or a <code>LogArchive</code> read back from a session's file. A <code>LogConsoleSink</code> keeps every record of a session, whole, in <code>LogConsole.Sessions</code>, and a session that ended stays until the console is cleared. The <a href="logging-console.html">log console</a>, an editor window beside Unity's Console, draws them. A runtime overlay, actions on a field's value and reading a player's log remotely are not in this version.
           </div>
+        </section>
+
+        <!-- ── Basics: The Log Console ── -->
+        <section class="docs-section" id="guide-log-console">
+          <div class="section-eyebrow">Basics</div>
+          <h2 class="section-title">The Log Console</h2>
+          <p class="section-intro">
+            Add a <code>LogConsoleSink</code> to the drain, and open <strong>Window &gt; General &gt; Log Console</strong>:
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">GameRoot.cs</span></div>
+<pre class="code-block"><code><span class="kw">var</span> drain = <span class="kw">new</span> <span class="type">LogDrain</span>(store,
+    (<span class="kw">new</span> <span class="type">UnityConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Warning)),
+    (<span class="kw">new</span> <span class="type">LogConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Debug)));</code></pre>
+          </div>
+
+          <p class="prose" style="margin-top:12px">The window shows a session's records as rows a query keeps, with a badge for each level and a tree of the categories. Selecting a row shows its fields, the scopes it is under, where it was written and the source around that line, and double-clicking it opens that line. A session that ended, as when Play Mode exits, stays until the console is cleared, and a session's JSON lines file can be opened and read back.</p>
+          <p class="prose">The team shares saved filters, category colours and what is always left out, in <code>ProjectSettings</code>, and each developer keeps their own columns, Clear on Play and Pause on Error, in <code>UserSettings</code>. Outside the editor the sink keeps nothing.</p>
+          <p class="prose">The window is on its own page, <a href="logging-console.html">The Log Console</a>; the sink and its sessions are in <a href="#guide-sessions">Log Console Sessions</a>.</p>
         </section>
 
         <!-- ── Events: Declaring Events ── -->
@@ -855,7 +893,7 @@ next = read.Next;</code></pre>
           <div class="section-eyebrow">Sinks</div>
           <h2 class="section-title">Drain &amp; Backlog</h2>
           <p class="section-intro">
-            A sink is where records leave the program: the Unity Console, a file, or memory for a test. Sinks never read the store; a drain reads it and hands every record to each of its sinks, which write the ones their options let through.
+            A sink is where records leave the program: the Unity Console, the log console, a file, or memory for a test. Sinks never read the store; a drain reads it and hands every record to each of its sinks, which write the ones their options let through.
           </p>
 
           <div class="code-card code-card--log">
@@ -879,7 +917,7 @@ next = read.Next;</code></pre>
                 </tbody>
               </table>
             </div>
-            <p class="prose"><code>LogPump.Install(drain)</code> pumps it once a frame from the PlayerLoop. An editor tool that wants records in Edit Mode, when the PlayerLoop does not run every editor frame, pumps it itself: <code>EditorApplication.update += drain.Pump;</code>.</p>
+            <p class="prose"><code>LogPump.Install(drain)</code> pumps it once a frame from the PlayerLoop (see <a href="#guide-pump">Pump &amp; Bridge</a>). An editor tool that wants records in Edit Mode, when the PlayerLoop does not run every editor frame, pumps it itself: <code>EditorApplication.update += drain.Pump;</code>.</p>
             <p class="prose">The drain owns its sinks. A sink given twice is refused with <code>ArgumentException</code>, since it would write every record twice. A sink that throws is said, as a <code>log/SinkFailed</code> record with the exception, and is not written to again. The program and the other sinks go on.</p>
           </div>
 
@@ -935,19 +973,19 @@ next = read.Next;</code></pre>
 
           <div class="code-card code-card--log">
             <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Console row</span></div>
-<pre class="code-block"><code><span class="kw">new</span> <span class="type">UnityConsoleSink</span>(openOnDoubleClick: <span class="kw">true</span>, name: <span class="str">"unity console"</span>)
+<pre class="code-block"><code><span class="kw">new</span> <span class="type">UnityConsoleSink</span>(openOnDoubleClick: <span class="kw">true</span>, name: <span class="str">"unity console"</span>, callSiteLine: <span class="kw">true</span>)
 
 <span class="cmt">// writes, for example:</span>
-game.save  Saved slot 3 in 00:00:01.2000000  &lt; Saving slot 3
+[game.save] Saved slot 3 in 00:00:01.2000000  &lt; Saving slot 3
 SaveManager.cs:42  frame 1240</code></pre>
           </div>
 
           <ul class="prose" style="margin-top:16px">
-            <li>The first line is the category and the message, then <code>  (+N)</code> when a limit dropped N records of the event before it, then <code>  &lt; </code> and the opening of the scope it is under.</li>
+            <li>The first line is the category in brackets and the message, then <code>  (+N)</code> when a limit dropped N records of the event before it, then <code>  &lt; </code> and the opening of the scope it is under.</li>
             <li>A scope's closing reads <code>Saving slot 3: done in 12.5 ms</code>.</li>
             <li>A record written as an error's context starts with <code>(context) </code>.</li>
             <li>An exception follows its record whole, on the lines after it.</li>
-            <li>The second line is the call site, which in the editor is a link, <code>&lt;a href="Assets/Game/SaveManager.cs" line="42"&gt;</code>, that opens the file at the line; then the frame, when the store had one. In a player it reads <code>(at Assets/Game/SaveManager.cs:42)</code>.</li>
+            <li>The second line is the call site, which in the editor is a link, <code>&lt;a href="Assets/Game/SaveManager.cs" line="42"&gt;</code>, that opens the file at the line; then the frame, when the store had one. In a player it reads <code>(at Assets/Game/SaveManager.cs:42)</code>. With <code>callSiteLine: false</code> a row is its first line alone, and in the editor, with <code>openOnDoubleClick</code>, a double-click still opens the call site.</li>
             <li>Levels map to row types: <code>Warning</code> is a warning, <code>Error</code> and <code>Critical</code> are errors, and the rest are logs (<code>UnityConsoleSink.TypeOf</code>).</li>
             <li>Records overwritten before the drain read them are a warning row, <code>1,234 records were overwritten before the Console read them</code>.</li>
           </ul>
@@ -956,7 +994,7 @@ SaveManager.cs:42  frame 1240</code></pre>
 
           <div class="callout callout--note">
             <strong>The bridge and the Console never feed each other</strong>
-            The sink skips what <code>UnityLogBridge</code> captured from Unity's own log, which the Console already shows, and the bridge skips what this sink writes. A row is a string, which Unity's log needs, so this sink allocates for every record it writes; records below its level cost nothing here.
+            The sink skips what <code>UnityLogBridge</code> captured from Unity's own log, which the Console already shows, and the bridge skips what this sink writes, so neither feeds the other. A row is a string, which Unity's log needs, so this sink allocates for every record it writes; records below its level cost nothing here.
           </div>
         </section>
 
@@ -1005,16 +1043,71 @@ SaveManager.cs:42  frame 1240</code></pre>
           </div>
         </section>
 
+        <!-- ── Sinks: Log Console Sessions ── -->
+        <section class="docs-section" id="guide-sessions">
+          <div class="section-eyebrow">Sinks</div>
+          <h2 class="section-title">Log Console Sessions</h2>
+          <p class="section-intro">
+            <code>LogConsoleSink</code> keeps a session for the log console: every record its drain hands it, whole and typed, in a live session of <code>LogConsole.Sessions</code>. The session starts when the drain opens the sink, and ends when the drain disposes it. An ended session stays until the console is cleared, so a Play Mode session can be read after Play Mode exits.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">GameRoot.cs</span></div>
+<pre class="code-block"><code><span class="kw">var</span> drain = <span class="kw">new</span> <span class="type">LogDrain</span>(store,
+    (<span class="kw">new</span> <span class="type">UnityConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Warning)),
+    (<span class="kw">new</span> <span class="type">LogConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Debug)));</code></pre>
+          </div>
+
+          <ul class="prose" style="margin-top:16px">
+            <li>A session holds at most <code>cap</code> records, a million by default, and past that lets the oldest go a block at a time, which its <code>Records.Dropped</code> counts. So it keeps what was written since the last clear, not only what the store's rings still hold.</li>
+            <li>A record under a scope whose opening was below the sink's level is kept after that opening, so it still says what it is under. Such a scope's closing is below the level too, so the session shows the scope as open.</li>
+            <li>It keeps records whole, so its options redact nothing: options that do are refused when it is opened, and the drain says so as <code>log/SinkFailed</code>.</li>
+            <li>A sink keeps one session, so a sink given to a second drain fails there.</li>
+            <li>A sink that throws is written to no more, so its session ends then, as when its drain lets it go.</li>
+            <li>Outside the editor it keeps nothing, since no window can read a session, so a composition root can add it without an <code>#if</code>.</li>
+            <li>A <code>cap</code> below 1 throws <code>ArgumentOutOfRangeException</code>.</li>
+          </ul>
+
+          <div class="sub-section">
+            <h3 class="sub-title">The sessions</h3>
+            <p class="prose"><code>LogConsole</code> is the process's sessions.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Member</th><th>What it does</th></tr></thead>
+                <tbody>
+                  <tr><td>Sessions</td><td>The sessions, oldest first: a new read-only list each time one starts, ends, is opened, is closed or is cleared away</td></tr>
+                  <tr><td>Find(id)</td><td>A session's state now, by its <code>LogSessionId</code>, while it is one of them</td></tr>
+                  <tr><td>Open(file)</td><td>Adds the session of a file <code>LogFile.Read</code> read, once</td></tr>
+                  <tr><td>Close(session)</td><td>Lets an ended session or a file's go; a live one has no <code>Close</code>, since it ends when its drain lets its sink go</td></tr>
+                  <tr><td>Clear()</td><td>Lets ended sessions go, and empties live ones, which keep what they are handed after; files' sessions stay</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">A <code>LogConsoleSession</code> is <code>Live</code>, <code>Ended</code> (with <code>At</code>, when it ended) or <code>File</code> (with its <code>Path</code> and <code>Skipped</code> lines), and its <code>Match</code> takes a function for each. Every one has an <code>Id</code> and its <code>Records</code>, a <code>LogArchive</code> that a <code>LogView</code> reads as it reads a store (see <a href="#guide-records">Reading Records</a>).</p>
+            <p class="prose">A session's state never changes in place: when a live session ends, <code>Sessions</code> is a new list with an <code>Ended</code> under the same id where it was. A domain reload lets every session go. <a href="logging-console.html">The Log Console</a> is the editor window that reads them.</p>
+          </div>
+        </section>
+
         <!-- ── Sinks: Tests & Custom Sinks ── -->
         <section class="docs-section" id="guide-memory">
           <div class="section-eyebrow">Sinks</div>
           <h2 class="section-title">Tests &amp; Custom Sinks</h2>
           <p class="section-intro">
-            <code>MemoryLog</code> is a store that captures every level, unless given rules, drained into a <code>MemorySink</code> each time its records are read. It allocates for every record, which is what a test wants and a program does not.
+            <code>MemoryLog</code> is a store that captures every level, unless given rules, drained into a <code>MemorySink</code> each time its records are read.
           </p>
 
           <div class="sub-section">
             <h3 class="sub-title">Memory, for tests</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">SaveManagerTests.cs</span></div>
+<pre class="code-block"><code><span class="kw">using var</span> logged = <span class="kw">new</span> <span class="type">MemoryLog</span>();
+<span class="kw">var</span> saves = <span class="kw">new</span> <span class="type">SaveManager</span>(logged.Log);
+
+saves.Save(<span class="num">3</span>);
+
+<span class="type">MemoryRecord</span> saved = logged.Events.Single(r =&gt; r.Event == <span class="type">SaveLog</span>.<span class="type">Events</span>.Saved);
+<span class="type">Assert</span>.That(saved.Field(<span class="str">"Slot"</span>), <span class="type">Is</span>.EqualTo(<span class="num">3</span>));</code></pre>
+            </div>
             <div class="table-wrap">
               <table class="docs-table">
                 <thead><tr><th>Member</th><th>What it is</th></tr></thead>
@@ -1027,7 +1120,7 @@ SaveManager.cs:42  frame 1240</code></pre>
               </table>
             </div>
             <p class="prose">A <code>MemoryRecord</code> has every stamp as a value (<code>Sequence</code>, <code>Frame</code>, <code>Scope</code>, <code>Begin</code>, <code>Thread</code>, <code>Level</code>, <code>Kind</code>, <code>Event</code>, <code>Suppressed</code>, <code>Backlog</code>, <code>Elapsed</code>, <code>CallSite</code>), its <code>Message</code>, and its <code>Fields</code>. <code>record.Field("Slot")</code> is a field's value by name, ignoring case: a number, bool, char, guid, date or span as itself, an enum as its <code>long</code>, text as a string, an exception as itself, and a value of the program's own type as its text.</p>
-            <p class="prose"><code>MemorySink</code> can be given to any drain, for a test that builds its own store; it also counts <code>Overwritten</code> records and <code>Flushes</code>.</p>
+            <p class="prose"><code>MemorySink</code> can be given to any drain, for a test that builds its own store; it also counts <code>Overwritten</code> records and <code>Flushes</code>. It allocates for every record, which is what a test wants and a program does not.</p>
           </div>
 
           <div class="sub-section">
@@ -1065,6 +1158,255 @@ SaveManager.cs:42  frame 1240</code></pre>
               </table>
             </div>
             <p class="prose">A sink that wants to allocate nothing formats into a buffer of its own with <code>TryFormat</code>, and grows the buffer when it returns false. <code>record.Field(i)</code> and <code>record.TryField(name, out value)</code> return a <code>LogValue</code>, which reads as itself (<code>Read&lt;T&gt;()</code>), as a number (<code>AsInt64()</code>, <code>AsDouble()</code>), as chars (<code>AsChars()</code>), or as the reference it was kept by (<code>AsRef()</code>), and formats into a span (<code>TryFormat</code>).</p>
+          </div>
+        </section>
+
+        <!-- ── Reading: Records a Reader Reads ── -->
+        <section class="docs-section" id="guide-records">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">Records a Reader Reads</h2>
+          <p class="section-intro">
+            A sink writes records out; a reader reads them as rows. A <code>LogView</code> is what a console reads: the records a filter keeps, kept up to date a frame at a time, with repeats counted rather than shown again and scopes drawn as a tree. It has nothing about drawing in it, so a test, an overlay and an Editor window read it alike.
+          </p>
+
+          <p class="prose">A view reads a live <code>LogStore</code>, or a session held as a <code>LogArchive</code>, which <code>LogFile.Read</code> makes from the file a <code>JsonLinesSink</code> wrote. It asks both the same questions.</p>
+          <p class="prose"><code>LogRecords</code> is a store or an archive, and nothing else.</p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Member</th><th>What it says</th></tr></thead>
+              <tbody>
+                <tr><td>Program, Clock</td><td>The program that wrote the records, and when its store started</td></tr>
+                <tr><td>Events</td><td>The events the records are of: the catalog's for a store, the file's own declarations for an archive</td></tr>
+                <tr><td>Capacity</td><td>The most records it holds</td></tr>
+                <tr><td>First, Next</td><td>The oldest sequence it holds, and one past the newest</td></tr>
+                <tr><td>Redacted</td><td>What the records lack, as the sink that wrote them left it out: <code>None</code> for a store, the file's for an archive</td></tr>
+                <tr><td>LateMark, LateFrom(seen)</td><td>Where it is in placing records it was handed after a later one, and, as a <code>LogLate</code>, the least sequence placed late since the mark <code>seen</code> with the mark to pass next time</td></tr>
+                <tr><td>Read(from, into)</td><td>Copies the records from a sequence on into a <code>LogBatch</code>, as a store's does</td></tr>
+                <tr><td>Read(sequences, into)</td><td>Copies the records of the given sequences it holds</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="prose">A store has no late records: its <code>LateFrom</code> is always <code>Next</code>. A <code>LogLateMark</code> is opaque: a reader keeps the one it was handed and passes it back. <code>default</code>, or a mark of other records, has seen none of these.</p>
+        </section>
+
+        <!-- ── Reading: The View ── -->
+        <section class="docs-section" id="guide-view">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">The View</h2>
+          <p class="section-intro">
+            A <code>LogView</code> shows what a <code>LogFilter</code> keeps, over a live store or a <code>LogArchive</code> read back from a session's file. <code>Update</code> reads what arrived since it last did, and drops the rows of records the store has since overwritten. It allocates nothing once its index has grown to the rows. A view is read and updated on one thread, as a console draws on one.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">View.cs</span></div>
+<pre class="code-block"><code><span class="type">LogFilter</span> filter = <span class="type">LogFilter</span>.Parse(<span class="str">"level&gt;=warning game.*"</span>).ValueUnsafe();
+<span class="kw">var</span> view = <span class="kw">new</span> <span class="type">LogView</span>(store, filter);
+
+<span class="cmt">// Once a frame:</span>
+view.Update();
+<span class="kw">for</span> (<span class="kw">int</span> row = <span class="num">0</span>; row &lt; view.Count; row++)
+{
+    <span class="type">LogRow</span> shown = view[row];
+    <span class="cmt">// shown.Sequence, shown.Records, shown.Depth, shown.LostBefore...</span>
+}</code></pre>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Rows</h3>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">LogRow.cs</span></div>
+<pre class="code-block"><code><span class="kw">public readonly record struct</span> <span class="type">LogRow</span>(<span class="kw">long</span> Sequence, <span class="kw">long</span> Last, <span class="kw">int</span> Records, <span class="kw">long</span> Suppressed, <span class="type">LogLevel</span> Level,
+    <span class="type">LogRowKind</span> Kind, <span class="kw">int</span> Depth, <span class="kw">long</span> LostBefore);</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">A row is a record, or a run of records that repeat one another.</p>
+            <ul class="prose">
+              <li><strong>A repeat</strong> is a record of the same event, level, scope and values as the row before it, and is counted on that row. <code>Records</code> is how many, <code>Sequence</code> and <code>Last</code> the first and the last, and <code>Suppressed</code> adds up what a rate limit dropped among them. A run spans records the filter hides between them, but not a loss, and never joins a record written as an error's backlog to one that was not.</li>
+              <li><strong>A scope's opening</strong> has a row of its own, <code>LogRowKind.Scope</code>, and what is under it is drawn under it: <code>Depth</code> is how many of the scopes a row is under have rows. A scope's closing has no row, since its opening's row says how long it was open (<code>view.Scopes.Elapsed(scope)</code>).</li>
+              <li><strong>A loss</strong> is said on the row after it: <code>LostBefore</code> is how many records were lost just before that row, and <code>view.Lost</code> is all of them.</li>
+            </ul>
+            <p class="prose"><code>Find(sequence)</code> is the row that holds a record, or the repeat whose run spans it, so a selection held by sequence keeps its row as the rows change.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Counts</h3>
+            <p class="prose"><code>Counts</code> is how many records match, by level: everything the filter keeps but for its levels. So the count of a level is what keeping it would show, which is what a toolbar's level badges say. <code>Counts.Total</code> is all of them.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">A new filter, and folds</h3>
+            <p class="prose">Setting <code>Filter</code> to a filter not equal to the one it has scans every record held again, about sixteen thousand an update, into an index of its own. Setting an equal one does nothing. The rows stay as they were until the scan has caught up, and <code>IsScanning</code> says when one is under way. Until then, what the rows are asked is answered as the filter they were made with, <code>Shown</code>, says.</p>
+            <p class="prose"><code>Fold(scope)</code> hides what is under a scope and keeps the scope's own row, and <code>Unfold(scope)</code> shows it again. Each scans again, as a new filter does.</p>
+            <p class="prose"><code>Clear()</code> starts the view at the newest record, as if nothing came before it. The records are all still there.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Copying rows</h3>
+            <p class="prose"><code>Read(row, count, into)</code> copies the record of each row into a batch, one a row. <code>Write(sink, row, count)</code> writes every record the rows stand for, each of a repeat's too, to a sink that has not been opened, as a drain would. A console copies rows as text or as JSON lines, or exports what it shows, through it.</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Export.cs</span></div>
+<pre class="code-block"><code><span class="kw">using var</span> file = <span class="kw">new</span> <span class="type">JsonLinesSink</span>(<span class="type">File</span>.Create(path));
+view.Write(file, <span class="num">0</span>, view.Count);</code></pre>
+            </div>
+            <p class="prose" style="margin-top:12px">Where the records say some were lost among them, or the store has overwritten some since, the sink is told how many.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Records placed late</h3>
+            <p class="prose">An error's backlog reaches a sink after records with later sequences. An archive places such a record among the others by its sequence, and moves its <code>LateMark</code> on. When the mark has moved, the next <code>Update</code> reads the rows again from the first record placed late since, and only those, so the record shows where its sequence puts it.</p>
+          </div>
+        </section>
+
+        <!-- ── Reading: Filters ── -->
+        <section class="docs-section" id="guide-filters">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">Filters</h2>
+          <p class="section-intro">
+            A console's filter line is a query, which <code>LogFilter.Parse</code> reads and <code>ToString</code> writes back.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Filter line</span></div>
+<pre class="code-block"><code>level&gt;=warning  game.*  -game.input/Moved  Slot:3  frame:1200..1300  scope:4182  "no image"  /fail(ed|ure)/</code></pre>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Terms</h3>
+            <p class="prose">A query is words split by spaces. Each word is a term, or a term left out when it starts with <code>-</code>.</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Term</th><th>Keeps</th></tr></thead>
+                <tbody>
+                  <tr><td>level&gt;=warning</td><td>Records at those levels; <code>&gt;</code>, <code>&lt;=</code>, <code>&lt;</code>, <code>=</code> and <code>:</code> too, with a level as rules name it</td></tr>
+                  <tr><td>frame:1200..1300</td><td>Records of those frames; <code>frame:1200..</code>, <code>frame:..1300</code> and <code>frame:1240</code> too</td></tr>
+                  <tr><td>scope:4182</td><td>The scope and everything under it, on every thread it reached</td></tr>
+                  <tr><td>thread:7</td><td>What one managed thread wrote</td></tr>
+                  <tr><td>File:*.png</td><td>Records with a field of that name, ignoring case, whose formatted value the pattern matches, ignoring case; <code>*</code> is any text and <code>?</code> any char</td></tr>
+                  <tr><td>File:/\.(png|jpg)$/</td><td>Records with a field whose formatted value a regular expression matches, ignoring case</td></tr>
+                  <tr><td>@level:high</td><td>A field named <code>level</code>, <code>frame</code>, <code>scope</code> or <code>thread</code>, which without the <code>@</code> are the terms above</td></tr>
+                  <tr><td>"no image"</td><td>Records whose message holds the text, ignoring case</td></tr>
+                  <tr><td>/fail(ed|ure)/</td><td>Records whose message a regular expression matches, ignoring case</td></tr>
+                  <tr><td>anything else</td><td>Records of an event, as a rule names it: <code>*</code>, a category, <code>category.*</code>, or a key</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="prose">A record is kept when its level and frame are in the ranges, it is of one of the events kept, if any are, it meets every other term kept, and it meets no term left out. So <code>game.save game.load</code> is either category, and <code>game.* Slot:3</code> both.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Quotes and regular expressions</h3>
+            <p class="prose">A value with a space in it is in quotes, in which <code>\"</code> is a quote and <code>\\</code> a backslash. A regular expression is between slashes, in which <code>\/</code> is a slash and every other backslash is the expression's own. A regular expression ignores case and culture, as quoted text and wildcards do.</p>
+            <p class="prose">A match that takes too long over a record gives up, and the record is not matched, so a pattern that backtracks without end cannot stall the editor. Over a view's rows, the term then matches nothing from that record on, rather than take as long over every record left: kept, it keeps nothing, and left out, it leaves nothing out. A record before that one is matched as before, when a record placed late has the rows read again, and a copy of the rows leaves out what the rows do. <code>view.GaveUp</code> says which terms did, in the filter's order, for a console to say under its filter line, and <code>view.Retry()</code> scans again to try them afresh. <code>LogFilter.Matches</code> alone remembers nothing, and tries every record afresh.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Parsing</h3>
+            <p class="prose"><code>Parse</code> never throws for a query. It fails with the first word that is not a term, and a <code>LogFilterError</code> as the error's code: <code>NotATerm</code>, <code>NotALevel</code>, <code>NotAFrame</code>, <code>NotAScope</code>, <code>NotAThread</code>, <code>NoText</code>, <code>NoValue</code>, <code>QuoteNotClosed</code>, <code>CannotLeaveOut</code>, <code>RegexNotClosed</code> or <code>NotARegex</code>.</p>
+            <p class="prose"><code>MatchingNothing(events)</code> is the events and fields a filter names that no event is or has. A console says them under its filter line, since a word that is a category no event is of is more often text meant to be in quotes.</p>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Filters as values</h3>
+            <p class="prose">A filter is a value: two filters are equal when their levels, frames and terms are, and a view given an equal filter does not scan. A regular expression is its pattern: <code>/a\/b/</code> and a term made from <code>a/b</code> are equal, and both write back as <code>/a\/b/</code>. A filter is also made from its parts, <code>new LogFilter(levels, frames, keep, leaveOut)</code>, with <code>LogLevelRange</code>, <code>LogFrameRange</code> and the cases of <code>LogFilterTerm</code>.</p>
+          </div>
+        </section>
+
+        <!-- ── Reading: Scopes ── -->
+        <section class="docs-section" id="guide-reading-scopes">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">Scopes</h2>
+          <p class="section-intro">
+            <code>view.Scopes</code> is what is under what, as the records the view has read say.
+          </p>
+
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Member</th><th>What it says</th></tr></thead>
+              <tbody>
+                <tr><td>IsUnder(scope, ancestor)</td><td>Whether a scope is the ancestor or under it</td></tr>
+                <tr><td>Parent(scope)</td><td>The scope it was opened under, or 0</td></tr>
+                <tr><td>IsOpen(scope)</td><td>Whether its opening, or a record under it, has been read, and its closing has not</td></tr>
+                <tr><td>Elapsed(scope)</td><td>How long it was open, once closed</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="prose">A scope is the sequence of the record that opened it. Only the view teaches it, and asking it changes nothing, so a filter asks the same question twice and gets the same answer.</p>
+        </section>
+
+        <!-- ── Reading: Reading a Session's File ── -->
+        <section class="docs-section" id="guide-session-file">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">Reading a Session's File</h2>
+          <p class="section-intro">
+            <code>LogFile.Read</code> reads back a log a <code>JsonLinesSink</code> wrote, as far as it goes, so a session that is still writing its file is read up to its last whole line. It opens the file shared, so the session writing it, and the folder keeping its latest few, go on.
+          </p>
+
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">ReadSession.cs</span></div>
+<pre class="code-block"><code><span class="type">Result</span>&lt;<span class="type">LogSessionFile</span>&gt; read = <span class="type">LogFile</span>.Read(path);
+read.Match(
+    error =&gt; <span class="type">Debug</span>.LogWarning(error.Message),
+    file =&gt;
+    {
+        <span class="kw">var</span> view = <span class="kw">new</span> <span class="type">LogView</span>(file.Archive, <span class="type">LogFilter</span>.All);
+        <span class="kw">foreach</span> (<span class="type">LogSkippedLine</span> skipped <span class="kw">in</span> file.Skipped)
+            <span class="type">Debug</span>.LogWarning(skipped.ToString());
+    });</code></pre>
+          </div>
+
+          <p class="prose" style="margin-top:12px"><code>LogFile.Read(stream, name)</code> reads a stream instead, from where it is to its end, and leaves it open.</p>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Errors</h3>
+            <p class="prose">It fails, with a <code>LogFileReadError</code> as the error's code, only when there is no log to read:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>Code</th><th>When</th></tr></thead>
+                <tbody>
+                  <tr><td>Unreadable</td><td>The file could not be opened or read</td></tr>
+                  <tr><td>NotALog</td><td>Its first line does not say its format, program and start, or runs past 64K characters, which no header does</td></tr>
+                  <tr><td>UnknownFormat</td><td>It is of a format other than 1</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">Skipped lines</h3>
+            <p class="prose">A line it cannot read is skipped, and the rest is read. <code>Skipped</code> says each such line, by number, with why, and <code>ToString</code> says it as a sentence:</p>
+            <div class="table-wrap">
+              <table class="docs-table">
+                <thead><tr><th>LogSkipReason</th><th>The line</th></tr></thead>
+                <tbody>
+                  <tr><td>NotJson</td><td>Is not JSON, as the last line of a file is when the program stopped while writing it</td></tr>
+                  <tr><td>NotALine</td><td>Is JSON, but not a record, a declaration or a loss</td></tr>
+                  <tr><td>Undeclared</td><td>Is a record of an event the file does not declare before it</td></tr>
+                  <tr><td>NotADeclaration</td><td>Declares an event as the format does not write a declaration</td></tr>
+                  <tr><td>NotAnEvent</td><td>Declares what is not an event, such as a template with a hole no field fills</td></tr>
+                  <tr><td>DeclaredTwice</td><td>Declares an event a line before it declares; the first is kept</td></tr>
+                  <tr><td>NotItsDeclaration</td><td>Is a record whose key, kind, level or fields are not as its declaration says</td></tr>
+                  <tr><td>NotAStamp</td><td>Is a record whose sequence, scope, frame, thread or other stamp no record can have</td></tr>
+                  <tr><td>SequenceTwice</td><td>Is a second record of a sequence; the first is kept</td></tr>
+                  <tr><td>LostAtEnd</td><td>Says records were lost after the last record, with no record after to say it before</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3 class="sub-title">What a file reads back as</h3>
+            <p class="prose">The archive's events are the file's declarations, not the catalog's, so it reads a log whatever program wrote it. They are the file's alone: the catalog never holds one, a store's <code>IsEnabled</code> says no to one, and writing one throws. A record keeps its sequence, its stamps, its call site and its time.</p>
+            <p class="prose">A field reads back as the kind it was declared as, but for three the file holds only as text, which read back as strings:</p>
+            <ul class="prose">
+              <li>a <code>char</code> or <code>ReadOnlySpan&lt;char&gt;</code>,</li>
+              <li>a value of the program's own type, such as a <code>Vector3</code>,</li>
+              <li>a field marked <code>[Personal]</code> in a file written with personal fields left out, which reads <code>[personal]</code>.</li>
+            </ul>
+            <p class="prose">An exception reads back as an <code>ArchivedException</code>: its <code>TypeName</code> is the full name it was thrown as, its <code>Message</code> is its message, and its <code>ToString()</code> is the text the file holds, stack trace and all.</p>
+            <p class="prose">The sequences have holes where the sink skipped records below its level. A read says records were lost only where the file says so.</p>
+            <p class="prose">The archive holds what the file held, and takes nothing after. Its <code>Redacted</code> is what the file's sink left out, and a view writing its rows to another sink leaves that out too, whatever the sink's own options, since the records no longer have it.</p>
           </div>
         </section>
 
@@ -1168,7 +1510,7 @@ bridge.Dispose();</code></pre>
               </table>
             </div>
             <p class="prose">Each path is mapped once and then read from a table.</p>
-            <p class="prose">In the editor, a row written with <code>openOnDoubleClick</code> (the default) also opens the call site when it is double-clicked, as a <code>Debug.Log</code> written at that line does. Unity has no public way to say where a row opens, so this binds the internal <code>Debug.LogInfo</code>, <code>LogWarning</code> and <code>LogError</code> overloads that take a file and a line. It is kept apart from the sink, and Editor-only, so that a Unity upgrade that renames or removes them costs only the double-click: the sink falls back to rows with the link, for good, the first time binding or a call fails. <code>new UnityConsoleSink(openOnDoubleClick: false)</code> writes every row with the public API.</p>
+            <p class="prose">In the editor, a row written with <code>openOnDoubleClick</code> (the default) also opens the call site when it is double-clicked, as a <code>Debug.Log</code> written at that line does. Unity has no public way to say where a row opens, so this binds the internal <code>Debug.LogInfo</code>, <code>LogWarning</code> and <code>LogError</code> overloads that take a file and a line. It is kept apart from the sink, and Editor-only, so that a Unity upgrade that renames or removes them costs only the double-click: the sink falls back to rows with the link, for good, the first time binding or a call fails. <code>new UnityConsoleSink(openOnDoubleClick: false)</code> writes every row with the public API. <code>new UnityConsoleSink(callSiteLine: false)</code> leaves the link line out of every row, leaving the double-click as the way to the call site.</p>
           </div>
 
           <div class="sub-section">

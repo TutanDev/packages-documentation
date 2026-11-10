@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log Console - Unity Framework</title>
+  <meta name="description" content="The Tutan Logging log console: an editor window, beside Unity's Console, that reads a program's records whole and typed, from the sessions a LogConsoleSink keeps and the files a JsonLinesSink wrote.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles.css">
+  <link rel="stylesheet" href="src/docs.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/favicon/favicon-32x32.png" alt="" class="nav-logo-icon" aria-hidden="true">
+        Unity Framework
+      </a>
+    </div>
+  </nav>
+  <div class="docs-shell">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to home
+        </a>
+        <span class="sidebar-pkg-id sidebar-pkg-id--log">com.tutan.logging</span>
+        <div class="sidebar-pkg-name">Logging</div>
+      </div>
+      <nav class="sidebar-nav" aria-label="Page sections">
+        <a href="#log-console" class="sidebar-direct" data-pkg="log">The Log Console</a>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Basics
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#console-setup" class="sidebar-link" data-pkg="log">Setting It Up</a>
+            <a href="#console-window" class="sidebar-link" data-pkg="log">The Window</a>
+            <a href="#console-sessions" class="sidebar-link" data-pkg="log">Sessions</a>
+          </div>
+        </div>
+
+        <div class="sidebar-group open">
+          <button class="sidebar-group-btn" aria-expanded="true">
+            Reading
+            <svg class="sidebar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-items">
+            <a href="#console-query" class="sidebar-link" data-pkg="log">Choosing What Is Shown</a>
+            <a href="#console-rows" class="sidebar-link" data-pkg="log">The Rows</a>
+            <a href="#console-details" class="sidebar-link" data-pkg="log">The Details</a>
+            <a href="#console-export" class="sidebar-link" data-pkg="log">Exporting</a>
+            <a href="#console-errors" class="sidebar-link" data-pkg="log">Errors Not Yet Seen</a>
+            <a href="#console-settings" class="sidebar-link" data-pkg="log">Settings</a>
+          </div>
+        </div>
+
+        <a href="logging.html" class="sidebar-direct" data-pkg="log">← Guides</a>
+        <a href="logging-api.html" class="sidebar-direct" data-pkg="log">API Reference →</a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="docs-main">
+
+      <!-- ── The Log Console Hero ── -->
+      <section class="docs-hero" id="log-console">
+        <div class="docs-hero-glow" style="background:radial-gradient(ellipse, var(--log-glow) 0%, transparent 70%)" aria-hidden="true"></div>
+        <span class="docs-hero-badge docs-hero-badge--log">com.tutan.logging · v0.1.0</span>
+        <h1 class="docs-hero-title">The Log Console</h1>
+        <p class="docs-hero-desc">
+          The log console is an editor window, beside Unity's Console, that reads a program's records whole and typed. It shows the records a query keeps as rows, with a badge for each level, a tree of the categories, and the details of the row selected: its fields, the scopes it is under, where it was written, and the source around that line. It reads the sessions a <code>LogConsoleSink</code> keeps, and the files a <code>JsonLinesSink</code> wrote.
+        </p>
+      </section>
+
+      <div class="docs-content">
+
+        <!-- ── Basics: Setting It Up ── -->
+        <section class="docs-section" id="console-setup">
+          <div class="section-eyebrow">Basics</div>
+          <h2 class="section-title">Setting It Up</h2>
+          <p class="prose">The console shows what a <code>LogConsoleSink</code> keeps, so the composition root adds one to its drain:</p>
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">GameRoot.cs</span></div>
+<pre class="code-block"><code><span class="kw">var</span> drain = <span class="kw">new</span> <span class="type">LogDrain</span>(store,
+    (<span class="kw">new</span> <span class="type">UnityConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Warning)),
+    (<span class="kw">new</span> <span class="type">LogConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Debug)));</code></pre>
+          </div>
+          <p class="prose" style="margin-top:12px">With the console open, Unity's Console can be raised to <code>Warning</code>, so it keeps compiler errors and the warnings and errors that matter, and the log console keeps the rest. Outside the editor the sink keeps nothing, so the root adds it without an <code>#if</code>. <a href="logging.html#guide-sessions">Sinks</a> says what the sink keeps and for how long.</p>
+          <p class="prose">Open the console at <strong>Window &gt; General &gt; Log Console</strong>. A shortcut that opens it, <strong>Log Console &gt; Open</strong>, is registered with no key, for a developer to bind in <strong>Edit &gt; Shortcuts</strong>. The menu and the shortcut bring the open console forward, and open one only when none is.</p>
+        </section>
+
+        <!-- ── Basics: The Window ── -->
+        <section class="docs-section" id="console-window">
+          <div class="section-eyebrow">Basics</div>
+          <h2 class="section-title">The Window</h2>
+          <p class="prose">From the top:</p>
+          <ul class="prose">
+            <li><strong>The toolbar:</strong> the session shown, <strong>Clear</strong> and its menu, <strong>Follow</strong>, <strong>Pause on Error</strong>, a badge for each level, how many rows there are, and the <strong>⋮</strong> menu.</li>
+            <li><strong>The saved filters:</strong> a button for each filter the team saved, shown once there is one.</li>
+            <li><strong>The query line</strong>, and under it what the console says of the rows: why a query does not read, what it names that no event is or has, and what was lost or left out.</li>
+            <li><strong>The categories</strong>, on the left: a tree of the categories of the session's events, each with its count.</li>
+            <li><strong>The rows</strong>, in columns.</li>
+            <li><strong>The details</strong> of the row selected, under the rows.</li>
+          </ul>
+          <p class="prose">The query line and <strong>Follow</strong> are kept across a domain reload and an editor restart. The session shown, what is folded and what is selected are not.</p>
+        </section>
+
+        <!-- ── Basics: Sessions ── -->
+        <section class="docs-section" id="console-sessions">
+          <div class="section-eyebrow">Basics</div>
+          <h2 class="section-title">Sessions</h2>
+          <p class="section-intro">
+            The session menu, at the left of the toolbar, lists the process's sessions, oldest first, and shows the one chosen.
+          </p>
+          <ul class="prose">
+            <li>A <strong>live</strong> session is one a sink keeps as the program logs.</li>
+            <li>An <strong>ended</strong> session is one whose drain let its sink go, as when Play Mode exits. It stays until the console is cleared or it is closed, so a Play Mode session can be read after Play Mode exits.</li>
+            <li>A <strong>file's</strong> session is one read from a JSON lines file, through <strong>Open a Session File...</strong>, in this menu and in the <strong>⋮</strong> menu. It stays until it is closed.</li>
+          </ul>
+          <p class="prose"><strong>Close This Session</strong>, in this menu, lets the ended or file's session shown go. A live session cannot be closed: it ends when its drain lets its sink go.</p>
+          <p class="prose"><strong>Clear</strong> empties the live sessions, which keep what is logged after, and lets the ended ones go. A file's session stays. Its menu sets <strong>Clear on Play</strong>, on at first, which clears the console as Play Mode is entered.</p>
+          <p class="prose"><strong>Follow</strong> keeps the newest row in sight, and shows a live session as it starts. Scrolling up stops it, and scrolling to the newest row follows again.</p>
+          <p class="prose">A domain reload, as when a script compiles or Play Mode is entered with domain reload on, lets every session go. To read one again, open the file a <code>JsonLinesSink</code> wrote of it.</p>
+        </section>
+
+        <!-- ── Reading: Choosing What Is Shown ── -->
+        <section class="docs-section" id="console-query">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">Choosing What Is Shown</h2>
+          <p class="prose">The query line is a filter query, as <a href="logging.html#guide-filters">Reading Records</a> describes:</p>
+          <div class="code-card code-card--log">
+            <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Query line</span></div>
+<pre class="code-block"><code>level&gt;=warning game.* -game.input.* "no image" /fail(ed|ure)/ Slot:3</code></pre>
+          </div>
+          <p class="prose" style="margin-top:12px">Each word keeps records, and a word after <code>-</code> leaves them out. Pointing at the line shows a short guide to the words. The rows follow the query as it is typed. While a query does not read, the rows stay those of the last one that did, and a line under it says why.</p>
+          <p class="prose">The badges and the categories write the query too, so the line always says what is shown.</p>
+          <ul class="prose">
+            <li><strong>A level's badge</strong>, <code>T</code>, <code>D</code>, <code>I</code>, <code>W</code>, <code>E</code> and <code>C</code>, counts the records the query keeps but for its levels. Clicking one shows only that level, and clicking it again shows every level.</li>
+            <li><strong>A category</strong>, clicked, is shown or hidden with every category under it. Ctrl+click (Cmd+click on macOS) shows only it, or every category again, and Shift+click shows every category. A category's mark says whether all, some or none of it is shown.</li>
+          </ul>
+          <p class="prose">Under the query line the console says:</p>
+          <ul class="prose">
+            <li>why a query does not read, while it does not;</li>
+            <li>the events and fields the query names that none of the session's events is or has, since such a word is more often text meant to be in quotes;</li>
+            <li>the regular expressions that took too long over a record and match nothing from it on, with <strong>Retry</strong>;</li>
+            <li>the lines of a file that could not be read;</li>
+            <li>how many records were lost before the console read them;</li>
+            <li>what the project always leaves out, with <strong>Edit</strong>, which opens its settings.</li>
+          </ul>
+        </section>
+
+        <!-- ── Reading: The Rows ── -->
+        <section class="docs-section" id="console-rows">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">The Rows</h2>
+          <p class="prose">A row is a record, a run of repeating records, or a scope's opening, under which what it holds is indented. The rows are in columns:</p>
+          <div class="table-wrap">
+            <table class="docs-table docs-table--labels">
+              <thead><tr><th>Column</th><th>What it says</th><th>At first</th></tr></thead>
+              <tbody>
+                <tr><td>Time</td><td>When the record was written, as <code>14:03:12.481</code></td><td>Shown</td></tr>
+                <tr><td>Frame</td><td>The frame it was written in</td><td>Shown</td></tr>
+                <tr><td>Level</td><td>Its level, as <code>WRN</code></td><td>Shown</td></tr>
+                <tr><td>Category</td><td>Its event's category, in the category's colour</td><td>Shown</td></tr>
+                <tr><td>Event</td><td>Its event's name, and its key when pointed at</td><td>Hidden</td></tr>
+                <tr><td>Message</td><td>Its message's first line, with the row's marks</td><td>Always shown</td></tr>
+                <tr><td>Duration</td><td>How long a scope was open, or <code>open</code></td><td>Shown</td></tr>
+                <tr><td>Call Site</td><td>The file and line that wrote it, and the whole path when pointed at</td><td>Shown</td></tr>
+                <tr><td>Thread</td><td>The managed id of the thread that wrote it</td><td>Hidden</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="prose">Right-clicking the header shows or hides a column, and dragging a column's edge resizes it. The message is always shown and takes the room the others leave. The columns are each developer's own, kept in <code>UserSettings</code>, and every console window shows the same ones.</p>
+          <p class="prose">The message's cell carries the row's marks:</p>
+          <ul class="prose">
+            <li><code>⚠</code>: records were lost before this row, and pointing at it says how many.</li>
+            <li><code>▾</code> or <code>▸</code>: a scope's row, open or folded, and clicking it folds or unfolds what is under it.</li>
+            <li><code>×12</code>: the row stands for 12 records that repeat.</li>
+            <li><code>+3</code>: a rate limit dropped 3 records of the event before this one.</li>
+          </ul>
+          <p class="prose">A row an error's backlog brought is drawn fainter, as context. A row whose records the session has let go since, past its cap, is drawn apart, and its details say so.</p>
+          <p class="prose">A row's call site, double-clicked or with Enter, opens in the IDE at its line. A message Unity's log handed over has no call site of its own, so it opens at the first frame of its stack that is in the project, and the Call Site column shows that frame.</p>
+          <p class="prose">Right-clicking a row shows:</p>
+          <div class="table-wrap">
+            <table class="docs-table docs-table--labels">
+              <thead><tr><th>Item</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Copy</strong></td><td>Copies the rows selected as text, as Ctrl+C (Cmd+C on macOS) does</td></tr>
+                <tr><td><strong>Copy as JSON Lines</strong></td><td>Copies them as the lines a <code>JsonLinesSink</code> writes, which a session file is made of</td></tr>
+                <tr><td><strong>Copy, Nothing Left Out</strong></td><td>Copies them as text or JSON lines with personal fields and the home folder kept</td></tr>
+                <tr><td><strong>Fold</strong> or <strong>Unfold</strong></td><td>Folds the scope selected, or unfolds it</td></tr>
+                <tr><td><strong>Show Only This Scope</strong></td><td>Keeps only the records of the scope a scope's row opens, or else of the innermost scope the row is under, and those under it</td></tr>
+                <tr><td><strong>Open</strong> <em>file:line</em></td><td>Opens where the row was written</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="prose">Copying leaves out what a file that leaves the machine would: personal fields and the home folder in paths. Copying a row that stands for many records copies every record it stands for.</p>
+        </section>
+
+        <!-- ── Reading: The Details ── -->
+        <section class="docs-section" id="console-details">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">The Details</h2>
+          <p class="prose">Selecting a row shows its record:</p>
+          <ul class="prose">
+            <li>its level, its key, when it was written, in which frame and on which thread;</li>
+            <li>its message whole, which can be selected and copied;</li>
+            <li><strong>Fields:</strong> each field and its value, with personal fields marked;</li>
+            <li><strong>Under:</strong> the scopes it is under, the innermost first, and clicking one shows only that scope's records;</li>
+            <li><strong>Written at:</strong> the call site, with three lines of source on each side, and clicking either opens it;</li>
+            <li><strong>Declared at:</strong> where its event was declared;</li>
+            <li><strong>Stack:</strong> the frames of an exception or of a message Unity's log handed over, each opening where it was.</li>
+          </ul>
+        </section>
+
+        <!-- ── Reading: Exporting ── -->
+        <section class="docs-section" id="console-export">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">Exporting</h2>
+          <p class="prose">The <strong>⋮</strong> menu's <strong>Export the Rows Shown...</strong> writes every record the rows stand for to a JSON lines file, which <strong>Open a Session File...</strong> reads back. It leaves out personal fields and the home folder, as copying does. <strong>Export the Rows Shown, Nothing Left Out...</strong> keeps them.</p>
+        </section>
+
+        <!-- ── Reading: Errors Not Yet Seen ── -->
+        <section class="docs-section" id="console-errors">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">Errors Not Yet Seen</h2>
+          <p class="section-intro">
+            The console counts the errors no console window has shown: the records at <code>Error</code> or <code>Critical</code> that are not an error's backlog. An error is seen once a visible console window shows its session, whether or not the query keeps it.
+          </p>
+          <ul class="prose">
+            <li>From Unity 6.3, a badge on the editor's main toolbar says the count, while there is one, and pressing it shows the console at the first. If the query, a fold or what the project leaves out hides that error, a line under the query line says so, as it does of an error let go before it could be shown.</li>
+            <li>Below Unity 6.3, the window's title says the count, as <code>Log Console (3)</code>.</li>
+          </ul>
+          <p class="prose"><strong>Pause on Error</strong>, in the toolbar, pauses the game when an error arrives while it plays. It is off at first.</p>
+        </section>
+
+        <!-- ── Reading: Settings ── -->
+        <section class="docs-section" id="console-settings">
+          <div class="section-eyebrow">Reading</div>
+          <h2 class="section-title">Settings</h2>
+          <p class="prose">What the team shares is kept in <code>ProjectSettings/TutanLogConsole.json</code>, committed with the project, and edited on the <strong>Project Settings &gt; Log Console</strong> page, which <strong>Log Console Settings...</strong> in the <strong>⋮</strong> menu opens:</p>
+          <ul class="prose">
+            <li><strong>Saved filters:</strong> buttons over the query line. Pressing one shows the rows of its query, and pressing it again shows what was shown before. <strong>+</strong>, or <strong>Save the Query as a Filter...</strong> in the <strong>⋮</strong> menu, saves the query, under a name no other filter has, in its name's hue or a colour chosen for it. Right-clicking a button edits it, removes it, or moves it left or right.</li>
+            <li><strong>Category colours:</strong> a category is drawn in the colour chosen for it, and so is each category under it that has none of its own. Every other category is drawn in a hue made of its name. Right-clicking a category in the tree chooses its colour, or gives it its name's colour again.</li>
+            <li><strong>Always left out:</strong> words after <code>-</code> that every view leaves out, after its own query, as <code>-unity/Logged</code>. The query line does not show them, and a line under it says they are left out.</li>
+          </ul>
+          <p class="prose">What each developer keeps is in <code>UserSettings/TutanLogConsole.json</code>, which the team does not share: <strong>Clear on Play</strong>, <strong>Pause on Error</strong>, and the columns.</p>
+          <p class="prose">Both files are read again when they change on disk, as when a teammate's change is pulled, and a change is made to the file as read again, so an edit made elsewhere is kept. An entry that does not read is skipped, and the settings page says which and why. A file that cannot be read at all is never written over: the console goes by the defaults, and the page says what is wrong with it.</p>
+        </section>
+
+      </div><!-- .docs-content -->
+    </main>
+  </div><!-- .docs-shell -->
+
+  <!-- Sidebar toggle (mobile) -->
+  <button class="sidebar-toggle-btn" aria-label="Toggle navigation sidebar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <script src="src/main.js"></script>
+  <script src="src/docs.js"></script>
+</body>
+</html>

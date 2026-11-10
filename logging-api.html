@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Logging - API Reference - Unity Framework</title>
-  <meta name="description" content="Tutan Logging API Reference: every public type and member of Tutan.Logging, from the declaring attributes, Log and LogScope to LogStore, LogRules, LogDrain, the sinks, LogPump and UnityLogBridge.">
+  <meta name="description" content="Tutan Logging API Reference: every public type and member of Tutan.Logging, from the declaring attributes, Log and LogScope to LogStore, LogRules, LogDrain and the sinks, reading records back with LogFile.Read, LogArchive, LogView and LogFilter, the sessions LogConsoleSink keeps for the editor's log console, and LogPump, UnityLogBridge and UnityPaths.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -36,6 +36,7 @@
       </div>
       <nav class="sidebar-nav" aria-label="Page sections">
         <a href="logging.html" class="sidebar-direct" data-pkg="log">← Guides</a>
+        <a href="logging-console.html" class="sidebar-direct" data-pkg="log">Log Console →</a>
 
         <div class="sidebar-group open">
           <button class="sidebar-group-btn" aria-expanded="true">
@@ -51,6 +52,8 @@
             <a href="#api-specs" class="sidebar-link" data-pkg="log">Specs &amp; the Catalog</a>
             <a href="#api-draining" class="sidebar-link" data-pkg="log">Draining</a>
             <a href="#api-sinks" class="sidebar-link" data-pkg="log">Sinks</a>
+            <a href="#api-reading" class="sidebar-link" data-pkg="log">Reading</a>
+            <a href="#api-sessions" class="sidebar-link" data-pkg="log">Console Sessions</a>
             <a href="#api-unity" class="sidebar-link" data-pkg="log">Unity</a>
           </div>
         </div>
@@ -66,7 +69,7 @@
         <section class="docs-section" id="api-declaring">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">Declaring</h2>
-          <p class="section-intro">Every public type of <code>Tutan.Logging</code> is in namespace <code>Tutan.Logging</code>. Members marked <em>Generator</em> are what generated code calls; they are hidden from IntelliSense and not meant to be called by hand. See <a href="logging.html#guide-events">Declaring Events</a>.</p>
+          <p class="section-intro">Every public type of <code>Tutan.Logging</code>, in namespace <code>Tutan.Logging</code>. Members marked <em>generator</em> are what generated code calls; they are hidden from IntelliSense and not meant to be called by hand. The log console, in the editor-only assembly <code>Tutan.Logging.Editor</code>, has no public API: <a href="logging-console.html">The Log Console</a> says how to use it.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -288,7 +291,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">bool IsEnabled(LogEventSpec spec)</div>
-                  <div class="api-member-desc">Whether the event is on at its own level.</div>
+                  <div class="api-member-desc">Whether the event is on at its own level; never for an event a file declares.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -327,6 +330,7 @@
                 </div>
               </div>
             </div>
+            <p class="prose"><code>Write</code> and <code>BeginScope</code> throw for an event of the other kind, a level other than the event's own or past <code>Critical</code>, and an event a file declares.</p>
           </div>
 
           <div class="api-group">
@@ -448,7 +452,7 @@
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
                   <div class="api-member-name">LogStore(LogRules rules, LogStoreOptions? options = null)</div>
-                  <div class="api-member-desc">A store capturing what the rules say, with rings of the given sizes.</div>
+                  <div class="api-member-desc">A store capturing what the rules say, with rings of the given sizes. Derives from <code>LogRecords</code>.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -512,6 +516,34 @@
                 <div class="api-member-content">
                   <div class="api-member-name">long Next</div>
                   <div class="api-member-desc">The sequence the next record gets.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;LogEventSpec&gt; Events</div>
+                  <div class="api-member-desc">The catalog's events.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogRedaction Redacted</div>
+                  <div class="api-member-desc"><code>None</code>: a store's records lack nothing.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLateMark LateMark</div>
+                  <div class="api-member-desc"><code>default</code>: a store holds its records in the order they were written.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLate LateFrom(LogLateMark seen)</div>
+                  <div class="api-member-desc"><code>Next</code>, with the <code>default</code> mark.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -862,6 +894,13 @@
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
+                  <div class="api-member-name">bool IsBacklog</div>
+                  <div class="api-member-desc">Whether a sink was handed it as an error's backlog; never for a store's.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
                   <div class="api-member-name">LogCallSite CallSite</div>
                   <div class="api-member-desc">The call that wrote it.</div>
                 </div>
@@ -921,7 +960,6 @@
                 <span class="api-kind kind--field">values</span>
                 <div class="api-member-content">
                   <div class="api-member-name">Event, ScopeBegin, ScopeEnd</div>
-                  <div class="api-member-desc">What a record is.</div>
                 </div>
               </div>
             </div>
@@ -1043,6 +1081,13 @@
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
+                  <div class="api-member-name">string ToText(LogRedaction redact)</div>
+                  <div class="api-member-desc">It as a sink that keeps strings writes it, leaving out <code>redact</code>: an exception's whole text, where a message holds its type and message; allocated.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
                   <div class="api-member-name">ToString()</div>
                   <div class="api-member-desc">It formatted, allocated.</div>
                 </div>
@@ -1060,7 +1105,6 @@
                 <span class="api-kind kind--field">values</span>
                 <div class="api-member-content">
                   <div class="api-member-name">Boolean, Char, SByte, Byte, Int16, UInt16, Int32, UInt32, Int64, UInt64, Single, Double, Decimal, Guid, DateTime, DateTimeOffset, TimeSpan, Enum, String, Exception, Chars, Formattable</div>
-                  <div class="api-member-desc">How a field's value is held.</div>
                 </div>
               </div>
             </div>
@@ -1146,7 +1190,7 @@
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">int Index</div>
-                  <div class="api-member-desc">Its place in the catalog, which is what a record stores.</div>
+                  <div class="api-member-desc">Its place in the catalog, which is what a record stores: -1 until it is registered, and always for an event a file declares.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -1352,7 +1396,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">void Register(params LogEventSpec[] specs)</div>
-                  <div class="api-member-desc"><em>Generator:</em> registers specs, idempotently.</div>
+                  <div class="api-member-desc"><em>Generator:</em> registers specs, idempotently, and all or none: it throws for a null spec or an event a file declares before it registers any.</div>
                 </div>
               </div>
             </div>
@@ -1539,7 +1583,7 @@
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">LogRedaction Redact</div>
-                  <div class="api-member-desc">What the sink leaves out.</div>
+                  <div class="api-member-desc">What the sink leaves out: its options' and what the records already lack.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -1563,6 +1607,13 @@
                   <div class="api-member-desc">The same, as a string.</div>
                 </div>
               </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Text(LogValue value)</div>
+                  <div class="api-member-desc">A field's value as a string, with the sink's redaction: an exception's whole text.</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1571,7 +1622,7 @@
         <section class="docs-section" id="api-sinks">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">Sinks</h2>
-          <p class="section-intro">The Unity Console, a JSON lines file per session, and memory for tests. See <a href="logging.html#guide-console">Unity Console</a> and <a href="logging.html#guide-file">JSON Lines File</a>.</p>
+          <p class="section-intro">The Unity Console, the log console's sessions, a JSON lines file per session, and memory for tests. See <a href="logging.html#guide-console">Unity Console</a>, <a href="logging.html#guide-file">JSON Lines File</a> and <a href="logging.html#guide-sessions">Log Console Sessions</a>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -1582,8 +1633,8 @@
               <div class="api-member">
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">UnityConsoleSink(bool openOnDoubleClick = true, string name = "unity console")</div>
-                  <div class="api-member-desc">A sink that writes to Unity's Console. Implements <code>ILogSink</code>.</div>
+                  <div class="api-member-name">UnityConsoleSink(bool openOnDoubleClick = true, string name = "unity console", bool callSiteLine = true)</div>
+                  <div class="api-member-desc">A sink that writes to Unity's Console; <code>callSiteLine: false</code> leaves out the second line, the call site and frame. Implements <code>ILogSink</code>.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -1628,6 +1679,50 @@
 
           <div class="api-group">
             <div class="api-group-header">
+              <span class="api-group-name">LogConsoleSink</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogConsoleSink(int cap = DefaultCap, string name = "log console")</div>
+                  <div class="api-member-desc">A sink that keeps a session of the log console, of at most <code>cap</code> records; a <code>cap</code> below 1 throws <code>ArgumentOutOfRangeException</code>. Implements <code>ILogSink</code> and <code>IDisposable</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">const</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">const int DefaultCap</div>
+                  <div class="api-member-desc">1,000,000.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Cap</div>
+                  <div class="api-member-desc">The most records its session holds.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Open(LogContext context)</div>
+                  <div class="api-member-desc">Starts its session, in the editor only; opening it again throws <code>InvalidOperationException</code>, and options that redact throw <code>ArgumentException</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Dispose()</div>
+                  <div class="api-member-desc">Ends its session, which stays until the console is cleared; opening it after throws <code>ObjectDisposedException</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
               <span class="api-group-name">LogFile</span>
               <span class="api-type-badge badge--static">static</span>
             </div>
@@ -1640,10 +1735,17 @@
                 </div>
               </div>
               <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static string Folder</div>
+                  <div class="api-member-desc"><code>Application.persistentDataPath/Logs</code>, where <code>Session(store)</code> keeps a program's files.</div>
+                </div>
+              </div>
+              <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">static Result&lt;JsonLinesSink&gt; Session(LogStore store, int keep = 10)</div>
-                  <div class="api-member-desc">A file for this session in <code>Application.persistentDataPath/Logs</code>.</div>
+                  <div class="api-member-desc">A file for this session in <code>Folder</code>.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -1651,6 +1753,34 @@
                 <div class="api-member-content">
                   <div class="api-member-name">static Result&lt;JsonLinesSink&gt; Session(LogStore store, string folder, int keep = 10)</div>
                   <div class="api-member-desc">A file for this session in a folder, keeping the program's latest <code>keep</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static Result&lt;LogSessionFile&gt; Read(string path)</div>
+                  <div class="api-member-desc">The log a <code>JsonLinesSink</code> wrote to a file, as far as it goes; fails with a <code>LogFileReadError</code> code.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static Result&lt;LogSessionFile&gt; Read(Stream stream, string name)</div>
+                  <div class="api-member-desc">The same, from a stream, which it leaves open; <code>name</code> is what the errors call it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static string ExportName(string program, DateTimeOffset at)</div>
+                  <div class="api-member-desc">The name to offer for an export, as <code>Sample Game export 20261104-093015.jsonl</code>: never a session file's, so <code>Session</code> never deletes it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static Result&lt;LogExported&gt; Export(LogView view, string path, LogSinkOptions options)</div>
+                  <div class="api-member-desc">Writes every row of a view as JSON lines that <code>Read</code> reads back, beside the path and moved to it once whole; fails with a <code>LogExportError</code> code.</div>
                 </div>
               </div>
             </div>
@@ -1667,6 +1797,227 @@
                 <div class="api-member-content">
                   <div class="api-member-name">NoFolder, NoFile</div>
                   <div class="api-member-desc">The <code>Error.Code</code> of a failed <code>Session</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogExportError</span>
+              <span class="api-type-badge badge--enum">enum</span>
+            </div>
+            <p class="prose">The <code>Error.Code</code> of a failed <code>Export</code>.</p>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">value</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotWritten</div>
+                  <div class="api-member-desc">It could not be written, and the file at the path, when there was one, is as it was, with nothing beside it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">value</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotPutBack</div>
+                  <div class="api-member-desc">A replace failed half way and could not put back the file it moved aside, which is beside the path under the name the error says, with why.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">value</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LeftBeside</div>
+                  <div class="api-member-desc">A replace failed half way, and the file at the path is there, but the replace also left a file beside it under the name it moves aside to, which the error names; that file is kept, as it may be the only copy of the file that was there.</div>
+                </div>
+              </div>
+            </div>
+            <p class="prose">Each way, what it wrote is deleted, or the error says where it is.</p>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogExported</span>
+              <span class="api-type-badge badge--class">record</span>
+            </div>
+            <p class="prose">What an export that was written left beside its path.</p>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Optional&lt;LogNotDeleted&gt; NotDeleted</div>
+                  <div class="api-member-desc">The file it wrote over, when that could not be deleted once replaced; it may hold what the export left out.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogNotDeleted</span>
+              <span class="api-type-badge badge--class">record</span>
+            </div>
+            <p class="prose">A file an export wrote over and could not delete once replaced.</p>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Path</div>
+                  <div class="api-member-desc">Where it is: beside the export's path, as <code>.replaced</code>, or <code>.replaced-2</code> and on.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Reason</div>
+                  <div class="api-member-desc">Why it could not be deleted, in the disk's own words, closed as a sentence: with a full stop unless they end in one or in <code>?</code> or <code>!</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogSessionFile</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Path</div>
+                  <div class="api-member-desc">What it was read from.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogArchive Archive</div>
+                  <div class="api-member-desc">Its records; <code>Capacity</code> is their count.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;LogSkippedLine&gt; Skipped</div>
+                  <div class="api-member-desc">The lines it could not read, in the order of the file.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogFileReadError</span>
+              <span class="api-type-badge badge--enum">enum</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">values</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Unreadable, NotALog, UnknownFormat</div>
+                  <div class="api-member-desc">The <code>Error.Code</code> of a failed <code>Read</code>. A first line past 64K characters is <code>NotALog</code>, as no header is that long.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogSkippedLine</span>
+              <span class="api-type-badge badge--class">record</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogSkippedLine(int Line, LogSkipReason Reason)</div>
+                  <div class="api-member-desc">A line's number, from 1, and why it was skipped.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">ToString()</div>
+                  <div class="api-member-desc">Says it as a sentence.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogSkipReason</span>
+              <span class="api-type-badge badge--class">abstract record</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotJson</div>
+                  <div class="api-member-desc">The line is not JSON.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotALine</div>
+                  <div class="api-member-desc">The line is JSON, but not a record, a declaration or a loss.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Undeclared(string Key, long Id)</div>
+                  <div class="api-member-desc">The line is a record of an event the file does not declare before it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotADeclaration(string Key, string Why)</div>
+                  <div class="api-member-desc">The line declares an event as the format does not write a declaration.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotAnEvent(string Key, string Why)</div>
+                  <div class="api-member-desc">The line declares what is not an event.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">DeclaredTwice(string Key, long Id)</div>
+                  <div class="api-member-desc">The line declares an event a line before it declares.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotItsDeclaration(string Key, string Why)</div>
+                  <div class="api-member-desc">The line is a record not as its declaration says.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotAStamp(string Stamp)</div>
+                  <div class="api-member-desc">The line is a record with a stamp no record can have.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">SequenceTwice(long Sequence)</div>
+                  <div class="api-member-desc">The line is a second record of a sequence.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LostAtEnd(long Count)</div>
+                  <div class="api-member-desc">The line says records were lost after the last record.</div>
                 </div>
               </div>
             </div>
@@ -1763,14 +2114,13 @@
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
                   <div class="api-member-name">MemoryRecord(long Sequence, long Frame, long Scope, long Begin, int Thread, LogLevel Level, LogRecordKind Kind, LogEventSpec Event, int Suppressed, bool Backlog, TimeSpan Elapsed, LogCallSite CallSite, string Message, IReadOnlyList&lt;MemoryField&gt; Fields)</div>
-                  <div class="api-member-desc">A record as values.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">object? Field(string name)</div>
-                  <div class="api-member-desc">A field's value by name, ignoring case; throws <code>KeyNotFoundException</code> when there is none.</div>
+                  <div class="api-member-desc">A field's value by name, ignoring case, and throws <code>KeyNotFoundException</code> when there is none.</div>
                 </div>
               </div>
             </div>
@@ -1790,6 +2140,746 @@
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <!-- ── API: Reading ── -->
+        <section class="docs-section" id="api-reading">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">Reading</h2>
+          <p class="section-intro">The records a filter query keeps, as rows that count repeats and nest under scopes, from a live store or a session's file. See <a href="logging.html#guide-records">Reading Records</a>.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogRecords</span>
+              <span class="api-type-badge badge--class">abstract class</span>
+            </div>
+            <p class="prose">A <code>LogStore</code> or a <code>LogArchive</code>, and nothing else.</p>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Program</div>
+                  <div class="api-member-desc">The program that wrote the records.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogClock Clock</div>
+                  <div class="api-member-desc">When its store started.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;LogEventSpec&gt; Events</div>
+                  <div class="api-member-desc">The events its records are of.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Capacity</div>
+                  <div class="api-member-desc">The most records it holds.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long First</div>
+                  <div class="api-member-desc">The oldest sequence it holds.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long Next</div>
+                  <div class="api-member-desc">One past the newest.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogRedaction Redacted</div>
+                  <div class="api-member-desc">What the records lack, as the sink that wrote them left it out.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLateMark LateMark</div>
+                  <div class="api-member-desc">Where it is in placing records it was handed after a later one.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLate LateFrom(LogLateMark seen)</div>
+                  <div class="api-member-desc">Where to read again from to see the records placed late since the mark <code>seen</code>, with the mark to pass next time, read in one step.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogRead Read(long from, LogBatch into)</div>
+                  <div class="api-member-desc">Copies the records from a sequence on, as many as fit.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Read(ReadOnlySpan&lt;long&gt; sequences, LogBatch into)</div>
+                  <div class="api-member-desc">Copies the records of the given sequences it holds.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogArchive</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <p class="prose">A session's records, held after the store that wrote them has moved on. A console sink keeps one for its session, and <code>LogFile.Read</code> makes one from a file. Derives from <code>LogRecords</code>.</p>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Count</div>
+                  <div class="api-member-desc">How many records it holds.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long Dropped</div>
+                  <div class="api-member-desc">How many of its oldest it let go to stay under its cap, since it was last cleared.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogErrorsHeld ErrorsFrom(long sequence)</div>
+                  <div class="api-member-desc">The errors it holds from a sequence on, and where it is now, read at once, without allocating.</div>
+                </div>
+              </div>
+            </div>
+            <p class="prose">An error is an event's record at <code>Error</code> or <code>Critical</code> that was not written as an error's backlog. An error it let go, past its cap or on a clear, is not held, so it is not counted.</p>
+            <p class="prose">A console's <code>Clear</code> lets every record go: <code>First</code> and <code>Next</code> are then where it stopped, and it takes no record older. A record older than what it let go is let go too, and so is one older than all it holds while it is full. A file's archive, and an ended session's, hold what they held, and take nothing after.</p>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogErrorsHeld</span>
+              <span class="api-type-badge badge--struct">readonly record struct</span>
+            </div>
+            <p class="prose">What <code>ErrorsFrom</code> read of an archive's errors. Only an archive makes one, so its count and its ends always agree.</p>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long Count</div>
+                  <div class="api-member-desc">How many errors it holds from the sequence on.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Optional&lt;long&gt; First</div>
+                  <div class="api-member-desc">The sequence of the first of them: none when there are none.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Optional&lt;long&gt; Last</div>
+                  <div class="api-member-desc">The sequence of the newest of them: none when there are none.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long Next</div>
+                  <div class="api-member-desc">The archive's <code>Next</code>, read with them.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogLateMark</span>
+              <span class="api-type-badge badge--struct">readonly record struct</span>
+            </div>
+            <p class="prose">Opaque: what <code>LateMark</code> and <code>LateFrom</code> hand a reader, to pass back to <code>LateFrom</code> next time. It is of the records that made it: <code>default</code>, or a mark of other records, has seen none of these.</p>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogLate</span>
+              <span class="api-type-badge badge--struct">readonly record struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long From</div>
+                  <div class="api-member-desc">The least sequence placed late since the mark: <code>Next</code> when none was, <code>First</code> when more were than the records remember.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLateMark Mark</div>
+                  <div class="api-member-desc">The mark to pass to <code>LateFrom</code> next time, taken with <code>From</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">ArchivedException</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">ArchivedException(string typeName, string message, string text)</div>
+                  <div class="api-member-desc">An exception read back from a file. Derives from <code>Exception</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string TypeName</div>
+                  <div class="api-member-desc">The full name it was thrown as.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">ToString()</div>
+                  <div class="api-member-desc">The text the file holds, stack trace and all.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogView</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogView(LogRecords source, LogFilter filter)</div>
+                  <div class="api-member-desc">A view of the records the filter keeps, which the first <code>Update</code> reads.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogRecords Source</div>
+                  <div class="api-member-desc">The records it reads.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogScopes Scopes</div>
+                  <div class="api-member-desc">The scopes it has read.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogFilter Filter</div>
+                  <div class="api-member-desc">Which records it is to show; setting one not equal to it scans again, and an equal one does nothing.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogFilter Shown</div>
+                  <div class="api-member-desc">The filter the rows were made with: <code>Filter</code>, but while a scan is under way.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;LogFilterTerm&gt; GaveUp</div>
+                  <div class="api-member-desc">The terms of <code>Shown</code> whose regular expression took too long over a record, in the filter's order, which match nothing in the rows from that record on.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool IsScanning</div>
+                  <div class="api-member-desc">Whether a scan for a new filter or fold is under way.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Count</div>
+                  <div class="api-member-desc">How many rows it has.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogRow this[int row]</div>
+                  <div class="api-member-desc">A row, from 0, the oldest.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLevelCounts Counts</div>
+                  <div class="api-member-desc">How many records match, by level, everything the filter keeps but for its levels.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long EventCount(int place)</div>
+                  <div class="api-member-desc">How many records match of the event at a place in <code>Source</code>'s events, everything the filter keeps but for its event terms; 0 for an event declared since it last read.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long Lost</div>
+                  <div class="api-member-desc">How many records were lost before it read them.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Update()</div>
+                  <div class="api-member-desc">Reads what arrived since it last did, or goes on with a scan; once a frame.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Retry()</div>
+                  <div class="api-member-desc">Scans again when a regular expression of <code>Filter</code> took too long, to try it afresh; nothing when none did.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Clear()</div>
+                  <div class="api-member-desc">Starts it at the newest record.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Fold(long scope), void Unfold(long scope)</div>
+                  <div class="api-member-desc">Hides or shows what is under a scope; scans again.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool IsFolded(long scope)</div>
+                  <div class="api-member-desc">Whether the rows hide what is under a scope.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Optional&lt;int&gt; Find(long sequence)</div>
+                  <div class="api-member-desc">The row that holds a record, or the repeat that spans it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Read(int row, int count, LogBatch into)</div>
+                  <div class="api-member-desc">Copies the records of rows, one a row.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Write(ILogSink sink, int row, int count, LogSinkOptions? options = null)</div>
+                  <div class="api-member-desc">Writes every record the rows stand for to a sink not yet opened, as a drain would.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">void Write(ILogSink sink, IReadOnlyList&lt;int&gt; rows, LogSinkOptions? options = null)</div>
+                  <div class="api-member-desc">The same for rows that need not be one run, in order and each once, through one opening of the sink.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogRow</span>
+              <span class="api-type-badge badge--struct">readonly record struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogRow(long Sequence, long Last, int Records, long Suppressed, LogLevel Level, LogRowKind Kind, int Depth, long LostBefore)</div>
+                  <div class="api-member-desc">The first and last record's sequences, how many records it stands for, what a limit dropped among them, their level, what kind of row it is, how many scopes with rows it is under, and how many records were lost just before it.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogRowKind</span>
+              <span class="api-type-badge badge--enum">enum</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">values</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Event, Scope</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogLevelCounts</span>
+              <span class="api-type-badge badge--struct">readonly record struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLevelCounts(long Trace, long Debug, long Information, long Warning, long Error, long Critical)</div>
+                  <div class="api-member-desc">With <code>this[LogLevel level]</code> and <code>Total</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogScopes</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">int Count</div>
+                  <div class="api-member-desc">How many scopes it knows.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool IsUnder(long scope, long ancestor)</div>
+                  <div class="api-member-desc">Whether a scope is the ancestor or under it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long Parent(long scope)</div>
+                  <div class="api-member-desc">The scope it was opened under, or 0.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool IsOpen(long scope)</div>
+                  <div class="api-member-desc">Whether it is known and its closing has not been read.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Optional&lt;TimeSpan&gt; Elapsed(long scope)</div>
+                  <div class="api-member-desc">How long it was open, once closed.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogFilter</span>
+              <span class="api-type-badge badge--class">record</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogFilter(LogLevelRange levels, LogFrameRange frames, IReadOnlyList&lt;LogFilterTerm&gt; keep, IReadOnlyList&lt;LogFilterTerm&gt; leaveOut)</div>
+                  <div class="api-member-desc">A filter of its parts; the lists are copied.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static LogFilter All</div>
+                  <div class="api-member-desc">Keeps every record.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLevelRange Levels, LogFrameRange Frames</div>
+                  <div class="api-member-desc">The levels and frames kept.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;LogFilterTerm&gt; Keep, LeaveOut</div>
+                  <div class="api-member-desc">The terms a record must meet, and must not.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static Result&lt;LogFilter&gt; Parse(string query)</div>
+                  <div class="api-member-desc">Reads a query; fails with a <code>LogFilterError</code> code and the word.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool Matches(LogRecord record, LogScopes scopes)</div>
+                  <div class="api-member-desc">Whether a record is kept; a regular expression that takes too long over it does not match it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">bool KeepsEvent(LogEventSpec spec)</div>
+                  <div class="api-member-desc">Whether its event terms keep records of an event: one it keeps, when it keeps any, and none it leaves out.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;LogFilterTerm&gt; MatchingNothing(IReadOnlyList&lt;LogEventSpec&gt; events)</div>
+                  <div class="api-member-desc">The events and fields it names that none of the events is or has.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">ToString()</div>
+                  <div class="api-member-desc">The query that reads back as it.</div>
+                </div>
+              </div>
+            </div>
+            <p class="prose">Two filters are equal when their levels, frames and terms, in order, are.</p>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogFilterTerm</span>
+              <span class="api-type-badge badge--class">abstract record</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Event(string Pattern)</div>
+                  <div class="api-member-desc">Matches records of the events a pattern names, as a rule names them.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Scope(long Id)</div>
+                  <div class="api-member-desc">Matches a scope's records, and every record under it.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Thread(int Id)</div>
+                  <div class="api-member-desc">Matches what one managed thread wrote.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Field(string Name, string Pattern)</div>
+                  <div class="api-member-desc">Matches a field whose formatted value a wildcard pattern matches, ignoring case.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Text(string Value)</div>
+                  <div class="api-member-desc">Matches a message that holds the text, ignoring case.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">TextRegex(string Pattern)</div>
+                  <div class="api-member-desc">Matches a message a regular expression matches, ignoring case.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">case</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">FieldRegex(string Name, string Pattern)</div>
+                  <div class="api-member-desc">Matches a field whose formatted value a regular expression matches, ignoring case.</div>
+                </div>
+              </div>
+            </div>
+            <p class="prose">Each case's constructor throws for what is not one. A regular expression's <code>Pattern</code> is as a query reads it back, with <code>/</code> for each <code>\/</code> it was written with, so the two are equal.</p>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogLevelRange, LogFrameRange</span>
+              <span class="api-type-badge badge--struct">readonly record structs</span>
+            </div>
+            <p class="prose">The levels or frames a filter keeps, both ends kept: <code>All</code> (the <code>default</code>), <code>Empty</code>, <code>Only(x)</code>, <code>Between(a, b)</code>, <code>Contains(x)</code>, <code>Intersect(other)</code>, <code>IsAll</code>, <code>IsEmpty</code>. <code>LogLevelRange</code> has <code>Least</code> and <code>Most</code>, and <code>LogFrameRange</code> has <code>First</code> and <code>Last</code>.</p>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogFilterError</span>
+              <span class="api-type-badge badge--enum">enum</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--field">values</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">NotATerm, NotALevel, NotAFrame, NotAScope, NotAThread, NoText, NoValue, QuoteNotClosed, CannotLeaveOut, RegexNotClosed, NotARegex</div>
+                  <div class="api-member-desc">The <code>Error.Code</code> of a failed <code>Parse</code>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── API: Console Sessions ── -->
+        <section class="docs-section" id="api-sessions">
+          <div class="section-eyebrow">API Reference</div>
+          <h2 class="section-title">Console Sessions</h2>
+          <p class="section-intro">The process's sessions, which a console sink keeps and the log console reads. See <a href="logging.html#guide-sessions">Log Console Sessions</a> and <a href="logging-console.html">The Log Console</a>.</p>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogConsole</span>
+              <span class="api-type-badge badge--static">static</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static IReadOnlyList&lt;LogConsoleSession&gt; Sessions</div>
+                  <div class="api-member-desc">The process's sessions, oldest first: a new list each time one starts, ends, is opened, is closed or is cleared away.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static Optional&lt;LogConsoleSession&gt; Find(LogSessionId id)</div>
+                  <div class="api-member-desc">The session as it is now, while it is one of them.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static LogConsoleSession.File Open(LogSessionFile file)</div>
+                  <div class="api-member-desc">Adds a file's session; the one it is already, when it was opened before.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static void Close(LogConsoleSession.Ended session)</div>
+                  <div class="api-member-desc">Lets an ended session go; does nothing when it is gone already.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static void Close(LogConsoleSession.File session)</div>
+                  <div class="api-member-desc">Lets a file's session go; does nothing when it is gone already.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static void Clear()</div>
+                  <div class="api-member-desc">Lets ended sessions go and empties live ones; files' sessions stay.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogConsoleSession</span>
+              <span class="api-type-badge badge--class">abstract record</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogSessionId Id</div>
+                  <div class="api-member-desc">Which session it is, whatever its state.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogArchive Records</div>
+                  <div class="api-member-desc">Its records, which a <code>LogView</code> reads.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">R Match&lt;R&gt;(Func&lt;Live, R&gt; live, Func&lt;Ended, R&gt; ended, Func&lt;File, R&gt; file)</div>
+                  <div class="api-member-desc">What the function for its state makes of it.</div>
+                </div>
+              </div>
+            </div>
+            <p class="prose">Its cases are its states:</p>
+            <ul class="prose">
+              <li><code>Live</code>: kept by a console sink; its <code>Records.Capacity</code> is the sink's cap.</li>
+              <li><code>Ended</code>: its drain let its sink go, or its sink threw; <code>DateTimeOffset At</code> is when, and its records take nothing after.</li>
+              <li><code>File</code>: read back from a file; <code>string Path</code> and <code>IReadOnlyList&lt;LogSkippedLine&gt; Skipped</code> are its file's.</li>
+            </ul>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogSessionId</span>
+              <span class="api-type-badge badge--struct">readonly record struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">long Value</div>
+                  <div class="api-member-desc">Numbered from 1, in the order the process's sessions started or were opened; <code>default</code> is no session.</div>
+                </div>
+              </div>
+            </div>
+            <p class="prose">Ids compare by <code>Value</code>, with <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> and <code>CompareTo</code>, so a later session's is the greater.</p>
           </div>
         </section>
 
@@ -1845,6 +2935,13 @@
                 </div>
               </div>
               <div class="api-member">
+                <span class="api-kind kind--field">const</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">const string StackTraceField</div>
+                  <div class="api-member-desc"><code>StackTrace</code>, the field of <code>unity/Logged</code> that holds the stack Unity handed over.</div>
+                </div>
+              </div>
+              <div class="api-member">
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">static LogLevel LevelOf(LogType type)</div>
@@ -1852,6 +2949,44 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">UnityPaths</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">UnityPaths(string root, IReadOnlyList&lt;(string Folder, string Name)&gt; packages)</div>
+                  <div class="api-member-desc">Paths mapped against the project's folder, empty when not known, and each package's folder and name; a package of an empty or blank folder or name throws <code>ArgumentException</code>, and a null one <code>ArgumentNullException</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static UnityPaths ForThisProject()</div>
+                  <div class="api-member-desc">The paths of the project Unity is running: its folder, and in the editor every registered package's.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Map(string file)</div>
+                  <div class="api-member-desc">A call site's path as Unity opens it, <code>Assets/...</code> or <code>Packages/&lt;name&gt;/...</code>; one it cannot map is kept, with forward slashes.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">static string FileName(string path)</div>
+                  <div class="api-member-desc">The file's name, without its folder.</div>
+                </div>
+              </div>
+            </div>
+            <p class="prose">A path is matched ignoring case on Windows and macOS, and by its case elsewhere.</p>
           </div>
         </section>
 
