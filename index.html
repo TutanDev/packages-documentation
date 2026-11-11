@@ -306,7 +306,7 @@ saving.Log.Saved(slot, file);
             </div>
             <div>
               <h3 class="feature-name">No Allocation at the Call</h3>
-              <p class="feature-desc">An event that is off costs one compare. One that is on copies its values into three fixed rings under a short lock; strings and exceptions are kept by reference.</p>
+              <p class="feature-desc">An event that is off costs one compare. One that is on copies its values into three fixed rings under a short lock; strings and exceptions are kept by reference. Only a record at its stack level allocates, for its stack.</p>
             </div>
           </div>
           <div class="feature">
@@ -315,7 +315,7 @@ saving.Log.Saved(slot, file);
             </div>
             <div>
               <h3 class="feature-name">Clickable Call Sites</h3>
-              <p class="feature-desc">A Console row ends with a link to the file and line that wrote it, and double-clicking the row opens it. Every record also carries <code>Time.frameCount</code>.</p>
+              <p class="feature-desc">A Console row ends with a link to the file and line that wrote it, and double-clicking the row opens it. An error, or whatever level the rules say, also carries the stack it was written from, to the file and the log console. Every record carries <code>Time.frameCount</code>.</p>
             </div>
           </div>
           <div class="feature">

@@ -367,6 +367,9 @@
   margin-top: 40px;
 }
 
+/* A sub-section linked to by id lands below the fixed nav */
+.sub-section[id] { scroll-margin-top: 64px; }
+
 .sub-title {
   font-size: 1.05rem;
   font-weight: 600;

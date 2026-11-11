@@ -674,7 +674,7 @@
         <section class="docs-section" id="api-rules">
           <div class="section-eyebrow">API Reference</div>
           <h2 class="section-title">Rules</h2>
-          <p class="section-intro">What a store captures: a least level, and rules by pattern that change it or limit how often an event is kept. See <a href="logging.html#guide-rules">Rules &amp; Rate Limits</a>.</p>
+          <p class="section-intro">What a store captures: a least level, a level from which a record carries its stack, and rules by pattern that change either or limit how often an event is kept. See <a href="logging.html#guide-rules">Rules &amp; Rate Limits</a>.</p>
 
           <div class="api-group">
             <div class="api-group-header">
@@ -686,14 +686,28 @@
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
                   <div class="api-member-name">LogRules(LogLevel least, params LogRule[] rules)</div>
-                  <div class="api-member-desc">Every event held to <code>least</code>, but where the rules say otherwise.</div>
+                  <div class="api-member-desc">Every event held to <code>least</code>, but where the rules say otherwise, with stacks from <code>DefaultStackLevel</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogRules(LogLevel least, LogLevel stackLevel, params LogRule[] rules)</div>
+                  <div class="api-member-desc">The same, with stacks from <code>stackLevel</code>, <code>None</code> for none; a level that is none of <code>Trace</code> to <code>None</code>, here or in a rule, throws <code>ArgumentOutOfRangeException</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--field">const</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">const LogLevel DefaultStackLevel</div>
+                  <div class="api-member-desc"><code>Error</code>: the stack level where the rules say none.</div>
                 </div>
               </div>
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">static LogRules Default</div>
-                  <div class="api-member-desc"><code>debug</code>, and no rules.</div>
+                  <div class="api-member-desc"><code>debug</code>, stacks from <code>error</code>, and no rules.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -701,6 +715,13 @@
                 <div class="api-member-content">
                   <div class="api-member-name">LogLevel Least</div>
                   <div class="api-member-desc">The least level where no rule says otherwise.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLevel StackLevel</div>
+                  <div class="api-member-desc">The least level a record carries its stack from, where no rule says otherwise; <code>None</code> for none.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -722,6 +743,13 @@
                 <div class="api-member-content">
                   <div class="api-member-name">LogLevel LeastFor(LogEventSpec spec)</div>
                   <div class="api-member-desc">The least level an event is captured at; <code>None</code> when off.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogLevel StackLevelFor(LogEventSpec spec)</div>
+                  <div class="api-member-desc">The least level a record of an event carries its stack from; <code>None</code> for none.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -763,7 +791,7 @@
                 <span class="api-kind kind--op">op</span>
                 <div class="api-member-content">
                   <div class="api-member-name">Equals, GetHashCode</div>
-                  <div class="api-member-desc">Equal when the least and every rule, in order, are.</div>
+                  <div class="api-member-desc">Equal when the least, the stack level and every rule, in order, are.</div>
                 </div>
               </div>
             </div>
@@ -778,8 +806,8 @@
               <div class="api-member">
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">LogRule(string Pattern, Optional&lt;LogLevel&gt; Least, Optional&lt;int&gt; PerSecond)</div>
-                  <div class="api-member-desc">For the events a pattern names, a least level (<code>None</code> for off), a limit, or both.</div>
+                  <div class="api-member-name">LogRule(string Pattern, Optional&lt;LogLevel&gt; Least, Optional&lt;int&gt; PerSecond, Optional&lt;LogLevel&gt; StackLevel = default)</div>
+                  <div class="api-member-desc">For the events a pattern names, a least level (<code>None</code> for off), a limit, a stack level (<code>None</code> for none), or more than one.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -801,7 +829,7 @@
               <div class="api-member">
                 <span class="api-kind kind--field">values</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">NotALevel, NotAPattern, NotALimit, LeastTwice</div>
+                  <div class="api-member-name">NotALevel, NotAPattern, NotALimit, LeastTwice, StackLevelTwice</div>
                   <div class="api-member-desc">The <code>Error.Code</code> of a failed <code>Parse</code>.</div>
                 </div>
               </div>
@@ -908,6 +936,13 @@
               <div class="api-member">
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
+                  <div class="api-member-name">Optional&lt;LogStack&gt; Stack</div>
+                  <div class="api-member-desc">The stack it was written from, when at its event's stack level; never for a scope's closing.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
                   <div class="api-member-name">LogEventSpec Event</div>
                   <div class="api-member-desc">Its event or scope.</div>
                 </div>
@@ -1004,6 +1039,80 @@
                 <div class="api-member-content">
                   <div class="api-member-name">ToString()</div>
                   <div class="api-member-desc"><code>File:Line</code>, or empty.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogStack</span>
+              <span class="api-type-badge badge--class">class</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogStack(IEnumerable&lt;LogStackFrame&gt; frames)</div>
+                  <div class="api-member-desc">A stack of these frames, as a reader of a file makes one; no frames, or a <code>default</code> frame, throws <code>ArgumentException</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">IReadOnlyList&lt;LogStackFrame&gt; Frames</div>
+                  <div class="api-member-desc">The frames, one at least, from the method that made the call outward.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--op">op</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">Equals, GetHashCode</div>
+                  <div class="api-member-desc">Equal when every frame, in order, is.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">ToString()</div>
+                  <div class="api-member-desc">A line a frame.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="api-group">
+            <div class="api-group-header">
+              <span class="api-group-name">LogStackFrame</span>
+              <span class="api-type-badge badge--struct">readonly struct</span>
+            </div>
+            <div class="api-members">
+              <div class="api-member">
+                <span class="api-kind kind--ctor">ctor</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogStackFrame(string method, LogCallSite at)</div>
+                  <div class="api-member-desc">A frame.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Method</div>
+                  <div class="api-member-desc">Its method, as <code>Game.SaveManager.Save(int)</code>, with a by-ref parameter as <code>ref int</code>, <code>out int</code> or <code>in int</code>.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--prop">prop</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">LogCallSite At</div>
+                  <div class="api-member-desc">The file and line of the call it made, unknown where the build had no symbols.</div>
+                </div>
+              </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">ToString()</div>
+                  <div class="api-member-desc"><code>Method (at File:Line)</code>, or the method alone.</div>
                 </div>
               </div>
             </div>
@@ -1614,6 +1723,13 @@
                   <div class="api-member-desc">A field's value as a string, with the sink's redaction: an exception's whole text.</div>
                 </div>
               </div>
+              <div class="api-member">
+                <span class="api-kind kind--method">method</span>
+                <div class="api-member-content">
+                  <div class="api-member-name">string Text(LogStack stack)</div>
+                  <div class="api-member-desc">A stack as a string, a line a frame, with the home folder left out when the sink leaves it out.</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -2113,7 +2229,7 @@
               <div class="api-member">
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
-                  <div class="api-member-name">MemoryRecord(long Sequence, long Frame, long Scope, long Begin, int Thread, LogLevel Level, LogRecordKind Kind, LogEventSpec Event, int Suppressed, bool Backlog, TimeSpan Elapsed, LogCallSite CallSite, string Message, IReadOnlyList&lt;MemoryField&gt; Fields)</div>
+                  <div class="api-member-name">MemoryRecord(long Sequence, long Frame, long Scope, long Begin, int Thread, LogLevel Level, LogRecordKind Kind, LogEventSpec Event, int Suppressed, bool Backlog, TimeSpan Elapsed, LogCallSite CallSite, string Message, IReadOnlyList&lt;MemoryField&gt; Fields, Optional&lt;LogStack&gt; Stack = default)</div>
                 </div>
               </div>
               <div class="api-member">

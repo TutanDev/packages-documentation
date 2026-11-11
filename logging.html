@@ -128,7 +128,7 @@
         <span class="docs-hero-badge docs-hero-badge--log">com.tutan.logging · v0.1.0</span>
         <h1 class="docs-hero-title">Structured Logging<br>Without Allocating</h1>
         <p class="docs-hero-desc">
-          Tutan Logging keeps records as typed data, not text. An event is declared once as a <code>static partial</code> method, and a source generator writes the method a program calls. Records are drained once a frame to the Unity Console, with a link to the line that wrote them, and to a JSON lines file. An error brings the records that led to it. A view reads a live store, or a session's file read back, as rows a filter query keeps, and the log console, an editor window beside Unity's Console, reads a session's records whole.
+          Tutan Logging keeps records as typed data, not text. An event is declared once as a <code>static partial</code> method, and a source generator writes the method a program calls. An error, or whatever level the rules say, also carries the stack it was written from. Records are drained once a frame to the Unity Console, with a link to the line that wrote them, and to a JSON lines file. An error brings the records that led to it. A view reads a live store, or a session's file read back, as rows a filter query keeps, and the log console, an editor window beside Unity's Console, reads a session's records whole.
         </p>
         <div class="docs-hero-stats">
           <div>
@@ -194,7 +194,7 @@
           <div class="section-eyebrow">Basics</div>
           <h2 class="section-title">Quick Start</h2>
           <p class="section-intro">
-            <code>Debug.Log</code> formats text at the call, allocates, captures a stack trace for every line, and keeps nothing a filter or a backlog can use. This package keeps records as typed data instead. An event that is off costs one compare. An event that is on copies its values into fixed rings and allocates nothing. Formatting waits for a reader: the Unity Console once a frame, a JSON lines file, or a test.
+            <code>Debug.Log</code> formats text at the call, allocates, captures a stack trace for every line, and keeps nothing a filter or a backlog can use. This package keeps records as typed data instead. An event that is off costs one compare. An event that is on copies its values into fixed rings and allocates nothing. Only a record at its stack level, an error by default, walks the stack it was written from. Formatting waits for a reader: the Unity Console once a frame, a JSON lines file, or a test.
           </p>
 
           <div class="sub-section">
@@ -386,7 +386,7 @@ Debug.Log ── UnityLogBridge ──▶ LogStore</code></pre>
     (<span class="kw">new</span> <span class="type">LogConsoleSink</span>(), <span class="kw">new</span> <span class="type">LogSinkOptions</span>(<span class="type">LogLevel</span>.Debug)));</code></pre>
           </div>
 
-          <p class="prose" style="margin-top:12px">The window shows a session's records as rows a query keeps, with a badge for each level and a tree of the categories. Selecting a row shows its fields, the scopes it is under, where it was written and the source around that line, and double-clicking it opens that line. A session that ended, as when Play Mode exits, stays until the console is cleared, and a session's JSON lines file can be opened and read back.</p>
+          <p class="prose" style="margin-top:12px">The window shows a session's records as rows a query keeps, with a badge for each level and a tree of the categories. Selecting a row shows its fields, the scopes it is under, where it was written and the source around that line, and its stack. Double-clicking a row opens the line that wrote it. A session that ended, as when Play Mode exits, stays until the console is cleared, and a session's JSON lines file can be opened and read back.</p>
           <p class="prose">The team shares saved filters, category colours and what is always left out, in <code>ProjectSettings</code>, and each developer keeps their own columns, Clear on Play and Pause on Error, in <code>UserSettings</code>. Outside the editor the sink keeps nothing.</p>
           <p class="prose">The window is on its own page, <a href="logging-console.html">The Log Console</a>; the sink and its sessions are in <a href="#guide-sessions">Log Console Sessions</a>.</p>
         </section>
@@ -708,7 +708,7 @@ saving.Log.Saved(slot, elapsed);   <span class="cmt">// under "Saving slot 3"</s
                 <tbody>
                   <tr><td>Records</td><td>One 72-byte entry per record: its stamps, level, event, scope and call site</td><td>16,384</td><td>16 (<code>LogStore.MinRecords</code>)</td></tr>
                   <tr><td>Bits</td><td>The values copied at the call, in 8-byte slots</td><td>65,536 slots</td><td>32,768 (<code>LogStore.MinBits</code>)</td></tr>
-                  <tr><td>Refs</td><td>The strings and exceptions kept by reference</td><td>16,384</td><td>64 (<code>LogStore.MinRefs</code>)</td></tr>
+                  <tr><td>Refs</td><td>The strings, exceptions and stacks kept by reference</td><td>16,384</td><td>64 (<code>LogStore.MinRefs</code>)</td></tr>
                 </tbody>
               </table>
             </div>
@@ -717,7 +717,7 @@ saving.Log.Saved(slot, elapsed);   <span class="cmt">// under "Saving slot 3"</s
 
           <div class="sub-section">
             <h3 class="sub-title">Writing</h3>
-            <p class="prose">A record is written under a lock, held for the copy of its fields and nothing else: no user code and no allocation run under it. The timestamp is taken under the lock too, so sequences are in the order of time.</p>
+            <p class="prose">A record is written under a lock, held for the copy of its fields and nothing else: no user code and no allocation run under it. The timestamp is taken under the lock too, so sequences are in the order of time. A record at its event's stack level walks its stack first, with the lock let go, once a limit has admitted it (see <a href="#guide-stacks">Stacks</a>).</p>
             <p class="prose">A writer never waits for a reader. When a ring is full the oldest records are overwritten, and since every reader reads by sequence, a reader that fell behind knows how many it lost. A drain that loses records says so, as a <code>log/DrainFellBehind</code> record and as a <code>Lost</code> call on each sink. The record that opened a scope still open is kept, however old it is, so whatever is written under the scope can still say what it is under.</p>
           </div>
 
@@ -738,6 +738,7 @@ saving.Log.Saved(slot, elapsed);   <span class="cmt">// under "Saving slot 3"</s
                 </tbody>
               </table>
             </div>
+            <p class="prose">A record at its event's stack level also carries <code>Stack</code>, the frames it was written from.</p>
             <p class="prose"><code>LogPump</code> calls <code>store.EnterFrame(Time.frameCount)</code> at the start of every frame (see <a href="#guide-pump">Pump &amp; Bridge</a>). A store that is not pumped can be told its frame by whatever drives it. <code>store.Clock</code> holds when the store started, as <code>LogClock(Started, StartedAt)</code>: <code>Clock.At(timestamp)</code> is the wall-clock time of a record, and <code>LogClock.Between(from, to)</code> is the time between two timestamps.</p>
           </div>
 
@@ -801,7 +802,7 @@ next = read.Next;</code></pre>
           <div class="section-eyebrow">Store &amp; Rules</div>
           <h2 class="section-title">Rules &amp; Rate Limits</h2>
           <p class="section-intro">
-            <code>LogRules</code> say what a store captures: a least level every event is held to, and rules that change it, or limit how often an event is kept, for the events a pattern names. A store compiles them with the catalog into one byte per event, which is all a call reads to decide it is off.
+            <code>LogRules</code> say what a store captures: a least level every event is held to, a level from which a record carries its stack, and rules that change either, or limit how often an event is kept, for the events a pattern names. A store compiles them with the catalog into two bytes per event, which is all a call reads to decide it is off, and whether it walks its stack.
           </p>
 
           <div class="sub-section">
@@ -809,12 +810,13 @@ next = read.Next;</code></pre>
             <div class="code-card code-card--log">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Rules.cs</span></div>
 <pre class="code-block"><code><span class="type">Result</span>&lt;<span class="type">LogRules</span>&gt; rules = <span class="type">LogRules</span>.Parse(
-    <span class="str">"debug; game.save=trace; ai.*=warning; game.input/Moved=off; physics/Contact=10/s"</span>);</code></pre>
+    <span class="str">"debug; stack&gt;=warning; game.save=trace; ai.*=warning,stack&gt;=off; game.input/Moved=off; physics/Contact=10/s"</span>);</code></pre>
             </div>
             <p class="prose" style="margin-top:12px">Items are separated by <code>;</code>, and spaces around them do not matter.</p>
             <ul class="prose">
               <li>A bare level is the least. There can be one, and text with none keeps the default, <code>debug</code>.</li>
-              <li><code>pattern=what</code> is a rule, where what is a level, <code>off</code>, a limit as <code>10/s</code>, or a level and a limit separated by a comma, as <code>debug,10/s</code>.</li>
+              <li><code>stack&gt;=level</code> is the stack level, the least level a record carries its stack from. There can be one, and text with none keeps the default, <code>error</code>; <code>stack&gt;=off</code> turns stacks off.</li>
+              <li><code>pattern=what</code> is a rule, where what is a level, <code>off</code>, a limit as <code>10/s</code>, a stack level as <code>stack&gt;=warning</code>, or more than one of them separated by commas, as <code>debug,10/s,stack&gt;=debug</code>.</li>
             </ul>
             <p class="prose">Levels are <code>trace</code>, <code>debug</code>, <code>information</code>, <code>warning</code>, <code>error</code>, <code>critical</code> and <code>off</code>, ignoring case; <code>info</code> and <code>warn</code> are read too.</p>
             <div class="table-wrap">
@@ -828,16 +830,17 @@ next = read.Next;</code></pre>
                 </tbody>
               </table>
             </div>
-            <p class="prose">Where two patterns match an event, the more specific wins: a key beats a category, a category beats every prefix, a longer prefix beats a shorter one, and every prefix beats <code>*</code>. Of two rules alike, the later wins. A level and a limit are resolved apart: a rule with only a limit keeps the level a less specific rule gave, and the other way round.</p>
+            <p class="prose">Where two patterns match an event, the more specific wins: a key beats a category, a category beats every prefix, a longer prefix beats a shorter one, and every prefix beats <code>*</code>. Of two rules alike, the later wins. A level, a limit and a stack level are resolved apart: a rule with only a limit keeps the level a less specific rule gave, and the other way round.</p>
             <p class="prose"><code>Parse</code> fails with an <code>Error</code> whose <code>Code</code> is a <code>LogRulesError</code>:</p>
             <div class="table-wrap">
               <table class="docs-table">
                 <thead><tr><th>Code</th><th>When</th></tr></thead>
                 <tbody>
-                  <tr><td>NotALevel</td><td>A bare item, or what follows <code>=</code>, is not a level</td></tr>
+                  <tr><td>NotALevel</td><td>A bare item, what follows <code>=</code>, or what follows <code>stack&gt;=</code>, is not a level</td></tr>
                   <tr><td>NotAPattern</td><td>A pattern is none of the four kinds</td></tr>
                   <tr><td>NotALimit</td><td>A limit is not a whole number a second, or a rule has two</td></tr>
                   <tr><td>LeastTwice</td><td>A second bare level</td></tr>
+                  <tr><td>StackLevelTwice</td><td>A second bare stack level, or a rule with two</td></tr>
                 </tbody>
               </table>
             </div>
@@ -848,16 +851,35 @@ next = read.Next;</code></pre>
             <h3 class="sub-title">In code</h3>
             <div class="code-card code-card--log">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">Rules.cs</span></div>
-<pre class="code-block"><code><span class="kw">var</span> rules = <span class="kw">new</span> <span class="type">LogRules</span>(<span class="type">LogLevel</span>.Debug,
+<pre class="code-block"><code><span class="kw">var</span> rules = <span class="kw">new</span> <span class="type">LogRules</span>(<span class="type">LogLevel</span>.Debug, <span class="type">LogLevel</span>.Warning,
     <span class="kw">new</span> <span class="type">LogRule</span>(<span class="str">"game.save"</span>, <span class="type">LogLevel</span>.Trace, <span class="type">F</span>.None),
-    <span class="kw">new</span> <span class="type">LogRule</span>(<span class="str">"physics/Contact"</span>, <span class="type">F</span>.None, <span class="num">10</span>));</code></pre>
+    <span class="kw">new</span> <span class="type">LogRule</span>(<span class="str">"physics/Contact"</span>, <span class="type">F</span>.None, <span class="num">10</span>),
+    <span class="kw">new</span> <span class="type">LogRule</span>(<span class="str">"ai.*"</span>, <span class="type">F</span>.None, <span class="type">F</span>.None, StackLevel: <span class="type">LogLevel</span>.None));</code></pre>
             </div>
-            <p class="prose" style="margin-top:12px">A <code>LogRule</code> is a <code>Pattern</code>, an optional <code>Least</code> (<code>LogLevel.None</code> for off) and an optional <code>PerSecond</code>. <code>LogRules.Default</code> is <code>debug</code> and no rules: a store captures what a developer would want when something goes wrong, and the sinks, which write from <code>Information</code> by default, write the rest only as an error's context.</p>
+            <p class="prose" style="margin-top:12px">A <code>LogRule</code> is a <code>Pattern</code>, an optional <code>Least</code> (<code>LogLevel.None</code> for off), an optional <code>PerSecond</code>, and an optional <code>StackLevel</code> (<code>LogLevel.None</code> for none). <code>new LogRules(least, rules)</code> keeps the default stack level, <code>LogRules.DefaultStackLevel</code>, which is <code>Error</code>. A level that is none of <code>Trace</code> to <code>None</code> throws <code>ArgumentOutOfRangeException</code>, since its text would not parse back. <code>LogRules.Default</code> is <code>debug</code> and no rules: a store captures what a developer would want when something goes wrong, and the sinks, which write from <code>Information</code> by default, write the rest only as an error's context.</p>
           </div>
 
           <div class="sub-section">
             <h3 class="sub-title">Rate limits</h3>
             <p class="prose">A limit is a bucket per event that holds <code>PerSecond</code> records and refills at that rate, starting full. A record that finds the bucket empty is dropped and counted, and the next one kept carries the count as <code>Suppressed</code>. A rule's limit overrides the event's own <code>PerSecond</code>, and <code>0/s</code> takes the event's limit away.</p>
+          </div>
+
+          <div class="sub-section" id="guide-stacks">
+            <h3 class="sub-title">Stacks</h3>
+            <p class="prose">A record at or above its event's stack level carries the stack it was written from, as Unity's own log does for every line. By default that is an error or a critical record: the one a developer reads the stack of, and the one a program writes least often.</p>
+            <div class="code-card code-card--log">
+              <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">DebugMenu.cs</span></div>
+<pre class="code-block"><code>store.Apply(<span class="type">LogRules</span>.Parse(<span class="str">"debug; stack&gt;=warning; game.save=stack&gt;=debug"</span>).ValueUnsafe());</code></pre>
+            </div>
+            <ul class="prose" style="margin-top:16px">
+              <li>The stack is a <code>LogStack</code>: its <code>Frames</code>, from the method that made the call outward, each a <code>LogStackFrame</code> of a <code>Method</code>, as <code>Game.SaveManager.Save(int)</code>, and <code>At</code>, the file and line of the call it made.</li>
+              <li>The package's own frames are left out, and so is any method whose first parameter is a <code>Log</code> and that takes a <code>[CallerFilePath]</code>: the method the generator writes, and a wrapper of the program's own that forwards its caller's call site.</li>
+              <li>A frame has a file and a line where the build has symbols: in the editor and in development builds, and in an IL2CPP build only with line numbers turned on.</li>
+              <li>Only a record with a call site walks its stack, so a message <code>UnityLogBridge</code> brought over keeps Unity's own stack, as its <code>StackTrace</code> field, and has no second one.</li>
+              <li>A scope's opening at its stack level carries one, and its closing never does.</li>
+              <li>The walk allocates and takes far longer than copying a record, so the store does it with its lock let go, and only once a limit has admitted the record. A program that wants no allocation from its errors writes <code>stack&gt;=off</code>.</li>
+            </ul>
+            <p class="prose"><code>record.Stack</code> is the stack, or none for a record below its level. The JSON lines file keeps it, the <a href="logging-console.html#console-details">log console</a> shows it frame by frame, and a row copied as text has it.</p>
           </div>
 
           <div class="sub-section">
@@ -866,7 +888,7 @@ next = read.Next;</code></pre>
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">DebugMenu.cs</span></div>
 <pre class="code-block"><code>store.Apply(<span class="type">LogRules</span>.Parse(<span class="str">"trace; ai.*=debug"</span>).ValueUnsafe());</code></pre>
             </div>
-            <p class="prose" style="margin-top:12px"><code>Apply</code> swaps the rules from any thread, and calls from then on read the new ones. It says, as a <code>log/RuleMatchesNothing</code> record, each rule whose pattern matches nothing the program declares, which is how a misspelt category is caught. <code>store.Rules</code> is the rules applied last. <code>LeastFor(spec)</code>, <code>PerSecondFor(spec)</code> and <code>MatchingNothing(specs)</code> answer what the rules say of an event without a store.</p>
+            <p class="prose" style="margin-top:12px"><code>Apply</code> swaps the rules from any thread, and calls from then on read the new ones. It says, as a <code>log/RuleMatchesNothing</code> record, each rule whose pattern matches nothing the program declares, which is how a misspelt category is caught. <code>store.Rules</code> is the rules applied last. <code>LeastFor(spec)</code>, <code>StackLevelFor(spec)</code>, <code>PerSecondFor(spec)</code> and <code>MatchingNothing(specs)</code> answer what the rules say of an event without a store.</p>
           </div>
 
           <div class="sub-section">
@@ -955,7 +977,7 @@ next = read.Next;</code></pre>
                 <tbody>
                   <tr><td>LogRedaction.None</td><td>Every field as it was logged</td></tr>
                   <tr><td>LogRedaction.Personal</td><td><code>[personal]</code> for every field marked <code>[Personal]</code>, exceptions included</td></tr>
-                  <tr><td>LogRedaction.HomeFolder</td><td><code>~</code> for the user's home folder, wherever a string, chars or exception field has it</td></tr>
+                  <tr><td>LogRedaction.HomeFolder</td><td><code>~</code> for the user's home folder, wherever a string, chars or exception field, a call site's file or a stack's file has it</td></tr>
                 </tbody>
               </table>
             </div>
@@ -990,7 +1012,7 @@ SaveManager.cs:42  frame 1240</code></pre>
             <li>Records overwritten before the drain read them are a warning row, <code>1,234 records were overwritten before the Console read them</code>.</li>
           </ul>
 
-          <p class="prose">A row is written with <code>LogOption.NoStacktrace</code>, since the stack Unity would capture is the drain's, not the call's. With <code>openOnDoubleClick</code>, in the editor, a row also opens its call site when double-clicked, through an internal Unity method; if a Unity version does not have it, every row is written with the public API and the link still opens the call site.</p>
+          <p class="prose">A row is written with <code>LogOption.NoStacktrace</code>, since the stack Unity would capture is the drain's, not the call's. A record's own stack, when it carries one (see <a href="#guide-stacks">Stacks</a>), is in the file and the log console, and not in the row. With <code>openOnDoubleClick</code>, in the editor, a row also opens its call site when double-clicked, through an internal Unity method; if a Unity version does not have it, every row is written with the public API and the link still opens the call site.</p>
 
           <div class="callout callout--note">
             <strong>The bridge and the Console never feed each other</strong>
@@ -1034,7 +1056,13 @@ SaveManager.cs:42  frame 1240</code></pre>
             <ul class="prose" style="margin-top:16px">
               <li><strong>The header</strong>, first: <code>format</code> (<code>JsonLinesSink.Format</code>, now 1), <code>program</code>, <code>started</code>, and <code>redact</code> when the sink redacts.</li>
               <li><strong>A declaration</strong>, before the first record of each event: its key, an <code>id</code> numbered from 1 in each file, <code>kind</code>, <code>lvl</code> (absent when each call chooses), <code>template</code>, <code>perSecond</code> when it has one, its <code>fields</code>, and its <code>source</code>. A field has <code>name</code>, <code>kind</code> and <code>type</code>, and <code>personal</code>, <code>tag</code>, <code>optional</code>, <code>names</code> (an enum's members) and <code>flags</code> when they apply. So the file says what its records are without the program that wrote them.</li>
-              <li><strong>A record</strong>: <code>seq</code>, <code>scope</code> when under one, <code>t</code>, <code>frame</code> when stamped, <code>thread</code>, <code>lvl</code>, <code>key</code> and the <code>id</code> of its declaration, <code>msg</code>, <code>suppressed</code> when a limit dropped some, <code>context</code> when written as an error's context, <code>file</code> and <code>line</code> when it has a call site, and its <code>fields</code>. A record names its declaration by <code>id</code> as well as its event by <code>key</code>, since two assemblies can declare one key.</li>
+              <li><strong>A record</strong>: <code>seq</code>, <code>scope</code> when under one, <code>t</code>, <code>frame</code> when stamped, <code>thread</code>, <code>lvl</code>, <code>key</code> and the <code>id</code> of its declaration, <code>msg</code>, <code>suppressed</code> when a limit dropped some, <code>context</code> when written as an error's context, <code>file</code> and <code>line</code> when it has a call site, its <code>fields</code>, and its <code>stack</code> when it carries one. A record names its declaration by <code>id</code> as well as its event by <code>key</code>, since two assemblies can declare one key.</li>
+              <li>A stack is an array of frames, from the method that made the call outward, each a <code>method</code> and, when the build had symbols, a <code>file</code> and a <code>line</code>:
+                <div class="code-card code-card--log" style="margin:10px 0 8px">
+                  <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">A record's stack</span></div>
+<pre class="code-block"><code>"stack":[{"method":"Game.SaveManager.Save(int)","file":"C:\\Projects\\MyGame\\Assets\\Game\\SaveManager.cs","line":42},{"method":"Game.Menu.OnSave()","file":"C:\\Projects\\MyGame\\Assets\\Game\\Menu.cs","line":17}]</code></pre>
+                </div>
+                A reader older than stacks skips the member, so the format is still 1.</li>
               <li>A scope's opening has <code>begin</code>, its own sequence, and its closing has <code>end</code>, the opening's, and <code>ms</code>, how long it was open.</li>
               <li>Numbers and bools are JSON's own, and a number that is not finite is a string. An exception is an object of its <code>type</code>, <code>message</code> and <code>text</code>. Every other value is its formatted text, and a value of the program's own type is formatted as the first hole that names it formats it.</li>
               <li><code>{"lost":N}</code> says N records were overwritten before the drain read them.</li>
@@ -1222,7 +1250,7 @@ view.Update();
             </div>
             <p class="prose" style="margin-top:12px">A row is a record, or a run of records that repeat one another.</p>
             <ul class="prose">
-              <li><strong>A repeat</strong> is a record of the same event, level, scope and values as the row before it, and is counted on that row. <code>Records</code> is how many, <code>Sequence</code> and <code>Last</code> the first and the last, and <code>Suppressed</code> adds up what a rate limit dropped among them. A run spans records the filter hides between them, but not a loss, and never joins a record written as an error's backlog to one that was not.</li>
+              <li><strong>A repeat</strong> is a record of the same event, level, scope and values as the row before it, and of the same stack when it carries one, and is counted on that row. <code>Records</code> is how many, <code>Sequence</code> and <code>Last</code> the first and the last, and <code>Suppressed</code> adds up what a rate limit dropped among them. A run spans records the filter hides between them, but not a loss, and never joins a record written as an error's backlog to one that was not.</li>
               <li><strong>A scope's opening</strong> has a row of its own, <code>LogRowKind.Scope</code>, and what is under it is drawn under it: <code>Depth</code> is how many of the scopes a row is under have rows. A scope's closing has no row, since its opening's row says how long it was open (<code>view.Scopes.Elapsed(scope)</code>).</li>
               <li><strong>A loss</strong> is said on the row after it: <code>LostBefore</code> is how many records were lost just before that row, and <code>view.Lost</code> is all of them.</li>
             </ul>
@@ -1397,7 +1425,7 @@ read.Match(
 
           <div class="sub-section">
             <h3 class="sub-title">What a file reads back as</h3>
-            <p class="prose">The archive's events are the file's declarations, not the catalog's, so it reads a log whatever program wrote it. They are the file's alone: the catalog never holds one, a store's <code>IsEnabled</code> says no to one, and writing one throws. A record keeps its sequence, its stamps, its call site and its time.</p>
+            <p class="prose">The archive's events are the file's declarations, not the catalog's, so it reads a log whatever program wrote it. They are the file's alone: the catalog never holds one, a store's <code>IsEnabled</code> says no to one, and writing one throws. A record keeps its sequence, its stamps, its call site, its time and its stack, frame for frame. A <code>stack</code> that is not an array of one frame or more, each with a <code>method</code>, and a <code>file</code> and a <code>line</code> together when it has either, is a stamp no record can have, and so is a stack on a scope's closing.</p>
             <p class="prose">A field reads back as the kind it was declared as, but for three the file holds only as text, which read back as strings:</p>
             <ul class="prose">
               <li>a <code>char</code> or <code>ReadOnlySpan&lt;char&gt;</code>,</li>
@@ -1485,7 +1513,7 @@ bridge.Dispose();</code></pre>
           <div class="section-eyebrow">Unity</div>
           <h2 class="section-title">Console Links &amp; Builds</h2>
           <p class="section-intro">
-            A record reaches the Console only when the drain writes it, so the stack Unity would capture is the drain's. The call site travels in the record instead: the generated method takes <code>[CallerFilePath]</code> and <code>[CallerLineNumber]</code>, two values the compiler writes as constants, so a call still allocates nothing.
+            A record reaches the Console only when the drain writes it, so the stack Unity would capture is the drain's. The call site travels in the record instead: the generated method takes <code>[CallerFilePath]</code> and <code>[CallerLineNumber]</code>, two values the compiler writes as constants, so a call below its stack level still allocates nothing. A record at its stack level carries its own stack too (see <a href="#guide-stacks">Stacks</a>), which the row leaves out, as Unity's would be the drain's.
           </p>
 
           <div class="sub-section">
