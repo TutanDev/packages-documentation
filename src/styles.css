@@ -1,5 +1,5 @@
 /* ================================================================
-   Unity Framework — Showcase Website
+   Unity Framework - Showcase Website
    Design: Dark developer-focused, OLED-inspired
    Typography: JetBrains Mono (code) / IBM Plex Sans (body)
    Colors: Blue (Architecture), Green (Functional), Cyan (Utilities),
@@ -478,7 +478,7 @@ code { font-family: var(--font-code); font-size: 0.875em; }
   font-size: 0.85em;
 }
 
-/* Package Grid — features + code side by side */
+/* Package Grid - features + code side by side */
 .package-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -611,12 +611,12 @@ code { font-family: var(--font-code); font-size: 0.875em; }
 }
 
 /* Syntax highlighting */
-.code-block .kw   { color: #c084fc; }  /* keywords — purple */
-.code-block .type { color: #60a5fa; }  /* types — blue */
-.code-block .str  { color: #86efac; }  /* strings — green */
-.code-block .num  { color: #fbbf24; }  /* numbers — amber */
-.code-block .cmt  { color: #4a5568; }  /* comments — muted */
-.code-block .attr { color: #f9a8d4; }  /* attributes — pink */
+.code-block .kw   { color: #c084fc; }  /* keywords - purple */
+.code-block .type { color: #60a5fa; }  /* types - blue */
+.code-block .str  { color: #86efac; }  /* strings - green */
+.code-block .num  { color: #fbbf24; }  /* numbers - amber */
+.code-block .cmt  { color: #4a5568; }  /* comments - muted */
+.code-block .attr { color: #f9a8d4; }  /* attributes - pink */
 
 /* --- Architecture Layout (features + diagram side by side) --- */
 .arch-layout {

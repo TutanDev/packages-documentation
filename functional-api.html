@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Functional — API Reference — Unity Framework</title>
+  <title>Functional - API Reference - Unity Framework</title>
   <meta name="description" content="Tutan Functional API Reference: complete type and member documentation for Optional&lt;T&gt;, Result&lt;T&gt;, Error, and the F module.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -97,7 +97,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">R Match&lt;TState,R&gt;(TState state, Func&lt;TState,R&gt; onNone, Func&lt;T,TState,R&gt; onSome)</div>
-                  <div class="api-member-desc">State-passing match — pass locals as <code>state</code> instead of capturing them in a closure. Also available as a void overload taking <code>Action</code>s.</div>
+                  <div class="api-member-desc">State-passing match - pass locals as <code>state</code> instead of capturing them in a closure. Also available as a void overload taking <code>Action</code>s.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -119,9 +119,9 @@
               <table class="docs-table">
                 <thead><tr><th>Method</th><th>Description</th></tr></thead>
                 <tbody>
-                  <tr><td>Then(Func&lt;T,R&gt;)</td><td>Map — applies func if <code>Some</code>, passes <code>None</code> through</td></tr>
-                  <tr><td>Then(Func&lt;T,Optional&lt;R&gt;&gt;)</td><td>Bind — flatMap, unwraps nested Optional</td></tr>
-                  <tr><td>Then(Action&lt;T&gt;)</td><td>Side-effect pass-through — returns <code>Optional&lt;T&gt;</code> unchanged</td></tr>
+                  <tr><td>Then(Func&lt;T,R&gt;)</td><td>Map - applies func if <code>Some</code>, passes <code>None</code> through</td></tr>
+                  <tr><td>Then(Func&lt;T,Optional&lt;R&gt;&gt;)</td><td>Bind - flatMap, unwraps nested Optional</td></tr>
+                  <tr><td>Then(Action&lt;T&gt;)</td><td>Side-effect pass-through - returns <code>Optional&lt;T&gt;</code> unchanged</td></tr>
                   <tr><td>Filter(Func&lt;T,bool&gt;)</td><td>Returns <code>None</code> if predicate fails</td></tr>
                   <tr><td>Or(T fallback)</td><td>Returns value or eager fallback</td></tr>
                   <tr><td>OrElse(Func&lt;T&gt;)</td><td>Returns value or lazy fallback</td></tr>
@@ -135,7 +135,7 @@
                   <tr><td>Map(Func&lt;T1,T2,R&gt;) / Map(Func&lt;T1,T2,T3,R&gt;)</td><td>Curried map of a 2- or 3-argument function, fixing the first argument</td></tr>
                   <tr><td>Map(this NoneType, Func&lt;T,R&gt;)</td><td>Mapping over <code>None</code> is <code>None</code></td></tr>
                   <tr><td>Apply(Optional&lt;T&gt; arg)</td><td>Applies a lifted function to a lifted value; overloads for 2-9-argument lifted functions partially apply the first argument</td></tr>
-                  <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads — avoid closure capture in hot paths</td></tr>
+                  <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads - avoid closure capture in hot paths</td></tr>
                   <tr><td>ToOptional(this T? nullable)</td><td>Converts a nullable struct to <code>Optional&lt;T&gt;</code></td></tr>
                   <tr><td>Select / Where / SelectMany</td><td>LINQ query syntax support</td></tr>
                   <tr><td>ThenAsync / MatchAsync</td><td>UniTask async counterparts, plus <code>Then</code> / <code>Match</code> on <code>UniTask&lt;Optional&lt;T&gt;&gt;</code> for sync steps in async chains. <code>MapAsync</code> / <code>BindAsync</code> are the underlying primitives. Requires <code>TUTAN_UNITASK</code>; see <a href="functional.html#guide-async">Async</a></td></tr>
@@ -255,7 +255,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">R Match&lt;TState,R&gt;(TState state, Func&lt;Error,TState,R&gt; onError, Func&lt;T,TState,R&gt; onSuccess)</div>
-                  <div class="api-member-desc">State-passing match — pass locals as <code>state</code> instead of capturing them in a closure. Also available as a void overload taking <code>Action</code>s.</div>
+                  <div class="api-member-desc">State-passing match - pass locals as <code>state</code> instead of capturing them in a closure. Also available as a void overload taking <code>Action</code>s.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -291,8 +291,8 @@
               <table class="docs-table">
                 <thead><tr><th>Method</th><th>Description</th></tr></thead>
                 <tbody>
-                  <tr><td>Then(Func&lt;T,R&gt;)</td><td>Map — applies func on success; passes error through</td></tr>
-                  <tr><td>Then(Func&lt;T,Result&lt;R&gt;&gt;)</td><td>Bind — flatMap, propagates errors</td></tr>
+                  <tr><td>Then(Func&lt;T,R&gt;)</td><td>Map - applies func on success; passes error through</td></tr>
+                  <tr><td>Then(Func&lt;T,Result&lt;R&gt;&gt;)</td><td>Bind - flatMap, propagates errors</td></tr>
                   <tr><td>Then(Action&lt;T&gt;)</td><td>Side-effect pass-through</td></tr>
                   <tr><td>Filter(Func&lt;T,bool&gt;)</td><td>Converts failing predicate to <code>Error("Predicate not satisfied")</code></td></tr>
                   <tr><td>Or(T fallback)</td><td>Returns value or fallback on error</td></tr>
@@ -309,7 +309,7 @@
                   <tr><td>Map / Bind</td><td>Aliases for <code>Then</code> overloads</td></tr>
                   <tr><td>Map(Func&lt;T1,T2,R&gt;) / Map(Func&lt;T1,T2,T3,R&gt;)</td><td>Curried map of a 2- or 3-argument function, fixing the first argument</td></tr>
                   <tr><td>Apply(Result&lt;T&gt; arg)</td><td>Applies a lifted function to a lifted value; overloads for 2-9-argument lifted functions partially apply the first argument</td></tr>
-                  <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads — avoid closure capture in hot paths</td></tr>
+                  <tr><td>Map / Bind / Then / Filter (TState state, …)</td><td>State-passing overloads - avoid closure capture in hot paths</td></tr>
                   <tr><td>Select / SelectMany</td><td>LINQ query syntax support</td></tr>
                   <tr><td>ThenAsync / MatchAsync</td><td>UniTask async counterparts, plus <code>Then</code> / <code>Match</code> on <code>UniTask&lt;Result&lt;T&gt;&gt;</code> for sync steps in async chains. <code>MapAsync</code> / <code>BindAsync</code> are the underlying primitives. Requires <code>TUTAN_UNITASK</code>; see <a href="functional.html#guide-async">Async</a></td></tr>
                 </tbody>
@@ -348,7 +348,7 @@
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
                   <div class="api-member-name">Error(string message, Error inner)</div>
-                  <div class="api-member-desc">Nested error — wraps a cause. Equivalent to <code>Exception.InnerException</code>.</div>
+                  <div class="api-member-desc">Nested error - wraps a cause. Equivalent to <code>Exception.InnerException</code>.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -362,7 +362,7 @@
                 <span class="api-kind kind--ctor">ctor</span>
                 <div class="api-member-content">
                   <div class="api-member-name">Error(IEnumerable&lt;Error&gt; errors)</div>
-                  <div class="api-member-desc">Composite error — joins all messages with <code>"; "</code>, stores all as inner errors.</div>
+                  <div class="api-member-desc">Composite error - joins all messages with <code>"; "</code>, stores all as inner errors.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -383,7 +383,7 @@
                 <span class="api-kind kind--prop">prop</span>
                 <div class="api-member-content">
                   <div class="api-member-name">ReadOnlySpan&lt;Error&gt; InnerErrors { get; }</div>
-                  <div class="api-member-desc">Inner errors (empty span when none). Cannot cross async boundaries — call <code>.ToArray()</code> first.</div>
+                  <div class="api-member-desc">Inner errors (empty span when none). Cannot cross async boundaries - call <code>.ToArray()</code> first.</div>
                 </div>
               </div>
               <div class="api-member">
@@ -426,7 +426,7 @@
 
           <div class="api-group">
             <div class="api-group-header">
-              <span class="api-group-name">F module — Validation</span>
+              <span class="api-group-name">F module - Validation</span>
               <span class="api-type-badge badge--static">static</span>
             </div>
             <div class="api-members">
@@ -467,7 +467,7 @@
                 <tr><td>Fail&lt;T&gt;(Error) / Fail&lt;T&gt;(string)</td><td>Creates a failed <code>Result&lt;T&gt;</code>; explicit alternative to the implicit <code>Error</code> → <code>Result&lt;T&gt;</code> cast.</td></tr>
                 <tr><td>Error(string)</td><td>Simple error.</td></tr>
                 <tr><td>Error(string, int)</td><td>Error with a machine-readable code.</td></tr>
-                <tr><td>Error(string, Error)</td><td>Nested error — message + cause.</td></tr>
+                <tr><td>Error(string, Error)</td><td>Nested error - message + cause.</td></tr>
                 <tr><td>Error(string, int, Error)</td><td>Nested error with a code.</td></tr>
                 <tr><td>Error(IEnumerable&lt;Error&gt;)</td><td>Composite error.</td></tr>
                 <tr><td>Try&lt;T&gt;(Func&lt;T&gt;)</td><td>Wraps exceptions into <code>Error(ex.ToString())</code>.</td></tr>
@@ -522,7 +522,7 @@
                 <span class="api-kind kind--method">method</span>
                 <div class="api-member-content">
                   <div class="api-member-name">Optional&lt;T&gt; Alive&lt;T&gt;(this Optional&lt;T&gt; opt) where T : UnityEngine.Object</div>
-                  <div class="api-member-desc">Re-checks Unity lifetime at point of use. Returns <code>None</code> if the wrapped object was destroyed after <code>Some</code> — the monadic analogue of <code>if (obj)</code>.</div>
+                  <div class="api-member-desc">Re-checks Unity lifetime at point of use. Returns <code>None</code> if the wrapped object was destroyed after <code>Some</code> - the monadic analogue of <code>if (obj)</code>.</div>
                 </div>
               </div>
             </div>

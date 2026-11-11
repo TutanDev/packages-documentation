@@ -1,5 +1,5 @@
 // ================================================================
-// Unity Framework — Package Documentation Pages
+// Unity Framework - Package Documentation Pages
 // Sidebar navigation, scroll spy, mobile toggle, copy to clipboard
 // ================================================================
 

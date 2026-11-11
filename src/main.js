@@ -1,5 +1,5 @@
 // ================================================================
-// Unity Framework — Showcase Website
+// Unity Framework - Showcase Website
 // Navigation, scroll animations, copy-to-clipboard
 // ================================================================
 

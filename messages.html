@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Messages — Unity Framework</title>
-  <meta name="description" content="Tutan Messages: standalone zero-allocation pub/sub message bus for Unity. Struct messages, ref dispatch, thread-safe enqueue — built for 72–120 Hz XR frame budgets.">
+  <title>Messages - Unity Framework</title>
+  <meta name="description" content="Tutan Messages: standalone zero-allocation pub/sub message bus for Unity. Struct messages, ref dispatch, thread-safe enqueue - built for 72–120 Hz XR frame budgets.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -67,7 +67,7 @@
         <span class="docs-hero-badge docs-hero-badge--msg">com.tutan.messages · v1.0.0</span>
         <h1 class="docs-hero-title">Zero-Allocation<br>Pub/Sub for XR</h1>
         <p class="docs-hero-desc">
-          Tutan Messages is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, disposable subscriptions, thread-safe enqueue from worker threads — designed to survive 72–120 Hz XR frame budgets without dropping a frame.
+          Tutan Messages is a standalone, zero-GC message bus for Unity. Struct messages dispatched by <code>ref</code>, disposable subscriptions, thread-safe enqueue from worker threads - designed to survive 72–120 Hz XR frame budgets without dropping a frame.
         </p>
         <div class="docs-hero-stats">
           <div>
@@ -114,8 +114,8 @@
         </div>
 
         <div class="callout callout--tip" style="margin-top:24px">
-          <strong>Runnable sample — Basic Publish / Subscribe</strong>
-          One self-contained sample ships with the package — import it from <strong>Package Manager → Tutan Messages → Samples → Import</strong>. It is a live score clicker in a single scene where a button publishes commands, a background thread <code>Enqueue</code>s commands off the main thread, and the score UI listens for events. Open the sample scene and press Play — no configuration needed. It exercises the CommandBus (N:1), the EventBus (N:M), composition-root handler binding via <code>CommandBus.Install</code>, and thread-safe <code>Enqueue</code>/drain all in one place. It requires uGUI (<code>com.unity.ugui</code>, present by default) and works with any render pipeline and either input backend. On Web players the background thread is replaced by a coroutine.
+          <strong>Runnable sample - Basic Publish / Subscribe</strong>
+          One self-contained sample ships with the package - import it from <strong>Package Manager → Tutan Messages → Samples → Import</strong>. It is a live score clicker in a single scene where a button publishes commands, a background thread <code>Enqueue</code>s commands off the main thread, and the score UI listens for events. Open the sample scene and press Play - no configuration needed. It exercises the CommandBus (N:1), the EventBus (N:M), composition-root handler binding via <code>CommandBus.Install</code>, and thread-safe <code>Enqueue</code>/drain all in one place. It requires uGUI (<code>com.unity.ugui</code>, present by default) and works with any render pipeline and either input backend. On Web players the background thread is replaced by a coroutine.
         </div>
       </section>
 
@@ -126,7 +126,7 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Defining Messages</h2>
           <p class="section-intro">
-            A message is any <code>struct</code> implementing <code>IEvent</code> or <code>ICommand</code> (both extend <code>IMessage</code>). Dispatch is allocation-free for any struct: the bus is generic over the message type and passes it by <code>ref</code>, so the message is never boxed. A queued message is copied into a reusable per-type <code>ConcurrentQueue</code> buffer, again without a per-message allocation. Reference-type fields (<code>string</code>, arrays, collections, class payloads) are permitted — see the caveats below.
+            A message is any <code>struct</code> implementing <code>IEvent</code> or <code>ICommand</code> (both extend <code>IMessage</code>). Dispatch is allocation-free for any struct: the bus is generic over the message type and passes it by <code>ref</code>, so the message is never boxed. A queued message is copied into a reusable per-type <code>ConcurrentQueue</code> buffer, again without a per-message allocation. Reference-type fields (<code>string</code>, arrays, collections, class payloads) are permitted - see the caveats below.
           </p>
 
           <div class="sub-section">
@@ -137,7 +137,7 @@
 <span class="kw">using</span> Unity.Collections;
 <span class="kw">using</span> UnityEngine;
 
-<span class="cmt">// Recommended — all fields are value types (no GC scan, safe across threads)</span>
+<span class="cmt">// Recommended - all fields are value types (no GC scan, safe across threads)</span>
 <span class="kw">public struct</span> <span class="type">HandTrackingLost</span> : <span class="type">IEvent</span>
 {
     <span class="kw">public int</span> HandIndex;       <span class="cmt">// 0 = left, 1 = right</span>
@@ -152,7 +152,7 @@
     <span class="kw">public</span> <span class="type">FixedString64Bytes</span> SceneName;
 }
 
-<span class="cmt">// Allowed, with caveats — reference-type fields are permitted</span>
+<span class="cmt">// Allowed, with caveats - reference-type fields are permitted</span>
 <span class="kw">public struct</span> <span class="type">LogLine</span> : <span class="type">IEvent</span>
 {
     <span class="kw">public string</span> Text; <span class="cmt">// reference field: see the trade-offs below</span>
@@ -163,7 +163,7 @@
 
           <div class="callout callout--tip">
             <strong>Reference-type fields are allowed but not free.</strong>
-            A message that holds a <code>string</code>, array, collection, or class reference still dispatches without allocating, but two caveats apply: while it sits in the deferred queue it is reachable from the bus, so the collector must trace its reference fields during the mark phase for as long as it waits to be drained (a scan cost, not an allocation), and <code>Enqueue</code> copies the struct <em>shallowly</em>, so a worker thread shares any referenced object with the main thread that drains it — treat such payloads as immutable handoffs. Prefer value-only messages on hot or cross-thread paths. For string-like data, <code>Unity.Collections.FixedString64Bytes</code> (from <code>com.unity.collections</code>) or an integer handle keeps the message fully value-typed.
+            A message that holds a <code>string</code>, array, collection, or class reference still dispatches without allocating, but two caveats apply: while it sits in the deferred queue it is reachable from the bus, so the collector must trace its reference fields during the mark phase for as long as it waits to be drained (a scan cost, not an allocation), and <code>Enqueue</code> copies the struct <em>shallowly</em>, so a worker thread shares any referenced object with the main thread that drains it - treat such payloads as immutable handoffs. Prefer value-only messages on hot or cross-thread paths. For string-like data, <code>Unity.Collections.FixedString64Bytes</code> (from <code>com.unity.collections</code>) or an integer handle keeps the message fully value-typed.
           </div>
         </section>
 
@@ -172,24 +172,24 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Events vs Commands</h2>
           <p class="section-intro">
-            The bus exposes two static facades — <code>EventBus</code> for N:M notifications and <code>CommandBus</code> for N:1 intents. Picking the right one enforces CQRS rules at runtime.
+            The bus exposes two static facades - <code>EventBus</code> for N:M notifications and <code>CommandBus</code> for N:1 intents. Picking the right one enforces CQRS rules at runtime.
           </p>
 
           <div class="table-wrap">
             <table class="docs-table">
               <thead><tr><th>Type</th><th>Cardinality</th><th>Naming</th><th>Use For</th></tr></thead>
               <tbody>
-                <tr><td>IEvent</td><td>N publishers, N subscribers</td><td>Past tense — <code>PlayerScored</code>, <code>OrderPlaced</code></td><td>Notifying the world that something happened</td></tr>
-                <tr><td>ICommand</td><td>N publishers, at most 1 handler</td><td>Imperative — <code>MovePlayer</code>, <code>PlaceOrder</code></td><td>Requesting that something be done</td></tr>
+                <tr><td>IEvent</td><td>N publishers, N subscribers</td><td>Past tense - <code>PlayerScored</code>, <code>OrderPlaced</code></td><td>Notifying the world that something happened</td></tr>
+                <tr><td>ICommand</td><td>N publishers, at most 1 handler</td><td>Imperative - <code>MovePlayer</code>, <code>PlaceOrder</code></td><td>Requesting that something be done</td></tr>
               </tbody>
             </table>
           </div>
 
-          <p class="prose">Command handlers are declared once at the composition root via <code>CommandBus.Install</code>, each command type bound at most once with <code>.Handle&lt;T&gt;(…)</code>. That is the runtime enforcement of CQRS's "one writer per command" rule: a duplicate (or null) handler is reported in the returned <code>InstallResult</code> — <code>Ok</code> is <code>false</code> and <code>Error</code> names the offending type — and the live bus is left untouched. It never throws.</p>
+          <p class="prose">Command handlers are declared once at the composition root via <code>CommandBus.Install</code>, each command type bound at most once with <code>.Handle&lt;T&gt;(…)</code>. That is the runtime enforcement of CQRS's "one writer per command" rule: a duplicate (or null) handler is reported in the returned <code>InstallResult</code> - <code>Ok</code> is <code>false</code> and <code>Error</code> names the offending type - and the live bus is left untouched. It never throws.</p>
 
           <p class="prose" style="margin-top:12px">Binding is not required: publishing or enqueuing a command that has no handler is a silent no-op. For commands that must be handled, assert <code>CommandBus.GetSubscriberCount&lt;T&gt;() == 1</code> once after <code>Install</code>.</p>
 
-          <p class="prose" style="margin-top:12px">A command handler is just a plain method matching <code>MessageHandler&lt;T&gt;</code> (<code>void Handle(ref T)</code>) — no interface to implement, no base class. Any object can supply one: a <code>MonoBehaviour</code>, a plain C# manager, or a service from your DI container. Because you new them up yourself at the composition root, handlers are free to take whatever dependencies they need.</p>
+          <p class="prose" style="margin-top:12px">A command handler is just a plain method matching <code>MessageHandler&lt;T&gt;</code> (<code>void Handle(ref T)</code>) - no interface to implement, no base class. Any object can supply one: a <code>MonoBehaviour</code>, a plain C# manager, or a service from your DI container. Because you new them up yourself at the composition root, handlers are free to take whatever dependencies they need.</p>
 
           <div class="code-card code-card--msg" style="margin-top:12px">
             <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">MovementManager.cs</span></div>
@@ -200,7 +200,7 @@
     <span class="kw">public void</span> Handle(<span class="kw">ref</span> <span class="type">MovePlayer</span> cmd) { <span class="cmt">/* ... */</span> }
 }
 
-<span class="cmt">// Composition root — Handle matches MessageHandler&lt;T&gt;, so it binds directly.</span>
+<span class="cmt">// Composition root - Handle matches MessageHandler&lt;T&gt;, so it binds directly.</span>
 <span class="kw">var</span> movement = <span class="kw">new</span> <span class="type">MovementManager</span>();
 <span class="kw">var</span> result = <span class="type">CommandBus</span>.Install(r =&gt; r.Handle&lt;<span class="type">MovePlayer</span>&gt;(movement.Handle));</code></pre>
           </div>
@@ -211,11 +211,11 @@
           <div class="section-eyebrow">Guides</div>
           <h2 class="section-title">Subscribe &amp; Subscription Lifetimes</h2>
           <p class="section-intro">
-            <code>Subscribe</code> returns a disposable <code>Subscription</code> — disposing it is the one way to unsubscribe. There is no <code>-=</code> operator: this avoids the well-known fragility of delegate equality with lambdas and closures. <code>Dispose()</code> is idempotent, safe during dispatch, and a harmless no-op after the issuing bus was <code>Reset()</code>.
+            <code>Subscribe</code> returns a disposable <code>Subscription</code> - disposing it is the one way to unsubscribe. There is no <code>-=</code> operator: this avoids the well-known fragility of delegate equality with lambdas and closures. <code>Dispose()</code> is idempotent, safe during dispatch, and a harmless no-op after the issuing bus was <code>Reset()</code>.
           </p>
 
           <div class="sub-section">
-            <h3 class="sub-title">Explicit handle — for dynamic lifetimes</h3>
+            <h3 class="sub-title">Explicit handle - for dynamic lifetimes</h3>
             <p class="prose">Hold the <code>Subscription</code> in a field when the lifetime is genuinely dynamic, e.g. a view that subscribes in <code>OnEnable</code> and unsubscribes in <code>OnDisable</code>:</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">FadeController.cs</span></div>
@@ -245,7 +245,7 @@
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title"><code>.AddTo(this)</code> — die with the GameObject</h3>
+            <h3 class="sub-title"><code>.AddTo(this)</code> - die with the GameObject</h3>
             <p class="prose">When a subscription should simply live and die with the component, skip the bookkeeping entirely: <code>.AddTo(this)</code> ties the <code>Subscription</code> to the GameObject (via one hidden <code>SubscriptionAnchor</code> component), and it is disposed automatically in <code>OnDestroy</code>. No handle field, no <code>OnDestroy</code> override:</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">FadeController.cs</span></div>
@@ -263,7 +263,7 @@
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title"><code>SubscriptionBag</code> — one shared lifetime</h3>
+            <h3 class="sub-title"><code>SubscriptionBag</code> - one shared lifetime</h3>
             <p class="prose">For non-MonoBehaviour systems (or several subscriptions with one shared lifetime), collect them in a <code>SubscriptionBag</code> and dispose it once. The bag is reusable after disposal:</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">AnalyticsSystem.cs</span></div>
@@ -280,7 +280,7 @@
     <span class="kw">public void</span> Dispose() =&gt; _subscriptions.Dispose(); <span class="cmt">// unsubscribes both</span>
 }</code></pre>
             </div>
-            <p class="prose" style="margin-top:12px">Prefer <code>.AddTo(this)</code> when the subscription lives as long as the component, the bag for plain-C# systems, and an explicit handle field when the lifetime is genuinely dynamic. All three are the same <code>Subscription</code> underneath — and <code>Subscribe</code> allocates nothing beyond the handler entry itself.</p>
+            <p class="prose" style="margin-top:12px">Prefer <code>.AddTo(this)</code> when the subscription lives as long as the component, the bag for plain-C# systems, and an explicit handle field when the lifetime is genuinely dynamic. All three are the same <code>Subscription</code> underneath - and <code>Subscribe</code> allocates nothing beyond the handler entry itself.</p>
           </div>
 
           <div class="callout callout--warn">
@@ -288,7 +288,7 @@
             <code>AddTo(this)</code> / <code>AddTo(gameObject)</code> dispose the subscription from the hidden <code>SubscriptionAnchor</code>'s <code>OnDestroy</code>. Unity only calls <code>OnDestroy</code> on components whose GameObject has been active at least once, so a subscription anchored to a GameObject that is created inactive and destroyed without ever being activated (a pooled instance, a disabled prefab instance) is <strong>not</strong> disposed - its handler keeps running against a destroyed object. Hold the <code>Subscription</code> (or use a <code>SubscriptionBag</code>) for those lifetimes.
           </div>
 
-          <p class="prose">The handler signature uses <code>ref T</code> — this eliminates the struct copy that <code>Action&lt;T&gt;</code> would force on every dispatch. Handlers <em>may</em> mutate the message (e.g., set a <code>Consumed</code> flag), and subsequent handlers will observe the mutation.</p>
+          <p class="prose">The handler signature uses <code>ref T</code> - this eliminates the struct copy that <code>Action&lt;T&gt;</code> would force on every dispatch. Handlers <em>may</em> mutate the message (e.g., set a <code>Consumed</code> flag), and subsequent handlers will observe the mutation.</p>
         </section>
 
         <!-- ── Guide: Publish & Enqueue ── -->
@@ -333,7 +333,7 @@
 
 <span class="kw">public class</span> <span class="type">VideoStreamReceiver</span>
 {
-    <span class="cmt">// Called on a network/decode thread — NOT the main thread</span>
+    <span class="cmt">// Called on a network/decode thread - NOT the main thread</span>
     <span class="kw">void</span> OnFrameReady(<span class="kw">int</span> index, <span class="kw">int</span> w, <span class="kw">int</span> h)
     {
         <span class="kw">var</span> msg = <span class="kw">new</span> <span class="type">FrameDecoded</span> { FrameIndex = index, Width = w, Height = h };
@@ -346,7 +346,7 @@
           </div>
 
           <div class="sub-section">
-            <h3 class="sub-title">Commands — N:1 dispatch</h3>
+            <h3 class="sub-title">Commands - N:1 dispatch</h3>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">OrderHandler.cs</span></div>
 <pre class="code-block"><code><span class="kw">public struct</span> <span class="type">PlaceOrder</span> : <span class="type">ICommand</span>
@@ -355,7 +355,7 @@
     <span class="kw">public int</span> Quantity;
 }
 
-<span class="cmt">// Handler — no Subscribe/Unsubscribe; just the method.</span>
+<span class="cmt">// Handler - no Subscribe/Unsubscribe; just the method.</span>
 <span class="kw">public class</span> <span class="type">OrderHandler</span> : <span class="type">MonoBehaviour</span>
 {
     <span class="kw">public void</span> Handle(<span class="kw">ref</span> <span class="type">PlaceOrder</span> cmd)
@@ -365,13 +365,13 @@
     }
 }
 
-<span class="cmt">// Composition root — declare every command handler in one place.</span>
+<span class="cmt">// Composition root - declare every command handler in one place.</span>
 <span class="kw">var</span> result = <span class="type">CommandBus</span>.Install(r =&gt; r
     .Handle&lt;<span class="type">PlaceOrder</span>&gt;(orderHandler.Handle));
 
 <span class="kw">if</span> (!result.Ok) <span class="type">Debug</span>.LogError(result.Error); <span class="cmt">// names the offending command type(s)</span>
 
-<span class="cmt">// Caller — same publish API</span>
+<span class="cmt">// Caller - same publish API</span>
 <span class="type">CommandBus</span>.Publish(<span class="kw">new</span> <span class="type">PlaceOrder</span> { ItemId = <span class="num">7</span>, Quantity = <span class="num">3</span> });</code></pre>
             </div>
           </div>
@@ -390,19 +390,19 @@
               <thead><tr><th>API</th><th>Thread</th><th>Notes</th></tr></thead>
               <tbody>
                 <tr><td>Publish / Subscribe / Subscription.Dispose / DrainQueues</td><td>Main thread only</td><td>Lock-free reads via <code>ConcurrentDictionary&lt;Type, ChannelBase&gt;</code>. In the editor (edit mode and Play Mode) and in development builds, an off-thread call logs an error naming the offending call; release builds compile the check out</td></tr>
-                <tr><td>Enqueue</td><td>Thread-safe</td><td>Lookup via <code>ConcurrentDictionary.GetOrAdd</code>; the per-channel pending queue is lazily created with an <code>Interlocked.CompareExchange</code>, and the message lands in a <code>ConcurrentQueue&lt;T&gt;</code>. Safe to race against any main-thread call and against concurrent <code>Enqueue</code> calls — including the very first <code>Enqueue</code> of a message type. The copy into the queue is shallow: treat reference-typed payloads as immutable handoffs</td></tr>
+                <tr><td>Enqueue</td><td>Thread-safe</td><td>Lookup via <code>ConcurrentDictionary.GetOrAdd</code>; the per-channel pending queue is lazily created with an <code>Interlocked.CompareExchange</code>, and the message lands in a <code>ConcurrentQueue&lt;T&gt;</code>. Safe to race against any main-thread call and against concurrent <code>Enqueue</code> calls - including the very first <code>Enqueue</code> of a message type. The copy into the queue is shallow: treat reference-typed payloads as immutable handoffs</td></tr>
               </tbody>
             </table>
           </div>
 
           <div class="callout callout--tip">
             <strong>Always safe to touch Unity in handlers</strong>
-            Even when the publisher was a background thread, the handler runs on the main thread — because <code>DrainQueues()</code> is called from <code>LateUpdate</code>. <code>EventBus.Enqueue</code> + handler is the idiomatic way to bridge worker results back to Unity APIs.
+            Even when the publisher was a background thread, the handler runs on the main thread - because <code>DrainQueues()</code> is called from <code>LateUpdate</code>. <code>EventBus.Enqueue</code> + handler is the idiomatic way to bridge worker results back to Unity APIs.
           </div>
 
           <div class="callout callout--warn" style="margin-top:12px">
             <strong>One carve-out: Reset / Install</strong>
-            <code>Reset()</code> (and <code>CommandBus.Install</code>) replaces the bus instance wholesale. A worker-thread <code>Enqueue</code> racing that swap can land its message in the discarded bus, where it is dropped along with the rest of the cleared state. Quiesce worker threads before resetting or re-installing — both are composition-root operations, not steady-state ones. Even without a race, messages already queued when the swap happens are discarded, not dispatched (see <a href="#guide-install-order">Install before anything enqueues</a>).
+            <code>Reset()</code> (and <code>CommandBus.Install</code>) replaces the bus instance wholesale. A worker-thread <code>Enqueue</code> racing that swap can land its message in the discarded bus, where it is dropped along with the rest of the cleared state. Quiesce worker threads before resetting or re-installing - both are composition-root operations, not steady-state ones. Even without a race, messages already queued when the swap happens are discarded, not dispatched (see <a href="#guide-install-order">Install before anything enqueues</a>).
           </div>
         </section>
 
@@ -431,8 +431,8 @@
 
           <div class="sub-section">
             <h3 class="sub-title">Binding command handlers (explicit)</h3>
-            <p class="prose">Command handlers are declared once, at your composition root, through <code>CommandBus.Install</code>. The N:1 rule is validated there and reported in the returned <code>InstallResult</code> — on a duplicate command type or a null handler, <code>Ok</code> is <code>false</code>, <code>Error</code> names the offender, and the live bus is left untouched (it never throws).</p>
-            <p class="prose" style="margin-top:12px">A handler is just a method matching <code>MessageHandler&lt;T&gt;</code> (<code>void Handle(ref T)</code>), so any object — a <code>MonoBehaviour</code>, a plain C# manager, a DI-resolved service — can supply one. Because you new them up yourself, handlers are free to take whatever dependencies they need; there is no discovery scan imposing a parameterless-constructor rule. Call <code>Install</code> again to rebuild the bus from scratch (composition-root semantics) — previously installed handlers are replaced wholesale.</p>
+            <p class="prose">Command handlers are declared once, at your composition root, through <code>CommandBus.Install</code>. The N:1 rule is validated there and reported in the returned <code>InstallResult</code> - on a duplicate command type or a null handler, <code>Ok</code> is <code>false</code>, <code>Error</code> names the offender, and the live bus is left untouched (it never throws).</p>
+            <p class="prose" style="margin-top:12px">A handler is just a method matching <code>MessageHandler&lt;T&gt;</code> (<code>void Handle(ref T)</code>), so any object - a <code>MonoBehaviour</code>, a plain C# manager, a DI-resolved service - can supply one. Because you new them up yourself, handlers are free to take whatever dependencies they need; there is no discovery scan imposing a parameterless-constructor rule. Call <code>Install</code> again to rebuild the bus from scratch (composition-root semantics) - previously installed handlers are replaced wholesale.</p>
             <p class="prose" style="margin-top:12px"><code>Install</code> does not require every command type to be bound: a command with no handler is silently dropped. For commands that must be handled, assert <code>CommandBus.GetSubscriberCount&lt;T&gt;() == 1</code> once after <code>Install</code>.</p>
           </div>
 
@@ -484,7 +484,7 @@
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">DiagnosticsOverlay.cs</span></div>
 <pre class="code-block"><code><span class="type">MessagesInstrumentation</span>.Enabled = <span class="kw">true</span>;
 
-<span class="cmt">// Payload capture is not a separate switch — while Enabled, every</span>
+<span class="cmt">// Payload capture is not a separate switch - while Enabled, every</span>
 <span class="cmt">// Publish/Enqueue record carries the boxed payload and a subscriber snapshot.</span>
 
 <span class="cmt">// Snapshot the ring buffer (allocates a copy; keep off the hot path).</span>
@@ -500,7 +500,7 @@
 
           <div class="sub-section">
             <h3 class="sub-title">Inspector-serializable references</h3>
-            <p class="prose"><code>EventReference</code> and <code>CommandReference</code> are serializable wrappers that let designers pick a message type and edit its payload directly in the Inspector — useful for hooking up <code>UnityEvent</code>s, prototyping, or wiring data-driven triggers without writing publisher code.</p>
+            <p class="prose"><code>EventReference</code> and <code>CommandReference</code> are serializable wrappers that let designers pick a message type and edit its payload directly in the Inspector - useful for hooking up <code>UnityEvent</code>s, prototyping, or wiring data-driven triggers without writing publisher code.</p>
             <div class="code-card code-card--msg">
               <div class="code-card-header"><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-dot"></span><span class="code-card-file">TriggerZone.cs</span></div>
 <pre class="code-block"><code><span class="kw">using</span> Tutan.Messages;
@@ -513,7 +513,7 @@
 
     <span class="kw">void</span> OnTriggerEnter(<span class="type">Collider</span> other)
     {
-        onEntered.Publish();   <span class="cmt">// boxes + reflection — fine for a one-shot trigger</span>
+        onEntered.Publish();   <span class="cmt">// boxes + reflection - fine for a one-shot trigger</span>
         onActivate.Publish();
     }
 }</code></pre>
@@ -522,11 +522,11 @@
             <p class="prose" style="margin-top:12px">The drawers are UI Toolkit only: they render in the default Inspector (UI Toolkit since Unity 2022.2) but not inside a custom IMGUI editor that draws the field with <code>EditorGUILayout.PropertyField</code>.</p>
             <div class="callout callout--warn" style="margin-top:12px">
               <strong>Not for runtime hot paths.</strong>
-              Publishing via a <code>MessageReference</code> involves <code>JsonUtility.FromJson</code>, <code>Activator.CreateInstance</code>, <strong>boxing the struct</strong>, and dispatch through the non-generic <code>PublishBoxed</code> seam (one unbox inside the channel) — the opposite of the zero-alloc dispatch path. Use it for editor/authoring workflows, debug buttons, and tooling — not per-frame gameplay dispatch.
+              Publishing via a <code>MessageReference</code> involves <code>JsonUtility.FromJson</code>, <code>Activator.CreateInstance</code>, <strong>boxing the struct</strong>, and dispatch through the non-generic <code>PublishBoxed</code> seam (one unbox inside the channel) - the opposite of the zero-alloc dispatch path. Use it for editor/authoring workflows, debug buttons, and tooling - not per-frame gameplay dispatch.
             </div>
             <div class="callout callout--note" style="margin-top:12px">
               <strong>Mark referenced structs <code>[Serializable]</code>.</strong>
-              The payload round-trips through <code>JsonUtility</code>, which only serializes plain structs carrying the <code>[Serializable]</code> attribute. A message struct without it still works on the bus, but its payload cannot be edited through a reference — the values silently stay at their defaults.
+              The payload round-trips through <code>JsonUtility</code>, which only serializes plain structs carrying the <code>[Serializable]</code> attribute. A message struct without it still works on the bus, but its payload cannot be edited through a reference - the values silently stay at their defaults.
             </div>
           </div>
 
@@ -546,7 +546,7 @@
 
           <div class="sub-section">
             <h3 class="sub-title">Supported field types in the inline editor</h3>
-            <p class="prose">The inline editor renders each field with its matching native UI-Toolkit control: <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>bool</code>, <code>string</code>, any <code>enum</code>, <code>Vector2</code>/<code>Vector3</code>/<code>Vector4</code>, <code>Vector2Int</code>/<code>Vector3Int</code>, <code>Color</code>, and <code>Quaternion</code> (edited as euler angles). Only fields <code>JsonUtility</code> serializes can be authored: <code>readonly</code> and <code>[NonSerialized]</code> public fields are listed as disabled "not serialized" rows. Other types render as a disabled "unsupported type" label and keep their default/serialized value; to edit them, serialize the message struct as an ordinary field on your own MonoBehaviour and publish it from code. Every field is authored explicitly — including a field named <code>Timestamp</code>; the reference publishes exactly the values you enter, with nothing populated implicitly at publish time.</p>
+            <p class="prose">The inline editor renders each field with its matching native UI-Toolkit control: <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>bool</code>, <code>string</code>, any <code>enum</code>, <code>Vector2</code>/<code>Vector3</code>/<code>Vector4</code>, <code>Vector2Int</code>/<code>Vector3Int</code>, <code>Color</code>, and <code>Quaternion</code> (edited as euler angles). Only fields <code>JsonUtility</code> serializes can be authored: <code>readonly</code> and <code>[NonSerialized]</code> public fields are listed as disabled "not serialized" rows. Other types render as a disabled "unsupported type" label and keep their default/serialized value; to edit them, serialize the message struct as an ordinary field on your own MonoBehaviour and publish it from code. Every field is authored explicitly - including a field named <code>Timestamp</code>; the reference publishes exactly the values you enter, with nothing populated implicitly at publish time.</p>
           </div>
         </section>
 
@@ -583,7 +583,7 @@
 {
     <span class="cmt">// Force channel creation with a dummy subscribe/dispose.</span>
     <span class="cmt">// The channel's internal List is allocated once. The per-channel</span>
-    <span class="cmt">// ConcurrentQueue is lazy — it is allocated on the first Enqueue call,</span>
+    <span class="cmt">// ConcurrentQueue is lazy - it is allocated on the first Enqueue call,</span>
     <span class="cmt">// so pre-warm that separately if your app uses queued dispatch.</span>
     <span class="type">EventBus</span>.Subscribe&lt;<span class="type">HandGesture</span>&gt;((<span class="kw">ref</span> <span class="type">HandGesture</span> _) =&gt; { }).Dispose();
     <span class="type">EventBus</span>.Subscribe&lt;<span class="type">FrameDecoded</span>&gt;((<span class="kw">ref</span> <span class="type">FrameDecoded</span> _) =&gt; { }).Dispose();
